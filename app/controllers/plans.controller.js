@@ -2,9 +2,7 @@ const stripeConfig = require("../config/stripe.config");
 const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY)
 
 exports.getplans = async(req, res) => {
-
   const products = await stripe.products.list();
-  console.log(products)
   const intermidiate = [
     {
       id: "prod_L0ZoffTtV9fd11FRee",
