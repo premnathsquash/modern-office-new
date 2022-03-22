@@ -14,9 +14,9 @@ var bcrypt = require("bcryptjs");
 exports.signup = (req, res) => {
   const pssword = nanoid();
   const renewal = req.body.renew;
+  const interval = req.body.interval;
   const productId = req.body.productId;
   const cardToken = req.body.cardToken;
-  const cvv = req.body.cvv;
   const user = new User({
     username: req.body.username,
     email: req.body.email,
@@ -60,44 +60,28 @@ exports.signup = (req, res) => {
             email: req.body.email,
             phone: req.body.phone,
           });
-          const card = await stripe.tokens.retrieve(cardToken);
 
-          console.log("user creation stripe", renewal, card, cvv);
+          await stripe.customers.createSource(
+            customer.id,
+            {source: cardToken}
+          );
 
-          /*
-
-const paymentMethod = await stripe.paymentMethods.create({
-  type: 'card',
-  card: {
-    number: '4242424242424242',
-    exp_month: 3,
-    exp_year: 2023,
-    cvc: '314',
-  },
-});
-
-await stripe.paymentMethods.attach(
-  'pm_1Kg3NNLnkfyAYdWUNI90d6JD',
-  {customer: 'cus_L1VscaxSgHKDkH'}
-);
-
-const price = await stripe.prices.create({
-  unit_amount: 500000,
-  currency: 'aud',
-  recurring: {interval: 'year'},
-  product: 'prod_LLhE8XyggI9emW',
-});
-
-const subscription = await stripe.subscriptions.create({
-  customer: 'cus_LMmxdbgr6HO7Tl',
-  items: [
-    {price: 'price_1KezphLnkfyAYdWUOwXNyhVc'},
-  ],
-});
-         */
-
+          const price = await stripe.prices.create({
+            unit_amount: 5000,
+            currency: 'aud',
+            recurring: {interval: 'year'},
+            product: productId,
+          });
+         await stripe.subscriptions.create({
+            customer: customer.id,
+            items: [
+              {price: price.id},
+            ],
+          });
+    
           user.stripeCustomerId = customer.id;
           user.stripeProductPrice.productId = productId;
+          user.stripeProductPrice.priceId = price.id;
           user.save(async (err) => {
             if (err) {
               res.status(500).send({ message: err });
