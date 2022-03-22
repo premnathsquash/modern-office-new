@@ -10,7 +10,7 @@ module.exports = function(app) {
   });
 
   app.get(
-    "/api/payment/plans",
+    "/payment/plans",
     controller.getplans
   );
 
