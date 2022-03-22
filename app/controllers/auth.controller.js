@@ -1,10 +1,10 @@
-const { customAlphabet } = require('nanoid');
+const { customAlphabet } = require("nanoid");
 const nanoid = customAlphabet("1234567890abcdefghABCDEFGH", 10);
 const config = require("../config/auth.config");
 const db = require("../models");
-const {sendMail} = require("../config/mailer")
+const { sendMail } = require("../config/mailer");
 const stripeConfig = require("../config/stripe.config");
-const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY)
+const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY);
 const User = db.user;
 const Role = db.role;
 
@@ -12,27 +12,29 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
-  const pssword = nanoid()
+  const pssword = nanoid();
   const renewal = req.body.renew;
-  const productId = req.body.productId
+  const productId = req.body.productId;
+  const cardToken = req.body.cardToken;
+  const cvv = req.body.cvv;
   const user = new User({
     username: req.body.username,
     email: req.body.email,
     password: bcrypt.hashSync(pssword, 8),
     phone: req.body.phone,
-    job: req.body.job
+    job: req.body.job,
   });
 
-  user.company ={
+  user.company = {
     name: req.body.companyName,
-      phone: req.body.companyPhone,
-      address: req.body.companyAddress,
-      city: req.body.companyCity,
-      state: req.body.companyState,
-      zip: req.body.companyZip,
-      country: req.body.companyCountry,
-      website: req.body.companyWebsite,
-  }
+    phone: req.body.companyPhone,
+    address: req.body.companyAddress,
+    city: req.body.companyCity,
+    state: req.body.companyState,
+    zip: req.body.companyZip,
+    country: req.body.companyCountry,
+    website: req.body.companyWebsite,
+  };
 
   user.save((err, user) => {
     if (err) {
@@ -43,37 +45,75 @@ exports.signup = (req, res) => {
     if (req.body.roles) {
       Role.find(
         {
-          name: { $in: req.body.roles }
+          name: { $in: req.body.roles },
         },
-        async(err, roles) => {
+        async (err, roles) => {
           if (err) {
             res.status(500).send({ message: err });
             return;
           }
 
-          user.roles = roles.map(role => role._id);
-
-          console.log("user creation stripe",renewal, productId);
-          // prod_L0ZoffTtV9fd11FRee free
+          user.roles = roles.map((role) => role._id);
 
           const customer = await stripe.customers.create({
             name: req.body.username,
             email: req.body.email,
-            phone: req.body.phone
+            phone: req.body.phone,
           });
+          const card = await stripe.tokens.retrieve(cardToken);
+
+          console.log("user creation stripe", renewal, card, cvv);
+
+          /*
+
+const paymentMethod = await stripe.paymentMethods.create({
+  type: 'card',
+  card: {
+    number: '4242424242424242',
+    exp_month: 3,
+    exp_year: 2023,
+    cvc: '314',
+  },
+});
+
+await stripe.paymentMethods.attach(
+  'pm_1Kg3NNLnkfyAYdWUNI90d6JD',
+  {customer: 'cus_L1VscaxSgHKDkH'}
+);
+
+const price = await stripe.prices.create({
+  unit_amount: 500000,
+  currency: 'aud',
+  recurring: {interval: 'year'},
+  product: 'prod_LLhE8XyggI9emW',
+});
+
+const subscription = await stripe.subscriptions.create({
+  customer: 'cus_LMmxdbgr6HO7Tl',
+  items: [
+    {price: 'price_1KezphLnkfyAYdWUOwXNyhVc'},
+  ],
+});
+         */
+
           user.stripeCustomerId = customer.id;
-          user.stripeProductPrice.productId = productId
-          user.save(async(err) => {
+          user.stripeProductPrice.productId = productId;
+          user.save(async (err) => {
             if (err) {
               res.status(500).send({ message: err });
               return;
             }
             await sendMail(
               req.body.email,
-              "Hydesq – New Account",null, `${req.body.email} pass: ${pssword} `,
+              "Hydesq – New Account",
+              null,
+              `${req.body.email} pass: ${pssword} `,
               null
             );
-            res.send({ message: "User was registered successfully!", stripeCustomerId: customer.id });
+            res.send({
+              message: "User was registered successfully!",
+              stripeCustomerId: customer.id,
+            });
           });
         }
       );
@@ -85,7 +125,7 @@ exports.signup = (req, res) => {
         }
 
         user.roles = [role._id];
-        user.save(err => {
+        user.save((err) => {
           if (err) {
             res.status(500).send({ message: err });
             return;
@@ -100,7 +140,7 @@ exports.signup = (req, res) => {
 
 exports.signin = (req, res) => {
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
     .populate("roles", "-__v")
     .exec((err, user) => {
@@ -121,12 +161,12 @@ exports.signin = (req, res) => {
       if (!passwordIsValid) {
         return res.status(401).send({
           accessToken: null,
-          message: "Invalid Password!"
+          message: "Invalid Password!",
         });
       }
 
       var token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: 86400 // 24 hours
+        expiresIn: 86400, // 24 hours
       });
 
       var authorities = [];
@@ -139,7 +179,7 @@ exports.signin = (req, res) => {
         username: user.username,
         email: user.email,
         roles: authorities,
-        accessToken: token
+        accessToken: token,
       });
     });
 };
