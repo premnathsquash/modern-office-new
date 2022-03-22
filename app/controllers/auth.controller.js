@@ -19,7 +19,8 @@ exports.signup = (req, res) => {
     username: req.body.username,
     email: req.body.email,
     password: bcrypt.hashSync(pssword, 8),
-    phone: req.body.phone
+    phone: req.body.phone,
+    job: req.body.job
   });
 
   user.company ={
@@ -54,13 +55,14 @@ exports.signup = (req, res) => {
 
           console.log("user creation stripe",renewal, productId);
           // prod_L0ZoffTtV9fd11FRee free
-          
+
           const customer = await stripe.customers.create({
             name: req.body.username,
             email: req.body.email,
             phone: req.body.phone
           });
-          user.stripeCustomerId = customer.id
+          user.stripeCustomerId = customer.id;
+          user.stripeProductPrice.productId = productId
           user.save(async(err) => {
             if (err) {
               res.status(500).send({ message: err });
