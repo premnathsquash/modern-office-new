@@ -1,5 +1,10 @@
+const { customAlphabet } = require('nanoid');
+const nanoid = customAlphabet("1234567890abcdefghABCDEFGH", 10);
 const config = require("../config/auth.config");
 const db = require("../models");
+const {sendMail} = require("../config/mailer")
+const stripeConfig = require("../config/stripe.config");
+const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY)
 const User = db.user;
 const Role = db.role;
 
@@ -7,10 +12,12 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
+  const pssword = nanoid()
   const user = new User({
     username: req.body.username,
     email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 8)
+    password: bcrypt.hashSync(pssword, 8),
+    phone: req.body.phone
   });
 
   user.save((err, user) => {
@@ -24,20 +31,30 @@ exports.signup = (req, res) => {
         {
           name: { $in: req.body.roles }
         },
-        (err, roles) => {
+        async(err, roles) => {
           if (err) {
             res.status(500).send({ message: err });
             return;
           }
 
           user.roles = roles.map(role => role._id);
-          user.save(err => {
+          const customer = await stripe.customers.create({
+            name: req.body.username,
+            email: req.body.email,
+            phone: req.body.phone
+          });
+          user.stripeCustomerId = customer.id
+          user.save(async(err) => {
             if (err) {
               res.status(500).send({ message: err });
               return;
             }
-
-            res.send({ message: "User was registered successfully!" });
+            await sendMail(
+              req.body.email,
+              "Hydesq – New Account",null, `${req.body.email} pass: ${pssword} `,
+              null
+            );
+            res.send({ message: "User was registered successfully!", stripeCustomerId: customer.id });
           });
         }
       );
