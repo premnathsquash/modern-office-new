@@ -13,12 +13,25 @@ var bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
   const pssword = nanoid()
+  const renewal = req.body.renew;
+  const productId = req.body.productId
   const user = new User({
     username: req.body.username,
     email: req.body.email,
     password: bcrypt.hashSync(pssword, 8),
     phone: req.body.phone
   });
+
+  user.company ={
+    name: req.body.companyName,
+      phone: req.body.companyPhone,
+      address: req.body.companyAddress,
+      city: req.body.companyCity,
+      state: req.body.companyState,
+      zip: req.body.companyZip,
+      country: req.body.companyCountry,
+      website: req.body.companyWebsite,
+  }
 
   user.save((err, user) => {
     if (err) {
@@ -38,6 +51,10 @@ exports.signup = (req, res) => {
           }
 
           user.roles = roles.map(role => role._id);
+
+          console.log("user creation stripe",renewal, productId);
+          // prod_L0ZoffTtV9fd11FRee free
+          
           const customer = await stripe.customers.create({
             name: req.body.username,
             email: req.body.email,

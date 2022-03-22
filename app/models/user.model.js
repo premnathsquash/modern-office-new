@@ -13,6 +13,20 @@ const User = mongoose.model(
       }
     ],
     phone: String,
+    company: {
+      name: String,
+      phone: String,
+      address: String,
+      city: String,
+      state: String,
+      zip: String,
+      country: String,
+      website: String,
+    },
+    stripeProductPrice:{
+      productId: String,
+      priceId: String,
+    },
     stripeCustomerId: String,
   })
 );
