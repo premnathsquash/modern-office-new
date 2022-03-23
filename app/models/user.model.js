@@ -7,12 +7,10 @@ const User = mongoose.model(
     email: String,
     password: String,
     job: String,
-    roles: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Role"
-      }
-    ],
+    roles: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Role",
+    },
     phone: String,
     company: {
       name: String,
@@ -24,7 +22,7 @@ const User = mongoose.model(
       country: String,
       website: String,
     },
-    stripeProductPrice:{
+    stripeProductPrice: {
       productId: String,
       priceId: String,
     },

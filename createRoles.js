@@ -16,13 +16,13 @@ function initial() {
       });
 
       new Role({
-        name: "moderator"
+        name: "client"
       }).save(err => {
         if (err) {
           console.log("error", err);
         }
 
-        console.log("added 'moderator' to roles collection");
+        console.log("added 'client' to roles collection");
       });
 
       new Role({

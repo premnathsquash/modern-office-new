@@ -1,12 +1,15 @@
 const { createTransport } = require("nodemailer");
-const GOOGLE_USER = "no.reply.greenuniverse@gmail.com", GOOGLE_PASSWORD = "Green@1234"
+const GOOGLE_USER = "no.reply.greenuniverse@outlook.com", GOOGLE_PASSWORD = "Green@1234"
 const transporter = createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, 
+    host: "smtp-mail.outlook.com", // hostname
+    secureConnection: false, // TLS requires secureConnection to be false
+    port: 587, // port for secure SMTP
+    tls: {
+       ciphers:'SSLv3'
+    },
     auth: {
-        user: GOOGLE_USER, 
-        pass: GOOGLE_PASSWORD 
+        user: GOOGLE_USER,
+        pass: GOOGLE_PASSWORD
     }
 });
 const sendMail = async (

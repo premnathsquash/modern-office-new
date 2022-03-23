@@ -5,9 +5,10 @@ const db = require("../models");
 const { sendMail } = require("../config/mailer");
 const stripeConfig = require("../config/stripe.config");
 const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY);
+
 const User = db.user;
 const Role = db.role;
-
+const mongoose = db.mongoose;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
@@ -17,6 +18,7 @@ exports.signup = (req, res) => {
   const interval = req.body.interval;
   const productId = req.body.productId;
   const cardToken = req.body.cardToken;
+  const role = "client";
   const user = new User({
     username: req.body.username,
     email: req.body.email,
@@ -42,83 +44,65 @@ exports.signup = (req, res) => {
       return;
     }
 
-    if (req.body.roles) {
-      Role.find(
-        {
-          name: { $in: req.body.roles },
-        },
-        async (err, roles) => {
-          if (err) {
-            res.status(500).send({ message: err });
-            return;
-          }
-
-          user.roles = roles.map((role) => role._id);
-
-          const customer = await stripe.customers.create({
-            name: req.body.username,
-            email: req.body.email,
-            phone: req.body.phone,
-          });
-
-          await stripe.customers.createSource(
-            customer.id,
-            {source: cardToken}
-          );
-
-          const price = await stripe.prices.create({
-            unit_amount: 5000,
-            currency: 'aud',
-            recurring: {interval: 'year'},
-            product: productId,
-          });
-         await stripe.subscriptions.create({
-            customer: customer.id,
-            items: [
-              {price: price.id},
-            ],
-          });
-    
-          user.stripeCustomerId = customer.id;
-          user.stripeProductPrice.productId = productId;
-          user.stripeProductPrice.priceId = price.id;
-          user.save(async (err) => {
-            if (err) {
-              res.status(500).send({ message: err });
-              return;
-            }
-            await sendMail(
-              req.body.email,
-              "Hydesq – New Account",
-              null,
-              `${req.body.email} pass: ${pssword} `,
-              null
-            );
-            res.send({
-              message: "User was registered successfully!",
-              stripeCustomerId: customer.id,
-            });
-          });
-        }
-      );
-    } else {
-      Role.findOne({ name: "user" }, (err, role) => {
+    Role.find(
+      {
+        name: { $in: role },
+      },
+      async (err, roles) => {
         if (err) {
           res.status(500).send({ message: err });
           return;
         }
+        user.roles = mongoose.Types.ObjectId(roles[0]._id);
 
-        user.roles = [role._id];
-        user.save((err) => {
+        user.save(async (err) => {
           if (err) {
             res.status(500).send({ message: err });
             return;
           }
-
-          res.send({ message: "User was registered successfully!" });
         });
-      });
-    }
+
+        const customer = await stripe.customers.create({
+          name: req.body.username,
+          email: req.body.email,
+          phone: req.body.phone,
+        });
+
+        await stripe.customers.createSource(customer.id, { source: cardToken });
+
+        const price = await stripe.prices.create({
+          unit_amount: 5000,
+          currency: "aud",
+          recurring: { interval: "year" },
+          product: productId,
+        });
+        await stripe.subscriptions.create({
+          customer: customer.id,
+          items: [{ price: price.id }],
+        });
+
+        user.stripeCustomerId = customer.id;
+        user.stripeProductPrice.productId = productId;
+        user.stripeProductPrice.priceId = price.id;
+        user.save(async (err) => {
+          if (err) {
+            res.status(500).send({ message: err });
+            return;
+          }
+          await sendMail(
+            req.body.email,
+            "Hydesq – New Account",
+            null,
+            `${req.body.email} pass: ${pssword} `,
+            null
+          );
+          res.send({
+            message: "User was registered successfully!",
+            stripeCustomerId: customer.id,
+          });
+        });
+      }
+    );
   });
 };
 
