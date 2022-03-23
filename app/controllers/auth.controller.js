@@ -157,7 +157,7 @@ exports.signin = (req, res) => {
 exports.resetPassReq = async(req, res)=>{
   const {email} = req.body
   const user = await User.findOne({ email });
-  if (!user) return res.status(500).send({ message: err });
+  if (!user) return res.status(500).send({ message: "No user by this mail" });
   let token = await Token.findOne({ userId: user._id });
   if (token) await token.deleteOne()
   let resetToken = crypto.randomBytes(32).toString("hex");
