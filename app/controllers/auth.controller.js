@@ -146,10 +146,10 @@ exports.signin = (req, res) => {
       }
       res.status(200).send({
         id: user._id,
-        username: user.username,
+        name: user.username,
         email: user.email,
-        roles: authorities,
-        accessToken: token,
+        role: authorities,
+        token: token,
       });
     });
 };
@@ -178,11 +178,13 @@ exports.resetPassReq = async (req, res) => {
 exports.resetPassword = async(req, res)=>{
   const {token, password} = req.body
   const passwordResetToken = await Token.findOne({token: token})
-  const hash = await bcrypt.hash(token, Number(10));
-  console.log(passwordResetToken, hash)
-  //if (!passwordResetToken) return res.status(500).send({ message: "Invalid or expired password reset token" });
-  //const isValid = await bcrypt.compare(token, passwordResetToken.token);
-  //if (!isValid) return res.status(500).send({ message: "Invalid or expired password reset token" });
-  //const hash = await bcrypt.hash(password, Number(10));
-  //await passwordResetToken.deleteOne();
+  if (!passwordResetToken) return res.status(500).send({ message: "Invalid or expired password reset token" });
+  const hash = await bcrypt.hash(password, Number(10));
+  await User.updateOne(
+    { _id: passwordResetToken.userId },
+    { $set: { password: hash } },
+    { new: true }
+  );
+  await passwordResetToken.deleteOne();
+  res.status(200).send({ res: "Password resetted successfully" });
 }
