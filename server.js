@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 require("./app/routes/auth.routes")(app);
-require("./app/routes/user.routes")(app);
+require("./app/routes/enquire.routes")(app);
 require("./app/routes/plans.routes")(app);
 
 app.listen(PORT, () => {

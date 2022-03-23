@@ -66,11 +66,6 @@ exports.getplans = async(req, res) => {
     }
   })
   const intermidiate = [
-    {
-      price: 0,
-      name: "free",
-      
-    },
     ...temp
   ];
 
