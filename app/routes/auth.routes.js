@@ -23,4 +23,6 @@ module.exports = function(app) {
 
   app.post("/auth/send-password", controller.resetPassReq)
 
+  app.post("/auth/reset-password", controller.resetPassword)
+
 };

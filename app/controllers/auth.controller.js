@@ -9,7 +9,7 @@ const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY);
 
 const User = db.user;
 const Role = db.role;
-const Token = db.token
+const Token = db.token;
 const mongoose = db.mongoose;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
@@ -154,32 +154,35 @@ exports.signin = (req, res) => {
     });
 };
 
-exports.resetPassReq = async(req, res)=>{
-  const {email} = req.body
+exports.resetPassReq = async (req, res) => {
+  const { email } = req.body;
   const user = await User.findOne({ email });
   if (!user) return res.status(500).send({ message: "No user by this mail" });
   let token = await Token.findOne({ userId: user._id });
-  if (token) await token.deleteOne()
+  if (token) await token.deleteOne();
   let resetToken = crypto.randomBytes(32).toString("hex");
-  const hash = await bcrypt.hash(resetToken, Number(10));
 
   await new Token({
     userId: user._id,
-    token: hash,
+    token: resetToken,
     createdAt: Date.now(),
   }).save();
 
   const link = `http://localhost:8080/auth/reset?id=${resetToken}`;
 
-  await sendMail(
-    user.email,
-    "Hydesq –  Link",
-    null,
-    `Link ${link}`,
-    null
-  );
+  await sendMail(user.email, "Hydesq –  Link", null, `Link ${link}`, null);
 
-  res.status(200).send({"res": "Email has been sent to you"});
+  res.status(200).send({ res: "Email has been sent to you" });
+};
 
-
+exports.resetPassword = async(req, res)=>{
+  const {token, password} = req.body
+  const passwordResetToken = await Token.findOne({token: token})
+  const hash = await bcrypt.hash(token, Number(10));
+  console.log(passwordResetToken, hash)
+  //if (!passwordResetToken) return res.status(500).send({ message: "Invalid or expired password reset token" });
+  //const isValid = await bcrypt.compare(token, passwordResetToken.token);
+  //if (!isValid) return res.status(500).send({ message: "Invalid or expired password reset token" });
+  //const hash = await bcrypt.hash(password, Number(10));
+  //await passwordResetToken.deleteOne();
 }
