@@ -1,4 +1,5 @@
 const { customAlphabet } = require("nanoid");
+const crypto = require("crypto");
 const nanoid = customAlphabet("1234567890abcdefghABCDEFGH", 10);
 const config = require("../config/auth.config");
 const db = require("../models");
@@ -8,6 +9,7 @@ const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY);
 
 const User = db.user;
 const Role = db.role;
+const Token = db.token
 const mongoose = db.mongoose;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
@@ -151,3 +153,33 @@ exports.signin = (req, res) => {
       });
     });
 };
+
+exports.resetPassReq = async(req, res)=>{
+  const {email} = req.body
+  const user = await User.findOne({ email });
+  if (!user) return res.status(500).send({ message: err });
+  let token = await Token.findOne({ userId: user._id });
+  if (token) await token.deleteOne()
+  let resetToken = crypto.randomBytes(32).toString("hex");
+  const hash = await bcrypt.hash(resetToken, Number(10));
+
+  await new Token({
+    userId: user._id,
+    token: hash,
+    createdAt: Date.now(),
+  }).save();
+
+  const link = `http://localhost:8080/auth/reset?id=${resetToken}`;
+
+  await sendMail(
+    user.email,
+    "Hydesq –  Link",
+    null,
+    `Link ${link}`,
+    null
+  );
+
+  res.status(200).send({"res": "Email has been sent to you"});
+
+
+}

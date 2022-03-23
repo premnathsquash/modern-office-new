@@ -20,4 +20,7 @@ module.exports = function(app) {
   );
 
   app.post("/auth/admin-login", controller.signin);
+
+  app.post("/auth/send-password", controller.resetPassReq)
+
 };
