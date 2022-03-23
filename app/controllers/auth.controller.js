@@ -123,7 +123,7 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: "User Not found." });
       }
 
-      var passwordIsValid = bcrypt.compareSync(
+      const passwordIsValid = bcrypt.compareSync(
         req.body.password,
         user.password
       );
@@ -135,15 +135,12 @@ exports.signin = (req, res) => {
         });
       }
 
-      var token = jwt.sign({ id: user.id }, config.secret, {
+      const token = jwt.sign({ id: user.id }, config.secret, {
         expiresIn: 86400, // 24 hours
       });
 
-      var authorities = [];
+      const authorities = user.roles.name.toUpperCase();
 
-      for (let i = 0; i < user.roles.length; i++) {
-        authorities.push("ROLE_" + user.roles[i].name.toUpperCase());
-      }
       res.status(200).send({
         id: user._id,
         name: user.username,
@@ -175,10 +172,13 @@ exports.resetPassReq = async (req, res) => {
   res.status(200).send({ res: "Email has been sent to you" });
 };
 
-exports.resetPassword = async(req, res)=>{
-  const {token, password} = req.body
-  const passwordResetToken = await Token.findOne({token: token})
-  if (!passwordResetToken) return res.status(500).send({ message: "Invalid or expired password reset token" });
+exports.resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+  const passwordResetToken = await Token.findOne({ token: token });
+  if (!passwordResetToken)
+    return res
+      .status(500)
+      .send({ message: "Invalid or expired password reset token" });
   const hash = await bcrypt.hash(password, Number(10));
   await User.updateOne(
     { _id: passwordResetToken.userId },
@@ -187,4 +187,4 @@ exports.resetPassword = async(req, res)=>{
   );
   await passwordResetToken.deleteOne();
   res.status(200).send({ res: "Password resetted successfully" });
-}
+};

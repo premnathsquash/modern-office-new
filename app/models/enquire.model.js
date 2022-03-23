@@ -8,6 +8,12 @@ const Enquire = mongoose.model(
     phone: String,
     email: String,
     query: String,
+    customerType: String,
+    status: {
+      type: String,
+      default: "Pending"
+    },
+    created: { type : Date, default: Date.now }
   })
 );
 

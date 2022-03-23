@@ -1,6 +1,7 @@
 const db = require("../models");
 const { sendMail } = require("../config/mailer");
 const Enquire = db.enquire;
+const User = db.user;
 exports.createEnquire = async(req, res) => {
   const {companyName, name, phone, email, query} = req.body
   const enquery = new Enquire({
@@ -10,6 +11,7 @@ exports.createEnquire = async(req, res) => {
     email,
     query
   });
+
   enquery.save((err, user) => {
     if (err) {
       res.status(500).send({ message: err });
