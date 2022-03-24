@@ -1,7 +1,7 @@
 const stripe = require("stripe");
 const express = require("express");
 const endpointSecret =
-  "whsec_f2f42c68330a0eeba357bb0868a31d962cef6e05109a70d0839bfdca9d7bb38f";
+  "whsec_B8gfV6NgpSxSxgmYxNUL1sYIDNG44DGW"; //whsec_B8gfV6NgpSxSxgmYxNUL1sYIDNG44DGW //whsec_f2f42c68330a0eeba357bb0868a31d962cef6e05109a70d0839bfdca9d7bb38f
 
 module.exports = function (app) {
   app.post(
