@@ -1,4 +1,5 @@
 const { customAlphabet } = require("nanoid");
+const {epochUtil} = require("epochutils")
 const crypto = require("crypto");
 const nanoid = customAlphabet("1234567890abcdefghABCDEFGH", 10);
 const config = require("../config/auth.config");
@@ -11,10 +12,13 @@ const User = db.user;
 const Role = db.role;
 const Token = db.token;
 const mongoose = db.mongoose;
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+
+const trailDate = epochUtil().addDay(14);
 
 exports.signup = (req, res) => {
+  const trialEnd = `${trailDate.getLocal()}`.substring(0, 10)
   const pssword = nanoid();
   const renewal = req.body.renew;
   const interval = req.body.interval;
@@ -81,8 +85,9 @@ exports.signup = (req, res) => {
         await stripe.subscriptions.create({
           customer: customer.id,
           items: [{ price: price.id }],
+          trial_end: trialEnd
         });
-
+        user.trialEnd = trialEnd
         user.stripeCustomerId = customer.id;
         user.stripeProductPrice.productId = productId;
         user.stripeProductPrice.priceId = price.id;

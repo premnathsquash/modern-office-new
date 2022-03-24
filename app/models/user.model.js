@@ -27,6 +27,11 @@ const User = mongoose.model(
       priceId: String,
     },
     stripeCustomerId: String,
+    active: {
+      type: Boolean,
+      default: true
+    },
+    trialEnd: Date
   })
 );
 
