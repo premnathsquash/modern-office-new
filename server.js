@@ -13,8 +13,6 @@ var corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.urlencoded({ extended: true }));
-
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith('/webhook')) {
     next();
@@ -22,6 +20,7 @@ app.use((req, res, next) => {
     express.json()(req, res, next);
   }
 });
+app.use(express.urlencoded({ extended: true }));
 
 require("./app/routes/auth.routes")(app);
 require("./app/routes/enquire.routes")(app);
