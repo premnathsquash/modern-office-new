@@ -130,7 +130,7 @@ exports.signup = (req, res) => {
           customer: customer.id,
           items: [{ price: price.id }],
           trial_end: trialEnd,
-          cancel_at_period_end: renewal,
+          cancel_at_period_end: !renewal,
         });
         user.trialEnd = trialEnd;
         user.stripeCustomerId = customer.id;
