@@ -15,6 +15,7 @@ const transporter = createTransport({
 const sendMail = async (
     to = [], subject = '', text = undefined, html = undefined, attachments = []
 ) => {
+
     try {
         return await transporter.sendMail({
             from: `Hydesq <${GOOGLE_USER}>`, // sender address
@@ -23,10 +24,17 @@ const sendMail = async (
             text, // plain text body
             html, // html body
             attachments // attachments
-        });
+        },(error, info) => {
+        if (error) {
+            return console.log('Error while sending mail: ' + error);
+        } else {
+            console.log('Message sent: %s', info.messageId);
+        }
+        transport.close(); // shut down the connection pool, no more messages.
+    });
     } catch (error) {
         // Log
-        console.error('Error in Sending Mail');
+        console.error('Error in Sending Mail', error);
         // Throw the Error
         return { error } 
     }

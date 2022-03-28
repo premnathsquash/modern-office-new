@@ -26,12 +26,13 @@ const User = mongoose.model(
       productId: String,
       priceId: String,
     },
+    slug: String,
     stripeCustomerId: String,
     active: {
       type: Boolean,
       default: true
     },
-    trialEnd: Date
+    trialEnd: String
   })
 );
 
