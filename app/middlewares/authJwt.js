@@ -26,10 +26,9 @@ isAdmin = (req, res, next) => {
       res.status(500).send({ message: err });
       return;
     }
-
     Role.find(
       {
-        _id: { $in: user.roles }
+        _id: { $in: user.roles },
       },
       (err, roles) => {
         if (err) {
@@ -37,11 +36,9 @@ isAdmin = (req, res, next) => {
           return;
         }
 
-        for (let i = 0; i < roles.length; i++) {
-          if (roles[i].name === "admin") {
-            next();
-            return;
-          }
+        if (roles[0].name === "admin") {
+          next();
+          return;
         }
 
         res.status(403).send({ message: "Require Admin Role!" });
@@ -51,7 +48,7 @@ isAdmin = (req, res, next) => {
   });
 };
 
-isModerator = (req, res, next) => {
+isClient = (req, res, next) => {
   User.findById(req.userId).exec((err, user) => {
     if (err) {
       res.status(500).send({ message: err });
@@ -60,7 +57,7 @@ isModerator = (req, res, next) => {
 
     Role.find(
       {
-        _id: { $in: user.roles }
+        _id: { $in: user.roles },
       },
       (err, roles) => {
         if (err) {
@@ -68,14 +65,41 @@ isModerator = (req, res, next) => {
           return;
         }
 
-        for (let i = 0; i < roles.length; i++) {
-          if (roles[i].name === "moderator") {
-            next();
-            return;
-          }
+        if (roles[0].name === "client") {
+          next();
+          return;
         }
 
-        res.status(403).send({ message: "Require Moderator Role!" });
+        res.status(403).send({ message: "Require Client Role!" });
+        return;
+      }
+    );
+  });
+};
+
+const isUser = (req, res, next) => {
+  User.findById(req.userId).exec((err, user) => {
+    if (err) {
+      res.status(500).send({ message: err });
+      return;
+    }
+
+    Role.find(
+      {
+        _id: { $in: user.roles },
+      },
+      (err, roles) => {
+        if (err) {
+          res.status(500).send({ message: err });
+          return;
+        }
+
+        if (roles[0].name === "user") {
+          next();
+          return;
+        }
+
+        res.status(403).send({ message: "Require User Role!" });
         return;
       }
     );
@@ -85,6 +109,7 @@ isModerator = (req, res, next) => {
 const authJwt = {
   verifyToken,
   isAdmin,
-  isModerator
+  isClient,
+  isUser
 };
 module.exports = authJwt;
