@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const { errors } = require('celebrate');
 const dbConfig = require("./app/config/db.config");
 const db = require("./app/models");
 const initial = require("./createRoles");
@@ -11,7 +11,7 @@ const app = express();
 var corsOptions = {
   origin: "*",
 };
-
+app.use(errors());
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith('/webhook')) {

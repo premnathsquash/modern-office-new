@@ -6,6 +6,7 @@ const config = require("../config/auth.config");
 const db = require("../models");
 const { sendMail } = require("../config/mailer");
 const stripeConfig = require("../config/stripe.config");
+
 const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY);
 
 const User = db.user;
@@ -20,6 +21,7 @@ const trailDate = epochUtil().addDay(14);
 exports.signup = (req, res) => {
   const trialEnd = `${trailDate.getLocal()}`.substring(0, 10);
   const pssword = req.body.password || nanoid();
+  const image = req.body.image
   const renewal = req.body.renew;
   const interval = req.body.interval;
   const productId = req.body.productId;
@@ -28,6 +30,7 @@ exports.signup = (req, res) => {
   const user = new User({
     username: req.body.username,
     email: req.body.email,
+    image,
     password: bcrypt.hashSync(pssword, 8),
     phone: req.body.phone,
     job: req.body.job,
