@@ -5,6 +5,11 @@ const Office = mongoose.model(
   new mongoose.Schema({
     slug: String,
     officeName: String,
+    address: String,
+    zipcode: String,
+    city: String,
+    state: String,
+    country: String,
   })
 );
 
