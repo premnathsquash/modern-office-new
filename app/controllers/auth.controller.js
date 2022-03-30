@@ -21,7 +21,7 @@ const trailDate = epochUtil().addDay(14);
 exports.signup = (req, res) => {
   const trialEnd = `${trailDate.getLocal()}`.substring(0, 10);
   const pssword = req.body.password || nanoid();
-  const image = req.body.image
+  const image = req.body.image;
   const renewal = req.body.renew;
   const interval = req.body.interval;
   const productId = req.body.productId;
@@ -35,7 +35,7 @@ exports.signup = (req, res) => {
     phone: req.body.phone,
     job: req.body.job,
   });
-
+  user.slug = req.body.companyName;
   if (role === "admin") {
     Role.find(
       {
@@ -102,7 +102,7 @@ exports.signup = (req, res) => {
     country: req.body.companyCountry,
     website: req.body.companyWebsite,
   };
-
+  
   Role.find(
     {
       name: { $in: role },
@@ -199,6 +199,7 @@ exports.signin = (req, res) => {
         name: user.username,
         email: user.email,
         role: authorities,
+        slug: user.slug,
         token: token,
       });
     });
@@ -220,7 +221,13 @@ exports.resetPassReq = async (req, res) => {
 
   const link = `http://localhost:8080/auth/reset?id=${resetToken}`;
 
-  await sendMail(user.email, "Hydesq –  Link", `Link ${link}`, `Link ${link}`, null);
+  await sendMail(
+    user.email,
+    "Hydesq –  Link",
+    `Link ${link}`,
+    `Link ${link}`,
+    null
+  );
 
   res.status(200).send({ res: "Email has been sent to you" });
 };
