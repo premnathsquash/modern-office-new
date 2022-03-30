@@ -10,6 +10,10 @@ const Office = mongoose.model(
     city: String,
     state: String,
     country: String,
+    floors: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Floor",
+    }],
   })
 );
 

@@ -10,6 +10,7 @@ db.role = require("./role.model");
 db.token = require("./token.model");
 db.enquire = require("./enquire.model");
 db.office = require("./office.model");
+db.floor = require("./floor.model");
 
 db.ROLES = ["user", "admin", "client"];
 

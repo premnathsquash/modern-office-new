@@ -1,6 +1,7 @@
 const db = require("../models");
 
 const Office = db.office;
+const Floor = db.floor
 
 exports.CreateOffice = async (req, res, next) => {
   const { slug, officeName, address, zipcode, city, state, country } = req.body;
@@ -42,4 +43,43 @@ exports.ListOffices= async (req, res, next) => {
     return;
   }
 
+}
+
+exports.CreateFloor = async (req, res, next) => {
+  const { slug, officeName } = req.body;
+  const floor = new Floor({
+    slug,
+    officeName,
+  });
+  Floor.findOne({ slug: slug, officeName: officeName }, function (
+    err,
+    floor1
+  ) {
+    if (err) {
+      res.status(500).send({ message: err });
+      return;
+    }
+    if (floor1) return res.end("floor already present");
+    floor.save((err, user) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+      return res.end("floor created");
+    });
+  });
+};
+
+exports.updateFloorToOffice = async(req, res, next)=>{
+  const { id, slug, officeName} = req.body;
+  Office.findOneAndUpdate({ slug: slug, officeName: officeName }, {floors: id}, (
+    err,
+    floor1
+  )=>{
+    if (err) {
+      res.status(500).send({ message: err });
+      return;
+    }
+    return res.end("floor is associated with office");
+  })
 }
