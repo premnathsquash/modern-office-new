@@ -3,10 +3,15 @@ const db = require("../models");
 const Office = db.office;
 
 exports.CreateOffice = async (req, res, next) => {
-  const { slug, officeName } = req.body;
+  const { slug, officeName, address, zipcode, city, state, country } = req.body;
   const office = new Office({
     slug,
     officeName,
+    address,
+    zipcode,
+    city,
+    state,
+    country,
   });
   Office.findOne({ slug: slug, officeName: officeName }, function (
     err,
