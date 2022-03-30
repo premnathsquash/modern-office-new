@@ -31,3 +31,15 @@ exports.CreateOffice = async (req, res, next) => {
     });
   });
 };
+
+exports.ListOffices= async (req, res, next) => {
+  const { slug } = req.query;
+  try{
+    const offices = await Office.find({slug: slug})
+    return res.json([...offices]);
+  }catch(err){
+    res.status(500).send({ message: err });
+    return;
+  }
+
+}

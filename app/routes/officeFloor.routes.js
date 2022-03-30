@@ -8,6 +8,11 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isClient],
     controller.CreateOffice
   );
+  app.get(
+    "/list/offices",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.ListOffices
+  );
 
   app.use(errors());
 };
