@@ -3,8 +3,8 @@ const db = require("../models");
 const Office = db.office;
 const Floor = db.floor
 
-const updateFloorToOffice = async(id, slug, officeName)=>{
-  Office.findOneAndUpdate({ slug: slug, officeName: officeName }, {floors: id}, (
+const updateFloorToOffice = async(id, officeId)=>{
+  Office.findOneAndUpdate({ _id: officeId }, {floors: id}, (
     err,
     floor1
   )=>{
@@ -59,29 +59,17 @@ exports.ListOffices= async (req, res, next) => {
 }
 
 exports.CreateFloor = async (req, res, next) => {
-  const { slug, officeName } = req.body;
+  const { name, officeId } = req.body;
   const floor = new Floor({
-    slug,
-    officeName,
+    name
   });
-  Floor.findOne({ slug: slug, officeName: officeName }, function (
-    err,
-    floor1
-  ) {
-    if (err) {
-      res.status(500).send({ message: err });
-      return;
-    }
-    if (floor1) return res.end("floor already present");
-    
     floor.save((err, data) => {
       if (err) {
         res.status(500).send({ message: err });
         return;
       }
-      updateFloorToOffice(data._id, slug, officeName)
+      updateFloorToOffice(data._id, officeId)
       return res.end("floor created");
     });
-  });
 };
 

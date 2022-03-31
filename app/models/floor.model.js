@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const Floor = mongoose.model(
   "Floor",
   new mongoose.Schema({
-    slug: String,
-    officeName: String,
+    name: String,
   })
 );
 
