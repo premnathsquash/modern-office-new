@@ -22,6 +22,7 @@ exports.CreateOffice = async (req, res, next) => {
     city,
     state,
     country,
+    updated_at: Date.now()
   });
   Office.findOne({ slug: slug, officeName: officeName }, function (
     err,
@@ -37,7 +38,7 @@ exports.CreateOffice = async (req, res, next) => {
         res.status(500).send({ message: err });
         return;
       }
-      return res.end({ res: "office created", data });
+      return res.json({ ...data });
     });
   });
 };

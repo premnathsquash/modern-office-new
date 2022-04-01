@@ -18,9 +18,6 @@ const Office = mongoose.model(
     updated_at: Date,
   })
 );
-Office.pre("save", function(next){
-  this.updated_at = Date.now;
-  next()
-})
+
 
 module.exports = Office;
