@@ -4,7 +4,8 @@ const Office = db.office;
 const Floor = db.floor;
 
 const updateFloorToOffice = async (id, officeId) => {
-  Office.findOneAndUpdate({ _id: officeId }, { floors: id }, (err, floor1) => {
+  const office = await Office.findOne({ _id: officeId })
+  Office.findOneAndUpdate({ _id: officeId }, { floors: [id, ...office.floors] }, (err, floor1) => {
     if (err) {
       return { message: err };
     }
@@ -63,7 +64,7 @@ exports.CreateFloor = async (req, res, next) => {
     if (err) {
       res.status(500).send({ message: err });
       return;
-    }
+    } 
     updateFloorToOffice(data._id, officeId);
     return res.end("floor created");
   });
