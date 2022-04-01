@@ -47,7 +47,7 @@ exports.CreateOffice = async (req, res, next) => {
 exports.ListOffices = async (req, res, next) => {
   const { slug } = req.query;
   try {
-    const offices = await Office.find({ slug: slug }).sort([["created_at", -1]]).populate("floors");
+    const offices = await Office.find({ slug: slug }).sort([["updated_at", -1]]).populate({path: 'floors', options: { sort: { 'created_at': -1 } } });
     return res.json([...offices]);
   } catch (err) {
     res.status(500).send({ message: err });
