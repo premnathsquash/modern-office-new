@@ -19,5 +19,12 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isClient],
     controller.CreateFloor
   );
+
+  app.patch(
+    "/update/office",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.updateOffice
+  );
+ 
   app.use(errors());
 };

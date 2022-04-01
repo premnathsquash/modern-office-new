@@ -70,3 +70,21 @@ exports.CreateFloor = async (req, res, next) => {
     return res.end("floor created");
   });
 };
+exports.updateOffice = async(req, res, next)=>{
+  const {id, officeName, address, city, state, country, zipcode} = req.body;
+  const office = await Office.findOne({ _id: id })
+  const officeTemp ={...office._doc, officeName:officeName, address:address, city:city, state:state, country:country, zipcode:zipcode};
+  Office.findOneAndUpdate({ _id: id }, officeTemp, (err, office1) => {
+    if (err) {
+      return { message: err };
+    }
+    return res.end("office is updated successfully");
+  });
+
+}
+exports.deleteFloor = async(req, res, next)=>{
+
+}
+exports.updateFloor = async(req, res, next)=>{
+
+}

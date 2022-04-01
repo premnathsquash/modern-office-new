@@ -34,7 +34,7 @@ app.listen(PORT, () => {
     .connect(`${dbConfig.HOSTURL}`, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useFindAndModify: true
+      useFindAndModify: false
     })
     .then(() => {
       console.log("Successfully connect to MongoDB.");
