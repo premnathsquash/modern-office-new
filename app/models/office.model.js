@@ -14,7 +14,13 @@ const Office = mongoose.model(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Floor",
     }],
+    created_at: {type: Date, required: true, default: Date.now},
+    updated_at: Date,
   })
 );
+Office.pre("save", function(next){
+  this.updated_at = Date.now;
+  next()
+})
 
 module.exports = Office;
