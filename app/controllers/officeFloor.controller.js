@@ -5,6 +5,7 @@ const Floor = db.floor;
 
 const updateFloorToOffice = async (id, officeId) => {
   const office = await Office.findOne({ _id: officeId })
+
   Office.findOneAndUpdate({ _id: officeId }, { floors: [id, ...office.floors] }, (err, floor1) => {
     if (err) {
       return { message: err };
@@ -23,7 +24,6 @@ exports.CreateOffice = async (req, res, next) => {
     city,
     state,
     country,
-    updated_at: Date.now()
   });
   Office.findOne({ slug: slug, officeName: officeName }, function (
     err,
@@ -47,7 +47,8 @@ exports.CreateOffice = async (req, res, next) => {
 exports.ListOffices = async (req, res, next) => {
   const { slug } = req.query;
   try {
-    const offices = await Office.find({ slug: slug }).sort([["updated_at", -1]]).populate({path: 'floors', options: { sort: { 'created_at': -1 } } });
+    const offices = await Office.find({ slug: slug }).sort([["updatedAt", -1]]).populate({path: 'floors' });
+
     return res.json([...offices]);
   } catch (err) {
     res.status(500).send({ message: err });

@@ -13,9 +13,10 @@ const Office = mongoose.model(
     floors: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Floor",
-    }],
-    created_at: {type: Date, required: true, default: Date.now},
-    updated_at: Date,
+    }]
+  },
+  {
+    timestamps: true
   })
 );
 
