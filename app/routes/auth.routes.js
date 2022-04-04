@@ -1,6 +1,6 @@
 const multer = require("multer");
 const { errors } = require("celebrate");
-const { verifySignUp } = require("../middlewares");
+const { verifySignUp, authJwt } = require("../middlewares");
 const controller = require("../controllers/auth.controller");
 const { storage } = require("../config/s3");
 const upload = multer({ storage });
@@ -29,6 +29,12 @@ module.exports = function (app) {
   app.post("/auth/send-password", controller.resetPassReq);
 
   app.post("/auth/reset-password", controller.resetPassword);
+
+  app.post(
+    "/reset-password",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.resetPasswordInternal
+  );
 
   app.use(errors());
 };

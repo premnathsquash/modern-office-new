@@ -102,7 +102,7 @@ exports.signup = (req, res) => {
     country: req.body.companyCountry,
     website: req.body.companyWebsite,
   };
-  
+
   Role.find(
     {
       name: { $in: role },
@@ -230,6 +230,35 @@ exports.resetPassReq = async (req, res) => {
   );
 
   res.status(200).send({ res: "Email has been sent to you" });
+};
+
+exports.resetPasswordInternal = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const user = await User.findOne({ _id: req.userId });
+  if (!user && !user.password)
+    return res.status(500).send({ res: "Something went wrong" });
+  const passVerification = await bcrypt.compareSync(oldPassword, user.password);
+  if (!passVerification)
+    return res.status(500).send("Current password does not match.");
+  await User.findOneAndUpdate(
+    { _id: req.userId },
+    {
+      password: bcrypt.hashSync(newPassword, 8),
+    }
+  )
+    .then(async() => {
+      await sendMail(
+        user.email,
+        "Hydesq – Password upgrade",
+        null,
+        `${user.email} password has been updated successfully`,
+        null
+      );
+    })
+    .catch((err) => {
+      return res.status(500).send({ res: "Something went wrong" });
+    });
+  res.status(200).send({ res: "Password resetted successfully" });
 };
 
 exports.resetPassword = async (req, res) => {
