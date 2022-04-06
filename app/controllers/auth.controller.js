@@ -10,6 +10,7 @@ const stripeConfig = require("../config/stripe.config");
 const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY);
 
 const User = db.user;
+const Profile = db.profile;
 const Role = db.role;
 const Token = db.token;
 const mongoose = db.mongoose;
@@ -29,7 +30,7 @@ exports.signup = (req, res) => {
   const user = new User({
     username: req.body.username,
     email: req.body.email,
-    dp:"",
+    dp: "",
     password: bcrypt.hashSync(pssword, 8),
     phone: req.body.phone,
     job: req.body.job,
@@ -205,6 +206,74 @@ exports.signin = (req, res) => {
     });
 };
 
+exports.userSignup = async (req, res) => {
+  const pssword = nanoid();
+  const role = "user";
+  const company = await User.findOne({ _id: req.userId });
+  const { location } = req.file;
+  const status = true;
+  const {
+    firstName,
+    lastName,
+    email,
+    department,
+    allocatedDesk,
+    reservedSeats,
+    makeAdmin,
+  } = req.body;
+  const profile = new Profile({
+    firstName,
+    lastName,
+    password: bcrypt.hashSync(pssword, 8),
+    dp: location ?? "",
+    email,
+    department,
+    allocatedDesk,
+    reservedSeats,
+    makeAdmin,
+  });
+  Role.find(
+    {
+      name: { $in: role },
+    },
+    async (err, roles) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+      profile.roles = mongoose.Types.ObjectId(roles[0]._id);
+      profile.status = status;
+      profile.slug = company.slug;
+      profile.save(async (err, result) => {
+        if (err) {
+          res.status(500).send({ message: err });
+          return;
+        }
+        await User.findOneAndUpdate(
+          { _id: company._id },
+          { profile: [result._id, ...company.profile] },
+          (err, profile1) => {
+            if (err) {
+              return { message: err };
+            }
+          }
+        );
+      });
+    }
+  );
+  return res.status(200).send({ res: "user sign-up successfuly" });
+};
+
+exports.userLoginIn = async (req, res) => {
+  return res.status(200).send("userLoginIn");
+};
+
+exports.getProfile = async (req, res) => {};
+
+exports.getAllusers = async (req, res) => {};
+
+exports.getUser = async (req, res) => {};
+
 exports.resetPassReq = async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
@@ -313,6 +382,7 @@ exports.updateProfile = async (req, res) => {
     return res.status(500).send({ res: "Something went wrong" });
   }
 };
+
 exports.logout = async (req, res) => {
   const token = req.headers["x-auth-token"];
   if (!token) return res.status(400).send({ res: "User not logged" });

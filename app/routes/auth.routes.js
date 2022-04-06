@@ -26,6 +26,18 @@ module.exports = function (app) {
 
   app.post("/auth/admin-login", controller.signin);
 
+  app.post("/auth/user-signup", 
+  upload,
+  [
+    verifySignUp.checkDuplicateProfilenameOrEmail,
+    verifySignUp.checkRolesExisted,
+    authJwt.verifyToken, 
+    authJwt.isClient
+  ],
+  controller.userSignup) 
+
+  app.post("/auth/user-login", controller.userLoginIn)
+
   app.post("/auth/send-password", controller.resetPassReq);
 
   app.post("/auth/reset-password", controller.resetPassword);

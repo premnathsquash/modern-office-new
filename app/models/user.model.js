@@ -12,6 +12,10 @@ const User = mongoose.model(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Role",
     },
+    profile: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Profile",
+    }],
     phone: String,
     company: {
       name: String,
