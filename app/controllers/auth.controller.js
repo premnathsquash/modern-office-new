@@ -29,6 +29,7 @@ exports.signup = (req, res) => {
   const user = new User({
     username: req.body.username,
     email: req.body.email,
+    dp:"",
     password: bcrypt.hashSync(pssword, 8),
     phone: req.body.phone,
     job: req.body.job,
@@ -92,6 +93,7 @@ exports.signup = (req, res) => {
 
   user.company = {
     name: req.body.companyName,
+    companyImg: "",
     phone: req.body.companyPhone,
     address: req.body.companyAddress,
     city: req.body.companyCity,
@@ -289,34 +291,30 @@ exports.updateProfile = async (req, res) => {
     companyCountry,
   } = req.body;
   const [image, image2] = req.files;
-  await User.findOneAndUpdate(
-    { _id: user._id },
-    {
-      username: username,
-      email: email,
-      dp: image.location,
-      company: {
-        name: companyName,
-        companyImg: image2.location,
-        address: companyAddress,
-        city: companyCity,
-        state: companyState,
-        zip: companyZip,
-        country: companyCountry,
-      },
-      ...user
-    }
-  )
-    .then(async () => {
-      //
-    })
-    .catch((err) => {
-      return res.status(500).send({ res: "Something went wrong" });
-    });
+  try {
+    let doc = await User.findOneAndUpdate(
+      { _id: user._id },
+      {
+        username: username ?? user.username,
+        email: email ?? user.email,
+        dp: image.location ?? user.dp,
+        company: {
+          name: companyName ?? user.company.name,
+          companyImg: image2.location ?? user.company.companyImg,
+          address: companyAddress ?? user.company.address,
+          city: companyCity ?? user.company.city,
+          state: companyState ?? user.company.state,
+          zip: companyZip ?? user.company.zip,
+          country: companyCountry ?? user.company.country,
+        },
+      }
+    );
+    console.log(doc);
 
-  res.status(200).send({ res: "Profile updated successfully" });
+  } catch (err) {
+    return res.status(500).send({ res: "Something went wrong" });
+  }
 };
-
 exports.logout = async (req, res) => {
   const token = req.headers["x-auth-token"];
   if (!token) return res.status(400).send({ res: "User not logged" });
