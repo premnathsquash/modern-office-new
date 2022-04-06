@@ -309,8 +309,6 @@ exports.updateProfile = async (req, res) => {
         },
       }
     );
-    console.log(doc);
-
   } catch (err) {
     return res.status(500).send({ res: "Something went wrong" });
   }
@@ -318,5 +316,5 @@ exports.updateProfile = async (req, res) => {
 exports.logout = async (req, res) => {
   const token = req.headers["x-auth-token"];
   if (!token) return res.status(400).send({ res: "User not logged" });
-  res.status(200).send({ res: "Profile updated successfully" });
+  res.status(200).send({ res: "user logout successfully" });
 };
