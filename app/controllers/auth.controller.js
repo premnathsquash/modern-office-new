@@ -21,7 +21,6 @@ const trailDate = epochUtil().addDay(14);
 exports.signup = (req, res) => {
   const trialEnd = `${trailDate.getLocal()}`.substring(0, 10);
   const pssword = req.body.password || nanoid();
-  const image = req.body.image;
   const renewal = req.body.renew;
   const interval = req.body.interval;
   const productId = req.body.productId;
@@ -30,7 +29,6 @@ exports.signup = (req, res) => {
   const user = new User({
     username: req.body.username,
     email: req.body.email,
-    image,
     password: bcrypt.hashSync(pssword, 8),
     phone: req.body.phone,
     job: req.body.job,
@@ -246,7 +244,7 @@ exports.resetPasswordInternal = async (req, res) => {
       password: bcrypt.hashSync(newPassword, 8),
     }
   )
-    .then(async() => {
+    .then(async () => {
       await sendMail(
         user.email,
         "Hydesq – Password upgrade",
@@ -276,4 +274,51 @@ exports.resetPassword = async (req, res) => {
   );
   await passwordResetToken.deleteOne();
   res.status(200).send({ res: "Password resetted successfully" });
+};
+
+exports.updateProfile = async (req, res) => {
+  const user = await User.findOne({ _id: req.userId });
+  const {
+    username,
+    email,
+    companyName,
+    companyAddress,
+    companyCity,
+    companyState,
+    companyZip,
+    companyCountry,
+  } = req.body;
+  const [image, image2] = req.files;
+  await User.findOneAndUpdate(
+    { _id: user._id },
+    {
+      username: username,
+      email: email,
+      dp: image.location,
+      company: {
+        name: companyName,
+        companyImg: image2.location,
+        address: companyAddress,
+        city: companyCity,
+        state: companyState,
+        zip: companyZip,
+        country: companyCountry,
+      },
+      ...user
+    }
+  )
+    .then(async () => {
+      //
+    })
+    .catch((err) => {
+      return res.status(500).send({ res: "Something went wrong" });
+    });
+
+  res.status(200).send({ res: "Profile updated successfully" });
+};
+
+exports.logout = async (req, res) => {
+  const token = req.headers["x-auth-token"];
+  if (!token) return res.status(400).send({ res: "User not logged" });
+  res.status(200).send({ res: "Profile updated successfully" });
 };

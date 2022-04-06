@@ -4,8 +4,8 @@ const User = mongoose.model(
   "User",
   new mongoose.Schema({
     username: String,
+    dp: String,
     email: String,
-    image: String,
     password: String,
     job: String,
     roles: {
@@ -15,6 +15,7 @@ const User = mongoose.model(
     phone: String,
     company: {
       name: String,
+      companyImg: String,
       phone: String,
       address: String,
       city: String,

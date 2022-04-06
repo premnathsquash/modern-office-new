@@ -3,7 +3,8 @@ const { errors } = require("celebrate");
 const { verifySignUp, authJwt } = require("../middlewares");
 const controller = require("../controllers/auth.controller");
 const { storage } = require("../config/s3");
-const upload = multer({ storage });
+const upload = multer({ storage }).single("image");
+const multipleUpload = multer({ storage }).array('images');
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -16,7 +17,6 @@ module.exports = function (app) {
 
   app.post(
     "/auth/signup",
-    upload.single("image"),
     [
       verifySignUp.checkDuplicateUsernameOrEmail,
       verifySignUp.checkRolesExisted,
@@ -35,6 +35,15 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isClient],
     controller.resetPasswordInternal
   );
+
+  app.patch(
+    "/update-profile",
+    multipleUpload,
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.updateProfile
+  );
+
+  app.get("/logout", controller.logout)
 
   app.use(errors());
 };
