@@ -1,7 +1,7 @@
 const { customAlphabet } = require("nanoid");
 const { epochUtil } = require("epochutils");
 const crypto = require("crypto");
-const nanoid = customAlphabet("1234567890abcdefghABCDEFGH", 10);
+const nanoid = customAlphabet("1234567890abcdefghijklmnABCDEFGHIJKLMN", 10);
 const config = require("../config/auth.config");
 const db = require("../models");
 const { sendMail } = require("../config/mailer");
