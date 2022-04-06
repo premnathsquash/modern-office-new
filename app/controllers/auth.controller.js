@@ -260,7 +260,7 @@ exports.userSignup = async (req, res) => {
               req.body.email,
               "Hydesq – New User Account",
               null,
-              `${email} pass: ${pssword} company slug: ${company.slug}`,
+              `${email} pass: ${pssword} companySlug: ${company.slug}`,
               null
             );
           }
