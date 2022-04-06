@@ -256,6 +256,13 @@ exports.userSignup = async (req, res) => {
             if (err) {
               return { message: err };
             }
+            await sendMail(
+              req.body.email,
+              "Hydesq – New User Account",
+              null,
+              `${email} pass: ${pssword} company slug: ${company.slug}`,
+              null
+            );
           }
         );
       });
