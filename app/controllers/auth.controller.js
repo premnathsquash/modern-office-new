@@ -445,7 +445,7 @@ exports.updateProfile = async (req, res) => {
   } = req.body;
   
   const image= req.file;
-  console.log(req.body, image.location);
+  console.log(req);
 
   try {
     let doc = await User.findOneAndUpdate(
