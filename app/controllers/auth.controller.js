@@ -432,8 +432,6 @@ exports.resetPassword = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  console.log("k");
-  
   const user = await User.findOne({ _id: req.userId });
   const {
     username,
@@ -469,7 +467,6 @@ exports.updateProfile = async (req, res) => {
         new: true,
       }
     );
-    console.log(doc);
     return res.status(200).send("updated successfully");
   } catch (err) {
     return res.status(500).send({ res: "Something went wrong" });
