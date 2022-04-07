@@ -432,6 +432,8 @@ exports.resetPassword = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
+  console.log("k");
+  
   const user = await User.findOne({ _id: req.userId });
   const {
     username,
