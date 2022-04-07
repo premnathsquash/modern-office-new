@@ -443,9 +443,9 @@ exports.updateProfile = async (req, res) => {
     companyZip,
     companyCountry,
   } = req.body;
-console.log(req.body);
-
-  const [image, image2] = req.files;
+  
+  const [image, image2] = req.file;
+  console.log(req.body, req.file);
 
   try {
     let doc = await User.findOneAndUpdate(
