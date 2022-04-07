@@ -252,7 +252,7 @@ exports.userSignup = async (req, res) => {
         await User.findOneAndUpdate(
           { _id: company._id },
           { profile: [result._id, ...company.profile] },
-         async (err, profile1) => {
+          async (err, profile1) => {
             if (err) {
               return { message: err };
             }
@@ -276,9 +276,47 @@ exports.userLoginIn = async (req, res) => {
 };
 
 exports.getProfile = async (req, res) => {
- const user = await User.findOne({ _id: req.userId });
- const {company:{name:companyName, companyImg, address: companyAddress, city:companyCity, state: companyState, zip: companyZip, country: companyCountry}, username, email, dp} = user
- return res.status(200).send({companyName, companyImg, companyAddress, companyCity, companyState, companyZip,  companyCountry, username, email, dp});
+  const user = await User.findOne({ _id: req.userId });
+  const {
+    company: {
+      name: companyName,
+      companyImg,
+      address: companyAddress,
+      city: companyCity,
+      state: companyState,
+      zip: companyZip,
+      country: companyCountry,
+    },
+    username,
+    email,
+    dp,
+  } = user;
+  return res
+    .status(200)
+    .send({
+      companyName,
+      companyImg,
+      companyAddress,
+      companyCity,
+      companyState,
+      companyZip,
+      companyCountry,
+      username,
+      email,
+      dp,
+    });
+};
+
+exports.searchEmail = async (req, res) => {
+  try{
+  if (!req.query.email)
+    return res.status(406).send("Please provide an email to verify.");
+  const user = await Profile.findOne({ email: req.query.email });
+  if (user) return res.status(400).send("Email Id already taken.");
+  else return res.status(200).send("Email available.");
+  }catch(err){
+    return res.status(500).send({ message: "servrer not responding due to error" });
+  }
 };
 
 exports.getAllusers = async (req, res) => {};

@@ -57,6 +57,8 @@ module.exports = function (app) {
     controller.updateProfile
   );
 
+  app.get("/email-availability", controller.searchEmail);
+
   app.get(
     "/get-profile",
     [authJwt.verifyToken, authJwt.isClient],
