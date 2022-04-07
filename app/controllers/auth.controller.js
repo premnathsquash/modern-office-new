@@ -272,7 +272,46 @@ exports.userSignup = async (req, res) => {
 };
 
 exports.userLoginIn = async (req, res) => {
-  return res.status(200).send("userLoginIn");
+  if (!req.body.email)
+    return res.status(400).end({ res: "please provide email" });
+  if (!req.body.slug)
+    return res.status(400).end({ res: "please provide slug" });
+  Profile.findOne({
+    email: req.body.email,
+    slug: req.body.slug,
+  })
+    .populate("roles", "-__v")
+    .exec((err, user) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+      if (!user) {
+        return res.status(404).send({ message: "User Not found." });
+      }
+      const passwordIsValid = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
+      if (!passwordIsValid) {
+        return res.status(401).send({
+          accessToken: null,
+          message: "Invalid Password!",
+        });
+      }
+      const token = jwt.sign({ id: user.id }, config.secret, {
+        expiresIn: 86400, // 24 hours
+      });
+      const authorities = user.roles.name.toUpperCase();
+    });
+  return res.status(200).send({
+    id: user._id,
+    name: user.username,
+    email: user.email,
+    role: authorities,
+    slug: user.slug,
+    token: token,
+  });
 };
 
 exports.getProfile = async (req, res) => {
@@ -291,37 +330,33 @@ exports.getProfile = async (req, res) => {
     email,
     dp,
   } = user;
-  return res
-    .status(200)
-    .send({
-      companyName,
-      companyImg,
-      companyAddress,
-      companyCity,
-      companyState,
-      companyZip,
-      companyCountry,
-      username,
-      email,
-      dp,
-    });
+  return res.status(200).send({
+    companyName,
+    companyImg,
+    companyAddress,
+    companyCity,
+    companyState,
+    companyZip,
+    companyCountry,
+    username,
+    email,
+    dp,
+  });
 };
 
 exports.searchEmail = async (req, res) => {
-  try{
-  if (!req.query.email)
-    return res.status(406).send("Please provide an email to verify.");
-  const user = await Profile.findOne({ email: req.query.email });
-  if (user) return res.status(400).send("Email Id already taken.");
-  else return res.status(200).send("Email available.");
-  }catch(err){
-    return res.status(500).send({ message: "servrer not responding due to error" });
+  try {
+    if (!req.query.email)
+      return res.status(406).send("Please provide an email to verify.");
+    const user = await Profile.findOne({ email: req.query.email });
+    if (user) return res.status(400).send("Email Id already taken.");
+    else return res.status(200).send("Email available.");
+  } catch (err) {
+    return res
+      .status(500)
+      .send({ message: "servrer not responding due to error" });
   }
 };
-
-exports.getAllusers = async (req, res) => {};
-
-exports.getUser = async (req, res) => {};
 
 exports.resetPassReq = async (req, res) => {
   const { email } = req.body;
@@ -408,7 +443,9 @@ exports.updateProfile = async (req, res) => {
     companyZip,
     companyCountry,
   } = req.body;
+
   const [image, image2] = req.files;
+
   try {
     let doc = await User.findOneAndUpdate(
       { _id: user._id },
@@ -425,12 +462,23 @@ exports.updateProfile = async (req, res) => {
           zip: companyZip ?? user.company.zip,
           country: companyCountry ?? user.company.country,
         },
+      },
+      {
+        new: true,
       }
     );
+    return res.status(200).send("updated successfully");
   } catch (err) {
     return res.status(500).send({ res: "Something went wrong" });
   }
 };
+
+exports.getAllProfileusers = async (req, res) => {
+  const user = await User.findOne({ _id: req.userId });
+  await Profile.find({ slug: user.slug }).then().c;
+};
+
+exports.getProfileUser = async (req, res) => {};
 
 exports.logout = async (req, res) => {
   const token = req.headers["x-auth-token"];

@@ -65,6 +65,12 @@ module.exports = function (app) {
     controller.getProfile
   );
 
+  app.get(
+    "/get-all-user-profiles",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.getAllProfileusers
+  );
+
   app.get("/logout", controller.logout);
 
   app.use(errors());
