@@ -252,7 +252,7 @@ exports.userSignup = async (req, res) => {
         await User.findOneAndUpdate(
           { _id: company._id },
           { profile: [result._id, ...company.profile] },
-          (err, profile1) => {
+         async (err, profile1) => {
             if (err) {
               return { message: err };
             }
