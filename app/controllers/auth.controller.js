@@ -275,7 +275,11 @@ exports.userLoginIn = async (req, res) => {
   return res.status(200).send("userLoginIn");
 };
 
-exports.getProfile = async (req, res) => {};
+exports.getProfile = async (req, res) => {
+ const user = await User.findOne({ _id: req.userId });
+ const {company:{name:companyName, companyImg, address: companyAddress, city:companyCity, state: companyState, zip: companyZip, country: companyCountry}, username, email, dp} = user
+ return res.status(200).send({companyName, companyImg, companyAddress, companyCity, companyState, companyZip,  companyCountry, username, email, dp});
+};
 
 exports.getAllusers = async (req, res) => {};
 

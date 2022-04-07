@@ -4,7 +4,7 @@ const { verifySignUp, authJwt } = require("../middlewares");
 const controller = require("../controllers/auth.controller");
 const { storage } = require("../config/s3");
 const upload = multer({ storage }).single("image");
-const multipleUpload = multer({ storage }).array('images');
+const multipleUpload = multer({ storage }).array("images");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -26,17 +26,19 @@ module.exports = function (app) {
 
   app.post("/auth/admin-login", controller.signin);
 
-  app.post("/auth/user-signup", 
-  upload,
-  [
-    verifySignUp.checkDuplicateProfilenameOrEmail,
-    verifySignUp.checkRolesExisted,
-    authJwt.verifyToken, 
-    authJwt.isClient
-  ],
-  controller.userSignup) 
+  app.post(
+    "/auth/user-signup",
+    upload,
+    [
+      verifySignUp.checkDuplicateProfilenameOrEmail,
+      verifySignUp.checkRolesExisted,
+      authJwt.verifyToken,
+      authJwt.isClient,
+    ],
+    controller.userSignup
+  );
 
-  app.post("/auth/user-login", controller.userLoginIn)
+  app.post("/auth/user-login", controller.userLoginIn);
 
   app.post("/auth/send-password", controller.resetPassReq);
 
@@ -55,7 +57,13 @@ module.exports = function (app) {
     controller.updateProfile
   );
 
-  app.get("/logout", controller.logout)
+  app.get(
+    "/get-profile",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.getProfile
+  );
+
+  app.get("/logout", controller.logout);
 
   app.use(errors());
 };
