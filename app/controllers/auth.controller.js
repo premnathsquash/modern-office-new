@@ -444,9 +444,9 @@ exports.updateProfile = async (req, res) => {
     companyCountry,
   } = req.body;
   
-  const image= req.file;
-  console.log(req);
-
+  const [image, image2]= req.files;
+  console.log(image, image2);
+  
   try {
     let doc = await User.findOneAndUpdate(
       { _id: user._id },
@@ -456,7 +456,7 @@ exports.updateProfile = async (req, res) => {
         dp: image.location ?? user.dp,
         company: {
           name: companyName ?? user.company.name,
-         // companyImg: image2.location ?? user.company.companyImg,
+         companyImg: image2.location ?? user.company.companyImg,
           address: companyAddress ?? user.company.address,
           city: companyCity ?? user.company.city,
           state: companyState ?? user.company.state,
