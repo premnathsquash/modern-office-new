@@ -469,7 +469,7 @@ exports.updateProfile = async (req, res) => {
     );
     return res.status(200).send("updated successfully");
   } catch (err) {
-    return res.status(500).send({ res: "Something went wrong" });
+    return res.status(500).send({ res: "Something went wrong", err });
   }
 };
 
