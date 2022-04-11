@@ -175,3 +175,9 @@ exports.updateFloor = async (req, res, next) => {
     });
   }
 };
+
+exports.getFloor = async (req, res, next) => { 
+  const floor = await Floor.find({ _id: req.params.id }).populate({ path: "Seats" })
+  const temp = floor;
+  return res.send({res: temp[0]});
+}

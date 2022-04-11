@@ -23,6 +23,11 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isClient],
     controller.updateOffice
   );
+  app.get(
+    "/find/floor/:id",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.getFloor
+  );
   app.patch(
     "/update/floor/:id",
     [authJwt.verifyToken, authJwt.isClient],
