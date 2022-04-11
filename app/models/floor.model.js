@@ -4,7 +4,13 @@ const Floor = mongoose.model(
   "Floor",
   new mongoose.Schema({
     name: String,
-    created_at: {type: Date, required: true, default: Date.now},
+    Seats: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Seats",
+    }
+  },
+  {
+    timestamps: true
   })
 );
 

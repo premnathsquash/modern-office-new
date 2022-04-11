@@ -2,6 +2,7 @@ const db = require("../models");
 
 const Office = db.office;
 const Floor = db.floor;
+const Seats = db.seats;
 const mongoose = db.mongoose;
 const updateFloorToOffice = async (id, officeId) => {
   const office = await Office.findOne({ _id: officeId });
@@ -105,19 +106,72 @@ exports.deleteFloor = async (req, res, next) => {
       res.status(500).send({ message: err });
       return;
     }
-    if (office){
+    if (office) {
       const officeTemp = {
         ...office._doc,
-        floors: office[0]?.floors?.filter(i=> i != id),
+        floors: office[0]?.floors?.filter((i) => i != id),
       };
-      Office.findOneAndUpdate({ _id: office[0]._id }, officeTemp, (err, data) => {
+      Office.findOneAndUpdate(
+        { _id: office[0]._id },
+        officeTemp,
+        (err, data) => {
+          if (err) {
+            res.status(500).send({ message: err });
+            return;
+          }
+        }
+      );
+    }
+  });
+  return res.end("floor deleted");
+};
+exports.updateFloor = async (req, res, next) => {
+  const floor_seat = await Floor.find({ _id: req.params.id });
+  if (floor_seat[0].Seats) {
+    const seat = await Seats.find({ _id: floor_seat[0].Seats });
+    Seats.findOneAndUpdate(
+      { _id: seat[0]._id },
+      { seats: seat[0].seats, officeInfo: seat[0].officeInfo, ...req.body },
+      { new: true },
+      (err, data) => {
         if (err) {
           res.status(500).send({ message: err });
           return;
         }
-      });
-    } 
-  });
-  return res.end("floor deleted");
+        Floor.findOneAndUpdate(
+          { _id: req.params.id },
+          { name: req.body.floorName },
+          (err, data1) => {
+            if (err) {
+              res.status(500).send({ message: err });
+              return;
+            }
+            //console.log("\n ", data1);
+          });
+      }
+    );
+    return res.end("floor updated");
+  } else {
+    const seats = new Seats({ ...req.body });
+    seats.save((err, data) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+      Floor.findOneAndUpdate(
+        { _id: req.params.id },
+        { name: req.body.floorName, Seats: data._id },
+        { new: true },
+        (err, data1) => {
+          if (err) {
+            res.status(500).send({ message: err });
+            return;
+          }
+          //console.log("\n ", data1);
+        }
+      );
+
+      return res.end("floor updated");
+    });
+  }
 };
-exports.updateFloor = async (req, res, next) => {};

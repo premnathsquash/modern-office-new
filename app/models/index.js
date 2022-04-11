@@ -12,6 +12,7 @@ db.enquire = require("./enquire.model");
 db.office = require("./office.model");
 db.floor = require("./floor.model");
 db.profile = require("./profile.model");
+db.seats = require("./seats.model");
 
 db.ROLES = ["user", "admin", "client"];
 

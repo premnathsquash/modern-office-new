@@ -445,7 +445,6 @@ exports.updateProfile = async (req, res) => {
   } = req.body;
   
   const [image, image2]= req.files;
-  console.log(req, req.files,image, image2);
   
   try {
     let doc = await User.findOneAndUpdate(
@@ -476,7 +475,7 @@ exports.updateProfile = async (req, res) => {
 
 exports.getAllProfileusers = async (req, res) => {
   const user = await User.findOne({ _id: req.userId });
-  await Profile.find({ slug: user.slug }).then().c;
+  await Profile.find({ slug: user.slug }).then();
 };
 
 exports.getProfileUser = async (req, res) => {};
