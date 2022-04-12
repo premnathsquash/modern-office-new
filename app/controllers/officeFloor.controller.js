@@ -131,7 +131,7 @@ exports.updateFloor = async (req, res, next) => {
     const seat = await Seats.find({ _id: floor_seat[0].Seats });
     Seats.findOneAndUpdate(
       { _id: seat[0]._id },
-      { seats: seat[0].seats, officeInfo: seat[0].officeInfo, ...req.body },
+      { seats: seat[0].seats, officeInfo: seat[0].officeInfo, ...req.body, floorName: req.body.floorName ?? floor_seat[0].name },
       { new: true },
       (err, data) => {
         if (err) {
@@ -140,7 +140,7 @@ exports.updateFloor = async (req, res, next) => {
         }
         Floor.findOneAndUpdate(
           { _id: req.params.id },
-          { name: req.body.floorName },
+          { name: req.body.floorName ?? floor_seat[0].name },
           (err, data1) => {
             if (err) {
               res.status(500).send({ message: err });
@@ -160,7 +160,7 @@ exports.updateFloor = async (req, res, next) => {
       }
       Floor.findOneAndUpdate(
         { _id: req.params.id },
-        { name: req.body.floorName, Seats: data._id },
+        { name: req.body.floorName ?? floor_seat[0].name, Seats: data._id },
         { new: true },
         (err, data1) => {
           if (err) {
