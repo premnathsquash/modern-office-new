@@ -24,11 +24,10 @@ exports.retrive = async (req, res) => {
     await stripe.subscriptions
       .retrieve(user.stripeSubscriptionId)
       .then((data) => {
-        console.log(data);
         return res.json({ res: data })
       });
   } catch (err) {
-    return res.json({ res: "Error in subscription cancelation" });
+    return res.json({ res: "Error in subscription retrival" });
   }
 };
 
