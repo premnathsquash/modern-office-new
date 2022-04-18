@@ -25,12 +25,10 @@ module.exports = function (app) {
       switch (event.type) {
         case "payment_intent.succeeded":
           const paymentIntent = event.data.object;
-          console.log(paymentIntent);
           break;
         case "customer.subscription.deleted":
           const subscriptionIntent = event.data.object;
-          console.log("check", subscriptionIntent);
-          subscriptionServices.resetUserDb()
+          subscriptionServices.resetUserDb(subscriptionIntent.id)
           break;
         default:
           console.log(`Unhandled event type ${event.type}`);
