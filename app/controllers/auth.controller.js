@@ -19,7 +19,7 @@ const bcrypt = require("bcryptjs");
 
 const trailDate = epochUtil().addDay(14);
 
-exports.signup = (req, res) => {
+exports.signup = async(req, res) => {
   const trialEnd = `${trailDate.getLocal()}`.substring(0, 10);
   const pssword = req.body.password || nanoid();
   const renewal = req.body.renew;
@@ -163,7 +163,7 @@ exports.signup = (req, res) => {
   );
 };
 
-exports.signin = (req, res) => {
+exports.signin = async (req, res) => {
   User.findOne({
     email: req.body.email,
   })
@@ -480,7 +480,9 @@ exports.getAllProfileusers = async (req, res) => {
   await Profile.find({ slug: user.slug }).then();
 };
 
-exports.getProfileUser = async (req, res) => {};
+exports.getProfileUser = async (req, res) => {
+
+};
 
 exports.logout = async (req, res) => {
   const token = req.headers["x-auth-token"];
