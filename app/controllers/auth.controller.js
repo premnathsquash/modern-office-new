@@ -203,6 +203,7 @@ exports.signin = (req, res) => {
         role: authorities,
         slug: user.slug,
         token: token,
+        ...user
       });
     });
 };
