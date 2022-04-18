@@ -1,7 +1,6 @@
 const stripe = require("stripe");
 const express = require("express");
-const endpointSecret =
-  "whsec_B8gfV6NgpSxSxgmYxNUL1sYIDNG44DGW"; //whsec_B8gfV6NgpSxSxgmYxNUL1sYIDNG44DGW //whsec_f2f42c68330a0eeba357bb0868a31d962cef6e05109a70d0839bfdca9d7bb38f
+const endpointSecret = "whsec_B8gfV6NgpSxSxgmYxNUL1sYIDNG44DGW"; //whsec_B8gfV6NgpSxSxgmYxNUL1sYIDNG44DGW //whsec_f2f42c68330a0eeba357bb0868a31d962cef6e05109a70d0839bfdca9d7bb38f
 
 module.exports = function (app) {
   app.post(
@@ -24,9 +23,12 @@ module.exports = function (app) {
       switch (event.type) {
         case "payment_intent.succeeded":
           const paymentIntent = event.data.object;
-
+          console.log(paymentIntent);
           break;
-
+        case "customer.subscription.deleted":
+          const subscriptionIntent = event.data.object;
+          console.log(subscriptionIntent);
+          break;
         default:
           console.log(`Unhandled event type ${event.type}`);
       }
