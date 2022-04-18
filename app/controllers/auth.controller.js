@@ -130,12 +130,13 @@ exports.signup = (req, res) => {
           recurring: { interval: interval },
           product: productId,
         });
-        await stripe.subscriptions.create({
+       const subscription = await stripe.subscriptions.create({
           customer: customer.id,
           items: [{ price: price.id }],
           trial_end: trialEnd,
           cancel_at_period_end: !renewal,
         });
+        user.stripeSubscriptionId = subscription.id
         user.trialEnd = trialEnd;
         user.stripeCustomerId = customer.id;
         user.stripeProductPrice.productId = productId;

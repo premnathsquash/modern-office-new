@@ -34,6 +34,7 @@ const User = mongoose.model(
     },
     slug: String,
     stripeCustomerId: String,
+    stripeSubscriptionId: String,
     active: {
       type: Boolean,
       default: true
