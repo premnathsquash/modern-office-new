@@ -17,7 +17,7 @@ const mongoose = db.mongoose;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-const trailDate = epochUtil().addDay(5/(24*60));
+const trailDate = epochUtil().addDay(14);
 
 exports.signup = async (req, res) => {
   const trialEnd = `${trailDate.getLocal()}`.substring(0, 10);

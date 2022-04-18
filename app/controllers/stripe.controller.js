@@ -17,4 +17,19 @@ exports.cancel = async (req, res) => {
   }
 };
 
+exports.retrive = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.userId });
+
+    await stripe.subscriptions
+      .retrieve(user.stripeSubscriptionId)
+      .then((data) => {
+        console.log(data);
+        return res.json({ res: "subscription cancelled" })
+      });
+  } catch (err) {
+    return res.json({ res: "Error in subscription cancelation" });
+  }
+};
+
 
