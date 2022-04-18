@@ -30,7 +30,7 @@ module.exports = function (app) {
         case "customer.subscription.deleted":
           const subscriptionIntent = event.data.object;
           console.log("check", subscriptionIntent);
-          subscriptionServices()
+          subscriptionServices.resetUserDb()
           break;
         default:
           console.log(`Unhandled event type ${event.type}`);
