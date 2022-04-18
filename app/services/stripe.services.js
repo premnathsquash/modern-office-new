@@ -1,14 +1,12 @@
 const db = require("../models");
 const User = db.user;
 exports.resetUserDb = async(id)=>{ 
-  const user = await User.findOne({
-    stripeSubscriptionId: id,
-  })
-  await User.findOneAndUpdate({_id: user._id}, {...user, stripeProductPrice: null, stripeSubscriptionId: "" }, { new: true },async (err, profile1) => {
+  await User.findOneAndUpdate({stripeSubscriptionId: id}, {stripeProductPrice: null, stripeSubscriptionId: "" }, { new: true },async (err, profile1) => {
     if (err) {
       return { message: err };
     }
-  //
+  console.log("updation");
+  
   })
   
 
