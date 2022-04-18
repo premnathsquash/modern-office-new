@@ -25,7 +25,7 @@ exports.retrive = async (req, res) => {
       .retrieve(user.stripeSubscriptionId)
       .then((data) => {
         console.log(data);
-        return res.json({ res: "subscription cancelled" })
+        return res.json({ res: data })
       });
   } catch (err) {
     return res.json({ res: "Error in subscription cancelation" });
