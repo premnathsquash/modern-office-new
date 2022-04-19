@@ -12,5 +12,8 @@ module.exports = function (app) {
   app.post("/update/subscription", [authJwt.verifyToken, authJwt.isClient],
   controller.update);
 
+  app.get("/get/invoices", [authJwt.verifyToken, authJwt.isClient],
+  controller.invoices);
+
   app.use(errors());
 }

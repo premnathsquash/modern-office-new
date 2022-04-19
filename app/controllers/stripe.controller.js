@@ -101,3 +101,6 @@ exports.update = async (req, res) => {
     return res.json({ res: "Subscription updated failed" });
   }
 };
+
+exports.invoices = async (req, res) => {
+}
