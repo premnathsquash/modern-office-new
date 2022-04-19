@@ -5,7 +5,7 @@ exports.resetUserDb = async(id)=>{
     if (err) {
       return { message: err };
     }
-  console.log("updation");
+  //console.log("updation");
   
   })
   

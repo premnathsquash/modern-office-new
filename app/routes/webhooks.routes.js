@@ -21,7 +21,6 @@ module.exports = function (app) {
         response.status(400).send(`Webhook Error: ${err.message}`);
         return;
       }
-
       switch (event.type) {
         case "payment_intent.succeeded":
           const paymentIntent = event.data.object;
@@ -30,6 +29,12 @@ module.exports = function (app) {
           const subscriptionIntent = event.data.object;
           subscriptionServices.resetUserDb(subscriptionIntent.id)
           break;
+        /* 
+        case "customer.subscription.updated":
+          const subscriptionIntent = event.data.object;
+          subscriptionServices.resetUserDb(subscriptionIntent.id)
+          break; 
+          */
         default:
           console.log(`Unhandled event type ${event.type}`);
       }
