@@ -16,6 +16,10 @@ const User = mongoose.model(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Profile",
     }],
+    departments: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+    }],
     phone: String,
     company: {
       name: String,
@@ -35,6 +39,8 @@ const User = mongoose.model(
     slug: String,
     stripeCustomerId: String,
     stripeSubscriptionId: String,
+    minSeat: Number,
+    maxSeat: Number,
     active: {
       type: Boolean,
       default: true

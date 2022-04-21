@@ -20,6 +20,7 @@ const bcrypt = require("bcryptjs");
 const trailDate = epochUtil().addDay(14);
 
 exports.signup = async (req, res) => {
+
   const trialEnd = `${trailDate.getLocal()}`.substring(0, 10);
 
   const pssword = req.body.password || nanoid();
@@ -28,6 +29,39 @@ exports.signup = async (req, res) => {
   const productId = req.body.productId;
   const cardToken = req.body.cardToken;
   const role = req.body.role || "client";
+  let maxCapacity;
+  let minCapacity;
+  switch (productId) {
+    case "prod_LLhE8XyggI9emW":
+    case "prod_LLhDgrkCb3iMdY":
+      
+      minCapacity = 50;
+      maxCapacity = 100;
+      break;
+    case "prod_LLhC9Mi443YJ87":
+    case "prod_LLhB9GC3dIcFJh":
+      
+      minCapacity = 21;
+      maxCapacity = 50;
+      break;
+    case "prod_LLhBtcAFb3UKTj":
+    case "prod_LLhApE4wTig88P":
+      
+      minCapacity = 11;
+      maxCapacity = 20;
+      break;
+    case "prod_LLh91siLUTHKza":
+    case "prod_LLh8yhbpznJKzL":
+      
+      minCapacity = 1;
+      maxCapacity = 10;
+      break;
+    default:
+      minCapacity = 100;
+      maxCapacity = 100000;
+      break;
+  }
+
   const user = new User({
     username: req.body.username,
     email: req.body.email,
@@ -35,6 +69,8 @@ exports.signup = async (req, res) => {
     password: bcrypt.hashSync(pssword, 8),
     phone: req.body.phone,
     job: req.body.job,
+    minSeat: minCapacity,
+    maxSeat: maxCapacity,
   });
   user.slug = req.body.companyName;
   if (role === "admin") {
@@ -131,13 +167,13 @@ exports.signup = async (req, res) => {
           recurring: { interval: interval },
           product: productId,
         });
-       const subscription = await stripe.subscriptions.create({
+        const subscription = await stripe.subscriptions.create({
           customer: customer.id,
           items: [{ price: price.id }],
           trial_end: trialEnd,
           cancel_at_period_end: !renewal,
         });
-        user.stripeSubscriptionId = subscription.id
+        user.stripeSubscriptionId = subscription.id;
         user.trialEnd = trialEnd;
         user.stripeCustomerId = customer.id;
         user.stripeProductPrice.productId = productId;
@@ -204,7 +240,7 @@ exports.signin = async (req, res) => {
         role: authorities,
         slug: user.slug,
         token: token,
-        ...user
+        ...user,
       });
     });
 };
@@ -213,7 +249,11 @@ exports.userSignup = async (req, res) => {
   const pssword = nanoid();
   const role = "user";
   const company = await User.findOne({ _id: req.userId });
+  let fileLocation;
+  if(req.file){
   const { location } = req.file;
+  fileLocation = location
+  }
   const status = true;
   const {
     firstName,
@@ -224,11 +264,12 @@ exports.userSignup = async (req, res) => {
     reservedSeats,
     makeAdmin,
   } = req.body;
+  if(company.profile.length < company.maxSeat){
   const profile = new Profile({
     firstName,
     lastName,
     password: bcrypt.hashSync(pssword, 8),
-    dp: location ?? "",
+    dp: fileLocation ?? "",
     email,
     department,
     allocatedDesk,
@@ -272,6 +313,10 @@ exports.userSignup = async (req, res) => {
     }
   );
   return res.status(200).send({ res: "user sign-up successfuly" });
+  }
+  else{
+    return res.status(200).send({ res: "user count exceeded" });
+  }
 };
 
 exports.userLoginIn = async (req, res) => {
@@ -446,9 +491,9 @@ exports.updateProfile = async (req, res) => {
     companyZip,
     companyCountry,
   } = req.body;
-  
-  const [image, image2]= req.files;
-  
+
+  const [image, image2] = req.files;
+
   try {
     let doc = await User.findOneAndUpdate(
       { _id: user._id },
@@ -458,7 +503,7 @@ exports.updateProfile = async (req, res) => {
         dp: image.location ?? user.dp,
         company: {
           name: companyName ?? user.company.name,
-         companyImg: image2.location ?? user.company.companyImg,
+          companyImg: image2.location ?? user.company.companyImg,
           address: companyAddress ?? user.company.address,
           city: companyCity ?? user.company.city,
           state: companyState ?? user.company.state,
@@ -481,9 +526,7 @@ exports.getAllProfileusers = async (req, res) => {
   await Profile.find({ slug: user.slug }).then();
 };
 
-exports.getProfileUser = async (req, res) => {
-
-};
+exports.getProfileUser = async (req, res) => {};
 
 exports.logout = async (req, res) => {
   const token = req.headers["x-auth-token"];
