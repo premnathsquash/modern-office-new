@@ -534,7 +534,17 @@ exports.updateProfile = async (req, res) => {
 
 exports.getAllProfileusers = async (req, res) => {
   const user = await User.findOne({ _id: req.userId });
-  await Profile.find({ slug: user.slug }).then();
+  const users = await Profile.find({ slug: user.slug });
+  return res
+    .status(200)
+    .send({
+        wfo: { wfoDays: 233, wfoRange: "Weekly", wfo: false },
+        departmentToggle: true,
+        autoApprove: false,
+        count: users.length,
+        users: users,
+      },
+    );
 };
 
 exports.logout = async (req, res) => {
