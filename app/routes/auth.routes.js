@@ -60,12 +60,6 @@ module.exports = function (app) {
   app.get("/email-availability", controller.searchEmail);
 
   app.get(
-    "/get-profile",
-    [authJwt.verifyToken, authJwt.isClient],
-    controller.getProfile
-  );
-
-  app.get(
     "/get-all-user-profiles",
     [authJwt.verifyToken, authJwt.isClient],
     controller.getAllProfileusers

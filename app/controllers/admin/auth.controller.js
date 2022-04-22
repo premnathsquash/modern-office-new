@@ -11,6 +11,7 @@ const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY);
 
 const User = db.user;
 const Profile = db.profile;
+const Departments = db.departments;
 const Role = db.role;
 const Token = db.token;
 const mongoose = db.mongoose;
@@ -20,7 +21,6 @@ const bcrypt = require("bcryptjs");
 const trailDate = epochUtil().addDay(14);
 
 exports.signup = async (req, res) => {
-
   const trialEnd = `${trailDate.getLocal()}`.substring(0, 10);
 
   const pssword = req.body.password || nanoid();
@@ -34,25 +34,21 @@ exports.signup = async (req, res) => {
   switch (productId) {
     case "prod_LLhE8XyggI9emW":
     case "prod_LLhDgrkCb3iMdY":
-      
       minCapacity = 50;
       maxCapacity = 100;
       break;
     case "prod_LLhC9Mi443YJ87":
     case "prod_LLhB9GC3dIcFJh":
-      
       minCapacity = 21;
       maxCapacity = 50;
       break;
     case "prod_LLhBtcAFb3UKTj":
     case "prod_LLhApE4wTig88P":
-      
       minCapacity = 11;
       maxCapacity = 20;
       break;
     case "prod_LLh91siLUTHKza":
     case "prod_LLh8yhbpznJKzL":
-      
       minCapacity = 1;
       maxCapacity = 10;
       break;
@@ -249,10 +245,11 @@ exports.userSignup = async (req, res) => {
   const pssword = nanoid();
   const role = "user";
   const company = await User.findOne({ _id: req.userId });
+
   let fileLocation;
-  if(req.file){
-  const { location } = req.file;
-  fileLocation = location
+  if (req.file) {
+    const { location } = req.file;
+    fileLocation = location;
   }
   const status = true;
   const {
@@ -264,57 +261,71 @@ exports.userSignup = async (req, res) => {
     reservedSeats,
     makeAdmin,
   } = req.body;
-  if(company.profile.length < company.maxSeat){
-  const profile = new Profile({
-    firstName,
-    lastName,
-    password: bcrypt.hashSync(pssword, 8),
-    dp: fileLocation ?? "",
-    email,
-    department,
-    allocatedDesk,
-    reservedSeats,
-    makeAdmin,
+  const departm = await Departments.findOne({ departments: department });
+  const company1 = await User.findOne({
+    _id: req.userId,
+    departments: [departm.id],
   });
-  Role.find(
-    {
-      name: { $in: role },
-    },
-    async (err, roles) => {
-      if (err) {
-        res.status(500).send({ message: err });
-        return;
-      }
-      profile.roles = mongoose.Types.ObjectId(roles[0]._id);
-      profile.status = status;
-      profile.slug = company.slug;
-      profile.save(async (err, result) => {
+  if (company1 && company.profile.length < company.maxSeat) {
+    const profile = new Profile({
+      firstName,
+      lastName,
+      password: bcrypt.hashSync(pssword, 8),
+      dp: fileLocation ?? "",
+      email,
+      department,
+      allocatedDesk,
+      reservedSeats,
+      makeAdmin,
+    });
+    Role.find(
+      {
+        name: { $in: role },
+      },
+      async (err, roles) => {
         if (err) {
           res.status(500).send({ message: err });
           return;
         }
-        await User.findOneAndUpdate(
-          { _id: company._id },
-          { profile: [result._id, ...company.profile] },
-          async (err, profile1) => {
-            if (err) {
-              return { message: err };
-            }
-            await sendMail(
-              req.body.email,
-              "Hydesq – New User Account",
-              null,
-              `${email} pass: ${pssword} companySlug: ${company.slug}`,
-              null
-            );
+        profile.roles = mongoose.Types.ObjectId(roles[0]._id);
+        profile.status = status;
+        profile.slug = company.slug;
+        profile.save(async (err, result) => {
+          if (err) {
+            res.status(500).send({ message: err });
+            return;
           }
-        );
-      });
-    }
-  );
-  return res.status(200).send({ res: "user sign-up successfuly" });
-  }
-  else{
+          await User.findOneAndUpdate(
+            { _id: company._id },
+            { profile: [result._id, ...company.profile] },
+            async (err, profile1) => {
+              if (err) {
+                return { message: err };
+              }
+              await sendMail(
+                req.body.email,
+                "Hydesq – New User Account",
+                null,
+                `${email} pass: ${pssword} companySlug: ${company.slug}`,
+                null
+              );
+            }
+          );
+          await Departments.findOneAndUpdate(
+            { _id: departm.id },
+            { users: departm.users + 1 },
+            (err, data) => {
+              if (err) {
+                res.status(500).send({ message: err });
+                return;
+              }
+            }
+          );
+        });
+      }
+    );
+    return res.status(200).send({ res: "user sign-up successfuly" });
+  } else {
     return res.status(200).send({ res: "user count exceeded" });
   }
 };
@@ -525,8 +536,6 @@ exports.getAllProfileusers = async (req, res) => {
   const user = await User.findOne({ _id: req.userId });
   await Profile.find({ slug: user.slug }).then();
 };
-
-exports.getProfileUser = async (req, res) => {};
 
 exports.logout = async (req, res) => {
   const token = req.headers["x-auth-token"];
