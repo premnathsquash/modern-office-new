@@ -74,6 +74,7 @@ exports.updateDepartment = async (req, res) => {
 
 exports.deleteDepartment = async (req, res) => {
   try {
+    console.log(req.body);
     const { id } = req.body;
     const user = await User.find({
       _id: req.userId,
