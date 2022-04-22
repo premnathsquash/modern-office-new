@@ -1,7 +1,7 @@
 const multer = require("multer");
 const { errors } = require("celebrate");
 const { verifySignUp, authJwt } = require("../middlewares");
-const controller = require("../controllers/auth.controller");
+const controller = require("../controllers/admin/auth.controller");
 const { storage } = require("../config/s3");
 const upload = multer({ storage }).single("image");
 const multipleUpload = multer({ storage }).array("images");

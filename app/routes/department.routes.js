@@ -1,5 +1,5 @@
 const { errors } = require("celebrate");
-const controller = require("../controllers/department.controller");
+const controller = require("../controllers/admin/department.controller");
 const { authJwt } = require("../middlewares");
 
 module.exports = function (app) {

@@ -1,6 +1,6 @@
 const { errors } = require("celebrate");
 const { authJwt } = require("../middlewares");
-const controller = require("../controllers/officeFloor.controller");
+const controller = require("../controllers/admin/officeFloor.controller");
 
 module.exports = function (app) {
   app.post(

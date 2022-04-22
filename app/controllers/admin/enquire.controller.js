@@ -1,5 +1,5 @@
-const db = require("../models");
-const { sendMail } = require("../config/mailer");
+const db = require("../../models");
+const { sendMail } = require("../../config/mailer");
 const Enquire = db.enquire;
 const User = db.user;
 exports.createEnquire = async (req, res) => {

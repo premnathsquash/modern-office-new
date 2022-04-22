@@ -1,4 +1,4 @@
-const db = require("../models");
+const db = require("../../models");
 
 const Office = db.office;
 const Floor = db.floor;

@@ -1,5 +1,5 @@
 const { errors } = require("celebrate");
-const controller = require("../controllers/plans.controller");
+const controller = require("../controllers/admin/plans.controller");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {

@@ -1,5 +1,5 @@
-const db = require("../models");
-const stripeConfig = require("../config/stripe.config");
+const db = require("../../models");
+const stripeConfig = require("../../config/stripe.config");
 
 const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY);
 

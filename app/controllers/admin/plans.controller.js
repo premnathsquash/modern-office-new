@@ -1,4 +1,4 @@
-const stripeConfig = require("../config/stripe.config");
+const stripeConfig = require("../../config/stripe.config");
 const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY)
 
 exports.getplans = async(req, res) => {

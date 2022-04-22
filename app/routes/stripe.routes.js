@@ -1,6 +1,6 @@
 const { errors } = require("celebrate");
 const { authJwt } = require("../middlewares");
-const controller = require("../controllers/stripe.controller");
+const controller = require("../controllers/admin/stripe.controller");
 
 module.exports = function (app) {
   app.get("/cancel/subscription", [authJwt.verifyToken, authJwt.isClient],
