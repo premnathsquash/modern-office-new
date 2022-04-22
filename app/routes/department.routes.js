@@ -22,12 +22,12 @@ module.exports = function (app) {
     controller.getAllDepartment
   );
   app.patch(
-    "/users/departments/:id",
+    "/users/departments",
     [authJwt.verifyToken, authJwt.isClient],
     controller.updateDepartment
   );
   app.delete(
-    "/users/departments/:id",
+    "/users/departments",
     [authJwt.verifyToken, authJwt.isClient],
     controller.deleteDepartment
   );

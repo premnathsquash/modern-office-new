@@ -39,10 +39,20 @@ exports.getAllDepartment = async (req, res) => {
     return res.json({ res: "Error in Department" });
   }
 };
+
 exports.updateDepartment = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.userId });
-    return res.json(user);
+    const { id, department, status } = req.body;
+    await Departments.findOneAndUpdate(
+      { _id: id },
+      { departments: department, status: status },
+        (err, department1) => {
+          if (err) {
+            return { message: err };
+          }
+          return res.json({ res: "update in Department" });
+        }
+    ) 
   } catch (err) {
     return res.json({ res: "Error in Department" });
   }
