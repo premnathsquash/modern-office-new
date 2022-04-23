@@ -11,10 +11,15 @@ module.exports = function (app) {
     next();
   });
 
-  app.post(
-    "/officeconfigure/create",
+  app.get(
+    "/officeconfigure",
     [authJwt.verifyToken, authJwt.isClient],
-    controller.officeConfigureCreate
+    controller.officeConfigureRead
+  );
+  app.patch(
+    "/officeconfigure",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.officeConfigureUpdate
   );
 
   app.use(errors());

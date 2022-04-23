@@ -15,7 +15,7 @@ const OfficeConfigure = mongoose.model(
     capacity: {
       AllowUpto50PerOccu: {type: Boolean, default: false},
       AllowUpto80PerOccu: {type: Boolean, default: false},
-      AllowUpto100PerOccu: {type: Boolean, default: false},
+      AllowUpto100PerOccu: {type: Boolean, default: true},
     }
   })
 );
