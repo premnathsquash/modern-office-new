@@ -18,7 +18,6 @@ const updateFloorToOffice = async (id, officeId) => {
     }
   );
 };
-
 exports.CreateOffice = async (req, res, next) => {
   const { slug, officeName, address, zipcode, city, state, country } = req.body;
   const office = new Office({
@@ -48,7 +47,6 @@ exports.CreateOffice = async (req, res, next) => {
     });
   });
 };
-
 exports.ListOffices = async (req, res, next) => {
   const { slug } = req.query;
   try {
@@ -62,7 +60,6 @@ exports.ListOffices = async (req, res, next) => {
     return;
   }
 };
-
 exports.CreateFloor = async (req, res, next) => {
   const { name, officeId } = req.body;
   const floor = new Floor({
@@ -175,9 +172,6 @@ exports.updateFloor = async (req, res, next) => {
     });
   }
 };
-
-
-
 exports.getFloor = async (req, res, next) => { 
   const floor = await Floor.find({ _id: req.params.id }).populate({ path: "Seats" })
   const temp = floor;

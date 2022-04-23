@@ -29,6 +29,7 @@ require("./app/routes/webhooks.routes")(app);
 require("./app/routes/officeFloor.routes")(app);
 require("./app/routes/stripe.routes")(app);
 require("./app/routes/department.routes")(app);
+require("./app/routes/officeConfigure.routes")(app);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
