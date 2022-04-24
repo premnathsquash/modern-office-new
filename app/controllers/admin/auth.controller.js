@@ -275,12 +275,13 @@ exports.userSignup = async (req, res) => {
   } = req.body;
   const departm = await Departments.findOne({ _id: department });
   const attend = new Attendance({});
-
   const company1 = await User.findOne({
     _id: req.userId,
-    departments: [departm.id],
   });
-  if (company1 && company1.profile.length < company1.maxSeat) {
+
+  const company2 = company1.departments.find(ele=> mongoose.Types.ObjectId(ele).toHexString() == departm.id)
+  
+  if (company2 && company1.profile.length < company1.maxSeat) {
     attend.save((error, attend1) => {
       if (error) {
         res.status(500).send({ message: error });
