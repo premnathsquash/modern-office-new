@@ -639,10 +639,9 @@ exports.userUpdateProfile = async (req, res) => {
     _id: req.userId,
   }).populate({ path: "profile" });
 
-  const tempProfile = profile.profile.find(ele=>ele._id==req.body.id)
+  const tempProfile = profile.profile.find((ele) => ele._id == req.body.id);
 
   if (tempProfile) {
-    
     await Profile.findOneAndUpdate(
       { _id: tempProfile._id },
       {
@@ -652,7 +651,7 @@ exports.userUpdateProfile = async (req, res) => {
         reservedSeats: reservedSeats ?? tempProfile.reservedSeats,
         allocatedDesk: allocatedDesk ?? tempProfile.allocatedDesk,
         makeAdmin: makeAdmin ?? tempProfile.makeAdmin,
-        dp: fileLocation ?? tempProfile.dp
+        dp: fileLocation ?? tempProfile.dp,
       },
       (error, profile2) => {
         if (error) {
@@ -660,14 +659,54 @@ exports.userUpdateProfile = async (req, res) => {
           return;
         }
       }
-    ); 
+    );
     return res.status(200).send({ res: "Edited successfully" });
   } else {
     return res.status(200).send({ res: "signed in with right user" });
   }
 };
 
-exports.userDeleteProfile = async (req, res) => {};
+exports.userDeleteProfile = async (req, res) => {
+  const profile = await User.findOne({
+    _id: req.userId,
+  }).populate({ path: "profile" });
+  const tempProfile = profile.profile.find((ele) => ele._id == req.body.id);
+  const newProfiles = profile.profile.filter((ele) => ele._id != req.body.id);
+  if (tempProfile) {
+    await Profile.findOneAndDelete(
+      { _id: tempProfile._id },
+      async (err, deleted) => {
+        if (err) {
+          res.status(500).send({ message: err });
+          return;
+        }
+        await Attendance.findOneAndDelete(
+          { _id: tempProfile.attendance },
+          async (err1, deleted1) => {
+            if (err1) {
+              res.status(500).send({ message: err1 });
+              return;
+            }
+            await User.findOneAndUpdate(
+              { _id: req.userId },
+              { profile: newProfiles },
+              (err2, deleted2) => {
+                if (err2) {
+                  res.status(500).send({ message: err2 });
+                  return;
+                }
+              }
+            );
+          }
+        );
+      }
+    );
+
+    return res.status(200).send({ res: "Deleted successfully" });
+  } else {
+    return res.status(200).send({ res: "signed in with right user" });
+  }
+};
 
 exports.logout = async (req, res) => {
   const token = req.headers["x-auth-token"];
