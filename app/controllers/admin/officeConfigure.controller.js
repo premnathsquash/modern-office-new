@@ -22,8 +22,6 @@ exports.officeConfigureUpdate = async (req, res) => {
     const officeConfigure1 = await OfficeConfigure.findOne({
       _id: user.officeConfigure,
     });
-    console.log(officeConfigure1);
-    
     await OfficeConfigure.findOneAndUpdate(
       { _id: user.officeConfigure },
       body,
