@@ -555,13 +555,26 @@ exports.updateProfile = async (req, res) => {
 
 exports.getAllProfileusers = async (req, res) => {
   const user = await User.findOne({ _id: req.userId });
-  const users = await Profile.find({ slug: user.slug });
+  const users = await Profile.find({ slug: user.slug }).populate({
+    path: "attendance",
+  });
+  const users1 = users.map((ele) => {
+    console.log(ele);
+    const { attendance, reservedSeats, makeAdmin, status, _id, firstName, lastName, dp, email, department, roles, slug} = ele;
+    return {
+      wfo: attendance.workfromoffice,
+      wfoDays: attendance.days,
+      wfoRange: attendance.range,
+      wfoDayStart: attendance.updatedAt,
+      reservedSeats, makeAdmin, status, _id, firstName, lastName, dp, email, department, roles, slug
+    };
+  });
   return res.status(200).send({
     wfo: { wfoDays: 233, wfoRange: "Weekly", wfo: false },
     departmentToggle: true,
     autoApprove: false,
     count: users.length,
-    users: users,
+    users: users1,
   });
 };
 
