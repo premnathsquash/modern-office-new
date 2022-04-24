@@ -609,9 +609,9 @@ exports.editProfileAttendance = async (req, res) => {
     await Attendance.findOneAndUpdate(
       { _id: req.body.attendanceId },
       {
-        wfo: req.body.wfo ?? attend.workfromoffice,
-        wfoDays: req.body.wfoDays ?? attend.days,
-        wfoRange: req.body.wfoRange ?? attend.range,
+        workfromoffice: req.body.wfo ?? attend.workfromoffice,
+        days: req.body.wfoDays ?? attend.days,
+        range: req.body.wfoRange ?? attend.range,
       }
     );
     return res.status(200).send({ res: "updated succesfully" });
