@@ -279,6 +279,8 @@ exports.userSignup = async (req, res) => {
     _id: req.userId,
     departments: [departm.id],
   });
+  console.log(company1, company.profile.length, company.maxSeat);
+  
   if (company1 && company.profile.length < company.maxSeat) {
     const profile = new Profile({
       firstName,
