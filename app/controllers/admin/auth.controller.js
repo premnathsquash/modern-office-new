@@ -273,13 +273,10 @@ exports.userSignup = async (req, res) => {
     makeAdmin,
   } = req.body;
   const departm = await Departments.findOne({ _id: department });
-  console.log(departm);
   const company1 = await User.findOne({
     _id: req.userId,
     departments: [departm.id],
-  });
-  console.log(company1, company1.profile.length, company1.maxSeat);
-  
+  }); 
   if (company1 && company1.profile.length < company1.maxSeat) {
     const profile = new Profile({
       firstName,
@@ -287,7 +284,7 @@ exports.userSignup = async (req, res) => {
       password: bcrypt.hashSync(pssword, 8),
       dp: fileLocation ?? "",
       email,
-      department,
+      department: departm.departments,
       allocatedDesk,
       reservedSeats,
       makeAdmin,
