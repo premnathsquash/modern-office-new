@@ -559,14 +559,37 @@ exports.getAllProfileusers = async (req, res) => {
     path: "attendance",
   });
   const users1 = users.map((ele) => {
-    console.log(ele);
-    const { attendance, reservedSeats, makeAdmin, status, _id, firstName, lastName, dp, email, department, roles, slug} = ele;
+    const {
+      attendance,
+      reservedSeats,
+      makeAdmin,
+      status,
+      _id,
+      firstName,
+      lastName,
+      dp,
+      email,
+      department,
+      roles,
+      slug,
+    } = ele;
     return {
+      attendanceId: attendance._id,
       wfo: attendance.workfromoffice,
       wfoDays: attendance.days,
       wfoRange: attendance.range,
       wfoDayStart: attendance.updatedAt,
-      reservedSeats, makeAdmin, status, _id, firstName, lastName, dp, email, department, roles, slug
+      reservedSeats,
+      makeAdmin,
+      status,
+      _id,
+      firstName,
+      lastName,
+      dp,
+      email,
+      department,
+      roles,
+      slug,
     };
   });
   return res.status(200).send({
@@ -576,6 +599,21 @@ exports.getAllProfileusers = async (req, res) => {
     count: users.length,
     users: users1,
   });
+};
+
+exports.editProfileAttendance = async (req, res) => {
+  const user = await User.findOne({ _id: req.userId });
+  if (user) {
+    const attend = await Attendance.findOne({ _id: req.body.attendanceId });
+    await Attendance.findOneAndUpdate({_id: req.body.attendanceId}, {
+      wfo: req.body.wfo ?? attend.workfromoffice, wfoDays: req.body.wfoDays ?? attend.days, wfoRange: req.body.wfoRange ?? attend.range
+    })
+    return res.status(200).send({ res: "updated succesfully" });
+  } else {
+    return res
+      .status(200)
+      .send({ res: "cant edit because of difference in user" });
+  }
 };
 
 exports.logout = async (req, res) => {
