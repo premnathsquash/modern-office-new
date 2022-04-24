@@ -15,6 +15,7 @@ const Departments = db.departments;
 const Role = db.role;
 const Token = db.token;
 const OfficeConfigure = db.officeConfigure;
+const Attendance = db.attendance;
 const mongoose = db.mongoose;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -38,7 +39,7 @@ exports.signup = async (req, res) => {
       res.status(500).send({ message: err });
       return;
     }
-   let officeConfigureId = dataofficeConfigure.id;
+    let officeConfigureId = dataofficeConfigure.id;
 
     let maxCapacity;
     let minCapacity;
@@ -273,11 +274,20 @@ exports.userSignup = async (req, res) => {
     makeAdmin,
   } = req.body;
   const departm = await Departments.findOne({ _id: department });
+  const attend = new Attendance({});
+
   const company1 = await User.findOne({
     _id: req.userId,
     departments: [departm.id],
-  }); 
+  });
   if (company1 && company1.profile.length < company1.maxSeat) {
+    attend.save((error, attend1)=>{
+      if (error) {
+        res.status(500).send({ message: error });
+        return;
+      }
+      console.log("Attendance : ",attend1);
+    })
     const profile = new Profile({
       firstName,
       lastName,

@@ -27,6 +27,10 @@ const Profile = mongoose.model(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Role",
     },
+    attendance: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Attendance",
+    },
   })
 );
 
