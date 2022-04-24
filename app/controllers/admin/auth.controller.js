@@ -605,9 +605,14 @@ exports.editProfileAttendance = async (req, res) => {
   const user = await User.findOne({ _id: req.userId });
   if (user) {
     const attend = await Attendance.findOne({ _id: req.body.attendanceId });
-    await Attendance.findOneAndUpdate({_id: req.body.attendanceId}, {
-      wfo: req.body.wfo ?? attend.workfromoffice, wfoDays: req.body.wfoDays ?? attend.days, wfoRange: req.body.wfoRange ?? attend.range
-    })
+    await Attendance.findOneAndUpdate(
+      { _id: req.body.attendanceId },
+      {
+        wfo: req.body.wfo ?? attend.workfromoffice,
+        wfoDays: req.body.wfoDays ?? attend.days,
+        wfoRange: req.body.wfoRange ?? attend.range,
+      }
+    );
     return res.status(200).send({ res: "updated succesfully" });
   } else {
     return res
@@ -615,6 +620,54 @@ exports.editProfileAttendance = async (req, res) => {
       .send({ res: "cant edit because of difference in user" });
   }
 };
+
+exports.userUpdateProfile = async (req, res) => {
+  let fileLocation;
+  if (req.file) {
+    const { location } = req.file;
+    fileLocation = location;
+  }
+  const {
+    firstName,
+    lastName,
+    department,
+    allocatedDesk,
+    reservedSeats,
+    makeAdmin,
+  } = req.body;
+  const profile = await User.findOne({
+    _id: req.userId,
+  }).populate({ path: "profile" });
+
+  const tempProfile = profile.profile.find(ele=>ele._id==req.body.id)
+
+  if (tempProfile) {
+    
+    await Profile.findOneAndUpdate(
+      { _id: tempProfile._id },
+      {
+        firstName: firstName ?? tempProfile.department,
+        lastName: lastName ?? tempProfile.department,
+        department: department ?? tempProfile.department,
+        reservedSeats: reservedSeats ?? tempProfile.reservedSeats,
+        allocatedDesk: allocatedDesk ?? tempProfile.allocatedDesk,
+        makeAdmin: makeAdmin ?? tempProfile.makeAdmin,
+        dp: fileLocation ?? tempProfile.dp
+      },
+      (error, profile2) => {
+        if (error) {
+          res.status(500).send({ message: error });
+          return;
+        }
+      }
+    ); 
+    return res.status(200).send({ res: "Edited successfully" });
+  } else {
+    return res.status(200).send({ res: "signed in with right user" });
+  }
+};
+
+exports.userDeleteProfile = async (req, res) => {};
 
 exports.logout = async (req, res) => {
   const token = req.headers["x-auth-token"];

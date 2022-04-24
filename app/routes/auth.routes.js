@@ -65,6 +65,18 @@ module.exports = function (app) {
     controller.getAllProfileusers
   );
 
+  app.patch(
+    "/users-profile",
+    upload,
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.userUpdateProfile
+  )
+  app.delete(
+    "/users-profile",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.userDeleteProfile
+  )
+
   app.get("/logout", controller.logout);
 
   app.use(errors());
