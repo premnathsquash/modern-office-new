@@ -257,8 +257,6 @@ exports.signin = async (req, res) => {
 exports.userSignup = async (req, res) => {
   const pssword = nanoid();
   const role = "user";
-  const company = await User.findOne({ _id: req.userId });
-
   let fileLocation;
   if (req.file) {
     const { location } = req.file;
@@ -279,9 +277,9 @@ exports.userSignup = async (req, res) => {
     _id: req.userId,
     departments: [departm.id],
   });
-  console.log(company1, company.profile.length, company.maxSeat);
+  console.log(company1, company1.profile.length, company1.maxSeat);
   
-  if (company1 && company.profile.length < company.maxSeat) {
+  if (company1 && company1.profile.length < company1.maxSeat) {
     const profile = new Profile({
       firstName,
       lastName,
@@ -304,15 +302,15 @@ exports.userSignup = async (req, res) => {
         }
         profile.roles = mongoose.Types.ObjectId(roles[0]._id);
         profile.status = status;
-        profile.slug = company.slug;
+        profile.slug = company1.slug;
         profile.save(async (err, result) => {
           if (err) {
             res.status(500).send({ message: err });
             return;
           }
           await User.findOneAndUpdate(
-            { _id: company._id },
-            { profile: [result._id, ...company.profile] },
+            { _id: company1._id },
+            { profile: [result._id, ...company1.profile] },
             async (err, profile1) => {
               if (err) {
                 return { message: err };
@@ -321,7 +319,7 @@ exports.userSignup = async (req, res) => {
                 req.body.email,
                 "Hydesq – New User Account",
                 null,
-                `${email} pass: ${pssword} companySlug: ${company.slug}`,
+                `${email} pass: ${pssword} companySlug: ${company1.slug}`,
                 null
               );
             }
