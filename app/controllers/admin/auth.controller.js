@@ -273,6 +273,7 @@ exports.userSignup = async (req, res) => {
     makeAdmin,
   } = req.body;
   const departm = await Departments.findOne({ _id: department });
+  console.log(departm);
   const company1 = await User.findOne({
     _id: req.userId,
     departments: [departm.id],
