@@ -274,7 +274,7 @@ exports.userSignup = async (req, res) => {
     reservedSeats,
     makeAdmin,
   } = req.body;
-  const departm = await Departments.findOne({ departments: department });
+  const departm = await Departments.findOne({ _id: department });
   const company1 = await User.findOne({
     _id: req.userId,
     departments: [departm.id],
