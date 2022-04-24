@@ -281,70 +281,70 @@ exports.userSignup = async (req, res) => {
     departments: [departm.id],
   });
   if (company1 && company1.profile.length < company1.maxSeat) {
-    attend.save((error, attend1)=>{
+    attend.save((error, attend1) => {
       if (error) {
         res.status(500).send({ message: error });
         return;
       }
-      console.log("Attendance : ",attend1);
-    })
-    const profile = new Profile({
-      firstName,
-      lastName,
-      password: bcrypt.hashSync(pssword, 8),
-      dp: fileLocation ?? "",
-      email,
-      department: departm.departments,
-      allocatedDesk,
-      reservedSeats,
-      makeAdmin,
-    });
-    Role.find(
-      {
-        name: { $in: role },
-      },
-      async (err, roles) => {
-        if (err) {
-          res.status(500).send({ message: err });
-          return;
-        }
-        profile.roles = mongoose.Types.ObjectId(roles[0]._id);
-        profile.status = status;
-        profile.slug = company1.slug;
-        profile.save(async (err, result) => {
+      const profile = new Profile({
+        firstName,
+        lastName,
+        password: bcrypt.hashSync(pssword, 8),
+        dp: fileLocation ?? "",
+        email,
+        department: departm.departments,
+        allocatedDesk,
+        reservedSeats,
+        makeAdmin,
+      });
+      Role.find(
+        {
+          name: { $in: role },
+        },
+        async (err, roles) => {
           if (err) {
             res.status(500).send({ message: err });
             return;
           }
-          await User.findOneAndUpdate(
-            { _id: company1._id },
-            { profile: [result._id, ...company1.profile] },
-            async (err, profile1) => {
-              if (err) {
-                return { message: err };
-              }
-              await sendMail(
-                req.body.email,
-                "Hydesq – New User Account",
-                null,
-                `${email} pass: ${pssword} companySlug: ${company1.slug}`,
-                null
-              );
+          profile.attendance = mongoose.Types.ObjectId(attend1._id);
+          profile.roles = mongoose.Types.ObjectId(roles[0]._id);
+          profile.status = status;
+          profile.slug = company1.slug;
+          profile.save(async (err, result) => {
+            if (err) {
+              res.status(500).send({ message: err });
+              return;
             }
-          );
-          await Departments.findOneAndUpdate(
-            { _id: departm.id },
-            { users: departm.users + 1 },
-            (err, data) => {
-              if (err) {
-                res.status(500).send({ message: err });
-                return;
+            await User.findOneAndUpdate(
+              { _id: company1._id },
+              { profile: [result._id, ...company1.profile] },
+              async (err, profile1) => {
+                if (err) {
+                  return { message: err };
+                }
+                await sendMail(
+                  req.body.email,
+                  "Hydesq – New User Account",
+                  null,
+                  `${email} pass: ${pssword} companySlug: ${company1.slug}`,
+                  null
+                );
               }
-            }
-          );
-        });
-      }
-    );
+            );
+            await Departments.findOneAndUpdate(
+              { _id: departm.id },
+              { users: departm.users + 1 },
+              (err, data) => {
+                if (err) {
+                  res.status(500).send({ message: err });
+                  return;
+                }
+              }
+            );
+          });
+        }
+      );
+    });
     return res.status(200).send({ res: "user sign-up successfuly" });
   } else {
     return res.status(200).send({ res: "user count exceeded" });
