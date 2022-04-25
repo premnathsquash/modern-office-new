@@ -16,6 +16,7 @@ db.seats = require("./seats.model");
 db.departments = require("./department.model");
 db.officeConfigure = require("./officeConfigure.model");
 db.attendance = require("./attendance.model");
+db.vendor = require("./vendor.model");
 db.promotion = require("./promotion.model");
 
 db.ROLES = ["user", "admin", "client"];
