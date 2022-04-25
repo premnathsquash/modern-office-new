@@ -709,6 +709,7 @@ exports.userDeleteProfile = async (req, res) => {
               res.status(500).send({ message: err1 });
               return;
             }
+            const departm = await Departments.findOne({ _id: req.body.departmId });
             await Departments.findOneAndUpdate(
               { _id: req.body.departmId },
               { users: departm.users - 1 },
