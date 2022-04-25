@@ -18,9 +18,10 @@ exports.createVendor = async (req, res) => {
     companyCategories,
     contactName,
     contactNumber,
-    companyImage: image.location ?? "",
-    contactImage: image2.location ?? "",
+    companyImage: image?.location ?? "",
+    contactImage: image2?.location ?? "",
   });
+
   vendor1.save((err, data) => {
     if (err) {
       res.status(500).send({ message: err });
@@ -77,3 +78,27 @@ exports.createPromotion = async (req, res) => {
 
   return res.status(200).send({ message: "promotion created successfuly" });
 };
+
+exports.listVendor = async (req, res) => {
+  const vendor = await Vendor.find({});
+  if (vendor) {
+    return res.status(200).send({ data: vendor });
+  } else {
+    return res.status(200).send({ data: "nothing is available" });
+  }
+};
+
+exports.listPromotion = async (req, res) => {
+  const vendorId = req.query.id;
+  const promotions = await Vendor.find({_id: vendorId}).populate({path: "promotionIds"})
+  if (promotions) {
+    return res.status(200).send({ data: promotions[0].promotionIds });
+  } else {
+    return res.status(200).send({ data: "nothing is available" });
+  }
+};
+
+exports.updateVendor = async (req, res) => {}
+exports.updatePromotion = async (req, res) => {}
+exports.deleteVendor = async (req, res) => {}
+exports.deletePromotion = async (req, res) => {}

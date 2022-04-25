@@ -14,11 +14,48 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.createVendor
   );
+  app.get(
+    "/vendors",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.listVendor
+  );
+
+  app.patch(
+    "/vendors",
+    multipleUpload,
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.updateVendor
+  );
+
+  app.delete(
+    "/vendors",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.deleteVendor
+  );
+
   app.post(
     "/promotions",
     upload,
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.createPromotion
+  );
+  app.get(
+    "/promotions",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.listPromotion
+  );
+
+  app.patch(
+    "/promotions",
+    upload,
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.updatePromotion
+  );
+
+  app.delete(
+    "/promotions",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.deletePromotion
   );
   
   app.use(errors());
