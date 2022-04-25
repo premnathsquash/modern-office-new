@@ -254,7 +254,7 @@ exports.signin = async (req, res) => {
         expiresIn: 86400, // 24 hours
       });
 
-      const authorities = user.roles.name.toUpperCase();
+      const authorities = user.roles.name.toLowerCase();
 
       res.status(200).send({
         id: user._id,
