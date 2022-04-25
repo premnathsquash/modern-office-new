@@ -90,7 +90,9 @@ exports.listVendor = async (req, res) => {
 
 exports.listPromotion = async (req, res) => {
   const vendorId = req.query.id;
-  const promotions = await Vendor.find({_id: vendorId}).populate({path: "promotionIds"})
+  const promotions = await Vendor.find({ _id: vendorId }).populate({
+    path: "promotionIds",
+  });
   if (promotions) {
     return res.status(200).send({ data: promotions[0].promotionIds });
   } else {
@@ -98,7 +100,68 @@ exports.listPromotion = async (req, res) => {
   }
 };
 
-exports.updateVendor = async (req, res) => {}
-exports.updatePromotion = async (req, res) => {}
-exports.deleteVendor = async (req, res) => {}
-exports.deletePromotion = async (req, res) => {}
+exports.updateVendor = async (req, res) => {
+  const {
+    companyName,
+    companyDescription,
+    companyCategories,
+    contactName,
+    contactNumber,
+    vendorId,
+  } = req.body;
+  const [image, image2] = req.files;
+  const vendor = await Vendor.find({ _id: vendorId });
+  await Vendor.findOneAndUpdate(
+    { _id: vendorId },
+    {
+      companyName: companyName ?? vendor.companyName,
+      companyDescription: companyDescription ?? vendor.companyDescription,
+      companyCategories: companyCategories ?? vendor.companyCategories,
+      contactName: contactName ?? vendor.contactName,
+      contactNumber: contactNumber ?? vendor.contactNumber,
+      companyImage: image?.location ?? vendor.companyImage,
+      contactImage: image2?.location ?? vendor.contactImage,
+    },
+    (err, data) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+    }
+  );
+};
+exports.updatePromotion = async (req, res) => {
+  const {
+    description,
+    company,
+    coupon,
+    offer,
+    categories,
+    validTill,
+    link,
+    promotionId,
+  } = req.body;
+  let fileLocation;
+  if (req.file) {
+    const { location } = req.file;
+    fileLocation = location;
+  }
+  const promotion = await Promotion.find({_id: promotionId});
+  await Promotion.findOneAndUpdate({_id: promotionId}, {
+    image: fileLocation ?? promotion.image,
+    description: description ?? promotion.description,
+    company: company ?? promotion.company,
+    coupon: coupon ?? promotion.coupon,
+    offer: offer ?? promotion.offer,
+    categories: categories ?? promotion.categories,
+    validTill: validTill ?? promotion.validTill,
+    link: link ?? promotion.link,
+  }, (err, data)=>{
+    if (err) {
+      res.status(500).send({ message: err });
+      return;
+    }
+  })
+};
+exports.deleteVendor = async (req, res) => {};
+exports.deletePromotion = async (req, res) => {};
