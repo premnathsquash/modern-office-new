@@ -50,7 +50,7 @@ const User = mongoose.model(
       default: true
     },
     trialEnd: String
-  })
+  }, {strict: false})
 );
 
 module.exports = User;

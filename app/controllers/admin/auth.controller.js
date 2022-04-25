@@ -65,8 +65,8 @@ exports.signup = async (req, res) => {
         maxCapacity = 10;
         break;
       default:
-        minCapacity = 100;
-        maxCapacity = 100000;
+        minCapacity = 0;
+        maxCapacity = 0;
         break;
     }
 
@@ -187,11 +187,24 @@ exports.signup = async (req, res) => {
           user.stripeCustomerId = customer.id;
           user.stripeProductPrice.productId = productId;
           user.stripeProductPrice.priceId = price.id;
-          user.save(async (err) => {
+          user.save(async (err, dataValue) => {
             if (err) {
               res.status(500).send({ message: err });
               return;
             }
+            const admin = await User.findOne({
+              _id: "626573171459db7cc9168eda",
+            });
+            await User.findOneAndUpdate(
+              { _id: "626573171459db7cc9168eda" },
+              { company: { [`${dataValue._id}`]: dataValue._id } },
+              (err1, newData) => {
+                if (err1) {
+                  res.status(500).send({ message: err1 });
+                  return;
+                }
+              }
+            );
             await sendMail(
               req.body.email,
               "Hydesq – New Account",
@@ -279,8 +292,10 @@ exports.userSignup = async (req, res) => {
     _id: req.userId,
   });
 
-  const company2 = company1.departments.find(ele=> mongoose.Types.ObjectId(ele).toHexString() == departm.id)
-  
+  const company2 = company1.departments.find(
+    (ele) => mongoose.Types.ObjectId(ele).toHexString() == departm.id
+  );
+
   if (company2 && company1.profile.length < company1.maxSeat) {
     attend.save((error, attend1) => {
       if (error) {
@@ -559,7 +574,7 @@ exports.getAllProfileusers = async (req, res) => {
   const users = await Profile.find({ slug: user.slug }).populate({
     path: "attendance",
   });
-  const users1 = users.map((ele) => {
+  const users1 = users.map(async (ele) => {
     const {
       attendance,
       reservedSeats,
@@ -574,8 +589,12 @@ exports.getAllProfileusers = async (req, res) => {
       roles,
       slug,
     } = ele;
+    const departIntermed = await Departments.findOne({
+      departments: department,
+    });
     return {
       attendanceId: attendance._id,
+      departmentId: departIntermed._id,
       wfo: attendance.workfromoffice,
       wfoDays: attendance.days,
       wfoRange: attendance.range,
@@ -593,12 +612,14 @@ exports.getAllProfileusers = async (req, res) => {
       slug,
     };
   });
-  return res.status(200).send({
-    wfo: { wfoDays: 233, wfoRange: "Weekly", wfo: false },
-    departmentToggle: true,
-    autoApprove: false,
-    count: users.length,
-    users: users1,
+  Promise.all(users1).then((data) => {
+    return res.status(200).send({
+      wfo: { wfoDays: 233, wfoRange: "Weekly", wfo: false },
+      departmentToggle: true,
+      autoApprove: false,
+      count: data.length,
+      users: data,
+    });
   });
 };
 
