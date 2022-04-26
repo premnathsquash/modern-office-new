@@ -10,7 +10,7 @@ exports.createVendor = async (req, res) => {
     companyCategories,
     contactName,
     contactNumber,
-    contactEmail
+    contactEmail,
   } = req.body;
   const [image, image2] = req.files;
   const vendor1 = new Vendor({
@@ -83,7 +83,7 @@ exports.createPromotion = async (req, res) => {
 exports.listVendor = async (req, res) => {
   const vendor = await Vendor.find({}).populate({
     path: "promotionIds",
-  }); 
+  });
   if (vendor) {
     return res.status(200).send({ data: vendor });
   } else {
@@ -126,15 +126,19 @@ exports.updateVendor = async (req, res) => {
       contactName: contactName ?? vendor.contactName,
       contactNumber: contactNumber ?? vendor.contactNumber,
       contactEmail: contactEmail ?? vendor.contactEmail,
-      companyImage: companyImage? companyImage : image?.location ?? vendor.companyImage,
-      contactImage: contactImage? contactImage : image2?.location ?? vendor.contactImage,
+      companyImage: companyImage
+        ? companyImage
+        : image?.location ?? vendor.companyImage,
+      contactImage: contactImage
+        ? contactImage
+        : image2?.location ?? vendor.contactImage,
     },
     (err, data) => {
       if (err) {
         res.status(500).send({ message: err });
         return;
       }
-      return res.status(200).send({ data: "Updated successfully"});
+      return res.status(200).send({ data: "Updated successfully" });
     }
   );
 };
@@ -155,56 +159,74 @@ exports.updatePromotion = async (req, res) => {
     fileLocation = location;
   }
 
-  const promotion = await Promotion.find({_id: promotionId});
-  await Promotion.findOneAndUpdate({_id: promotionId}, {
-    image: fileLocation ?? promotion.image,
-    description: description ?? promotion.description,
-    company: company ?? promotion.company,
-    coupon: coupon ?? promotion.coupon,
-    offer: offer ?? promotion.offer,
-    categories: categories ?? promotion.categories,
-    validTill: validTill ?? promotion.validTill,
-    link: link ?? promotion.link,
-  }, (err, data)=>{
-    if (err) {
-      res.status(500).send({ message: err });
-      return;
+  const promotion = await Promotion.find({ _id: promotionId });
+  await Promotion.findOneAndUpdate(
+    { _id: promotionId },
+    {
+      image: fileLocation ?? promotion.image,
+      description: description ?? promotion.description,
+      company: company ?? promotion.company,
+      coupon: coupon ?? promotion.coupon,
+      offer: offer ?? promotion.offer,
+      categories: categories ?? promotion.categories,
+      validTill: validTill ?? promotion.validTill,
+      link: link ?? promotion.link,
+    },
+    (err, data) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+      return res.status(200).send({ data: "Updated successfully" });
     }
-    return res.status(200).send({ data: "Updated successfully"});
-  })
+  );
 };
 exports.deleteVendor = async (req, res) => {
-  const {vendorId} = req.body
+  const { vendorId } = req.body;
   const vendor = await Vendor.find({ _id: vendorId }).populate({
     path: "promotionIds",
   });
-  if(vendor[0].promotionIds && vendor[0].promotionIds.length>0){
-    vendor[0].promotionIds.map(async(ele)=>{
-      await Promotion.findOneAndDelete({_id:ele.id},
+  if (vendor[0].promotionIds && vendor[0].promotionIds.length > 0) {
+    vendor[0].promotionIds.map(async (ele) => {
+      await Promotion.findOneAndDelete(
+        { _id: ele.id },
         async (err, deleted) => {
           if (err) {
             res.status(500).send({ message: err });
             return;
-          }})
-    })
+          }
+        }
+      );
+    });
   }
-  await Vendor.findOneAndDelete({_id: vendor[0].id},
-    async (err, deleted) => {
-      if (err) {
-        res.status(500).send({ message: err });
-        return;
-      }})
+  await Vendor.findOneAndDelete({ _id: vendor[0].id }, async (err, deleted) => {
+    if (err) {
+      res.status(500).send({ message: err });
+      return;
+    }
+  });
   return res.status(200).send({ data: "Deleted successfully" });
 };
 exports.deletePromotion = async (req, res) => {
-  const {promotionId, vendorId} = req.body
-  const promotions = await Promotion.find({ _id: promotionId });
-  const vendor = await Vendor.find({_id: vendorId})
-  const newIds = vendor[0].promotionIds.filter(ele=>{
-    console.log(ele);
-    
-  })
-  //await Vendor.findOneAndUpdate({_id: vendorId}, )
-  
-  return res.status(200).send({ data: "nothing is available" });
+  const { promotionId, vendorId } = req.body;
+  const vendor = await Vendor.find({ _id: vendorId });
+  const newIds = vendor[0].promotionIds.filter((ele) => ele != promotionId);
+  await Vendor.findOneAndUpdate(
+    { _id: vendorId },
+    { promotionIds: newIds },
+    async (err, data) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+      await Promotion.findOneAndDelete({ _id: promotionId }, (err1) => {
+        if (err1) {
+          res.status(500).send({ message: err1 });
+          return;
+        }
+      });
+    }
+  );
+
+  return res.status(200).send({ data: "Deleted successfully" });
 };
