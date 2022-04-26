@@ -195,10 +195,10 @@ exports.signup = async (req, res) => {
             const admin = await User.findOne({
               _id: "626573171459db7cc9168eda",
             });
-            console.log(admin);
+            console.log(admin._doc.connection);        
             await User.findOneAndUpdate(
               { _id: "626573171459db7cc9168eda" },
-              { company: { [`${dataValue._id}`]: dataValue._id } },
+              { connection: [...admin._doc.connection,dataValue._id] },
               (err1, newData) => {
                 if (err1) {
                   res.status(500).send({ message: err1 });
