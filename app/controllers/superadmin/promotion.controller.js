@@ -163,5 +163,14 @@ exports.updatePromotion = async (req, res) => {
     }
   })
 };
-exports.deleteVendor = async (req, res) => {};
-exports.deletePromotion = async (req, res) => {};
+exports.deleteVendor = async (req, res) => {
+  const promotions = await Vendor.find({ _id: vendorId }).populate({
+    path: "promotionIds",
+  });
+  
+  //const promotionsIds 
+  return res.status(200).send({ data: "nothing is available" });
+};
+exports.deletePromotion = async (req, res) => {
+
+};
