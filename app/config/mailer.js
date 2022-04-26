@@ -1,5 +1,7 @@
+require("dotenv").config()
+
 const { createTransport } = require("nodemailer");
-const GOOGLE_USER = "no.reply.greenuniverse@outlook.com", GOOGLE_PASSWORD = "Green@1234"
+const GOOGLE_USER = process.env.GOOGLE_USER, GOOGLE_PASSWORD = process.env.GOOGLE_PASSWORD
 const transporter = createTransport({
     host: "smtp-mail.outlook.com", // hostname
     secureConnection: false, // TLS requires secureConnection to be false

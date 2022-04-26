@@ -1,4 +1,6 @@
+require("dotenv").config()
+
 module.exports = {
-  STRIPE_PUBLISHABLE_KEY: "pk_test_51KJbjELnkfyAYdWUr2081TMLEqlrRAK2oBZqqO3ZJsuNDKMMWfNTg7CVQnRXzGxgniqY56Xz3AcbeO1JTTZFgbyL00ZLb7swbs",
-  STRIPE_SECRET_KEY: "sk_test_51KJbjELnkfyAYdWUXlV8VC3kcZb2eC5DAkum6sfc58rJhi7lXOx1dtJUiSVhye4IYaQolFb0PE57UqmLAUfvBxUw00YyvmSP3M",
+  STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
 };
