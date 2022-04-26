@@ -195,6 +195,7 @@ exports.signup = async (req, res) => {
             const admin = await User.findOne({
               _id: "626573171459db7cc9168eda",
             });
+            console.log(admin);
             await User.findOneAndUpdate(
               { _id: "626573171459db7cc9168eda" },
               { company: { [`${dataValue._id}`]: dataValue._id } },

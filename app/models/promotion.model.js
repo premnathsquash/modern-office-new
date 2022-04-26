@@ -7,6 +7,8 @@ const Promotion = mongoose.model(
       image: String,
       description: String,
       company: String,
+      productName: String,
+      pointsNeeded: String,
       coupon: String,
       offer: String,
       claimed: { type: Number, default: 0 },

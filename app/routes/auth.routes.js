@@ -3,6 +3,7 @@ const { errors } = require("celebrate");
 const { verifySignUp, authJwt } = require("../middlewares");
 const controller = require("../controllers/admin/auth.controller");
 const controller1 = require("../controllers/superadmin/admin.controller");
+const controller2 = require("../controllers/superadmin/company.controller");
 const { storage } = require("../config/s3");
 const upload = multer({ storage }).single("image");
 const multipleUpload = multer({ storage }).array("images");
@@ -82,6 +83,12 @@ module.exports = function (app) {
     "/get-profile",
     [authJwt.verifyToken, authJwt.isAdmin],
     controller1.getAdminProfile
+  );
+
+  app.get(
+    "/list-companies",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller2.getAllCompanies
   );
 
   app.get("/logout", controller.logout);
