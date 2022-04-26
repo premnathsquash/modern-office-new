@@ -133,6 +133,7 @@ exports.updateVendor = async (req, res) => {
         res.status(500).send({ message: err });
         return;
       }
+      return res.status(200).send({ data: "Updated successfully"});
     }
   );
 };
@@ -152,6 +153,7 @@ exports.updatePromotion = async (req, res) => {
     const { location } = req.file;
     fileLocation = location;
   }
+
   const promotion = await Promotion.find({_id: promotionId});
   await Promotion.findOneAndUpdate({_id: promotionId}, {
     image: fileLocation ?? promotion.image,
@@ -167,6 +169,7 @@ exports.updatePromotion = async (req, res) => {
       res.status(500).send({ message: err });
       return;
     }
+    return res.status(200).send({ data: "Updated successfully"});
   })
 };
 exports.deleteVendor = async (req, res) => {
