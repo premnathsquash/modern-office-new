@@ -178,7 +178,7 @@ exports.deleteVendor = async (req, res) => {
   const vendor = await Vendor.find({ _id: vendorId }).populate({
     path: "promotionIds",
   });
-  if(vendor[0].promotionIds.length>0){
+  if(vendor[0].promotionIds && vendor[0].promotionIds.length>0){
     vendor[0].promotionIds.map(async(ele)=>{
       await Promotion.findOneAndDelete({_id:ele.id},
         async (err, deleted) => {
@@ -200,6 +200,11 @@ exports.deletePromotion = async (req, res) => {
   const {promotionId, vendorId} = req.body
   const promotions = await Promotion.find({ _id: promotionId });
   const vendor = await Vendor.find({_id: vendorId})
-  console.log("p", promotions, "v", vendor);
+  const newIds = vendor[0].promotionIds.filter(ele=>{
+    console.log(ele);
+    
+  })
+  //await Vendor.findOneAndUpdate({_id: vendorId}, )
+  
   return res.status(200).send({ data: "nothing is available" });
 };
