@@ -1,7 +1,7 @@
 {
   "name": "node-js-jwt-auth-mongodb",
   "version": "1.0.0",
-  "description": "Node.js + MongoDB: JWT Authentication & Authorization",
+  "description": "Green universe",
   "main": "server.js",
   "scripts": {
     "start": "node ./server.js",
@@ -15,7 +15,7 @@
     "authentication",
     "mongodb"
   ],
-  "author": "bezkoder",
+  "author": "premnath",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1102.0",

@@ -23,7 +23,6 @@ exports.createVendor = async (req, res) => {
     companyImage: image?.location ?? "",
     contactImage: image2?.location ?? "",
   });
-
   vendor1.save((err, data) => {
     if (err) {
       res.status(500).send({ message: err });
