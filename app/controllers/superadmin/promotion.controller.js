@@ -172,13 +172,31 @@ exports.updatePromotion = async (req, res) => {
   })
 };
 exports.deleteVendor = async (req, res) => {
-  const promotions = await Vendor.find({ _id: vendorId }).populate({
+  const {vendorId} = req.body
+  const vendor = await Vendor.find({ _id: vendorId }).populate({
     path: "promotionIds",
   });
-  
-  //const promotionsIds 
-  return res.status(200).send({ data: "nothing is available" });
+  if(vendor[0].promotionIds.length>0){
+    vendor[0].promotionIds.map(async(ele)=>{
+      await Promotion.findOneAndDelete({_id:ele.id},
+        async (err, deleted) => {
+          if (err) {
+            res.status(500).send({ message: err });
+            return;
+          }})
+    })
+  }
+  await Vendor.findOneAndDelete({_id: vendor[0].id},
+    async (err, deleted) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }})
+  return res.status(200).send({ data: "Deleted successfully" });
 };
 exports.deletePromotion = async (req, res) => {
-
+  const {promotionId} = req.body
+  const promotions = await Promotion.find({ _id: promotionId });
+  console.log(promotions);
+  return res.status(200).send({ data: "nothing is available" });
 };

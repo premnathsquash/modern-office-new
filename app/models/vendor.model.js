@@ -11,6 +11,7 @@ const Vendor = mongoose.model(
       contactName: String,
       contactImage: String,
       contactNumber: String,
+      contactEmail: String,
       promotionIds: [
         {
           type: mongoose.Schema.Types.ObjectId,
