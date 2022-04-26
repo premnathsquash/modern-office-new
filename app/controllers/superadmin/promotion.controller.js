@@ -111,6 +111,8 @@ exports.updateVendor = async (req, res) => {
     contactName,
     contactNumber,
     contactEmail,
+    companyImage,
+    contactImage,
     vendorId,
   } = req.body;
   const [image, image2] = req.files;
@@ -124,8 +126,8 @@ exports.updateVendor = async (req, res) => {
       contactName: contactName ?? vendor.contactName,
       contactNumber: contactNumber ?? vendor.contactNumber,
       contactEmail: contactEmail ?? vendor.contactEmail,
-      companyImage: image?.location ?? vendor.companyImage,
-      contactImage: image2?.location ?? vendor.contactImage,
+      companyImage: companyImage? companyImage : image?.location ?? vendor.companyImage,
+      contactImage: contactImage? contactImage : image2?.location ?? vendor.contactImage,
     },
     (err, data) => {
       if (err) {
@@ -195,8 +197,9 @@ exports.deleteVendor = async (req, res) => {
   return res.status(200).send({ data: "Deleted successfully" });
 };
 exports.deletePromotion = async (req, res) => {
-  const {promotionId} = req.body
+  const {promotionId, vendorId} = req.body
   const promotions = await Promotion.find({ _id: promotionId });
-  console.log(promotions);
+  const vendor = await Vendor.find({_id: vendorId})
+  console.log("p", promotions, "v", vendor);
   return res.status(200).send({ data: "nothing is available" });
 };
