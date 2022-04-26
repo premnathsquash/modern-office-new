@@ -96,7 +96,7 @@ exports.listVendor = async (req, res) => {
 };
 
 exports.listPromotion = async (req, res) => {
-  const vendorId = req.query.id;
+  const vendorId = req.query;
   const promotions = await Vendor.find({ _id: vendorId }).populate({
     path: "promotionIds",
   });
