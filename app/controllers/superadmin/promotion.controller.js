@@ -10,6 +10,7 @@ exports.createVendor = async (req, res) => {
     companyCategories,
     contactName,
     contactNumber,
+    contactEmail
   } = req.body;
   const [image, image2] = req.files;
   const vendor1 = new Vendor({
@@ -18,6 +19,7 @@ exports.createVendor = async (req, res) => {
     companyCategories,
     contactName,
     contactNumber,
+    contactEmail,
     companyImage: image?.location ?? "",
     contactImage: image2?.location ?? "",
   });
@@ -80,7 +82,9 @@ exports.createPromotion = async (req, res) => {
 };
 
 exports.listVendor = async (req, res) => {
-  const vendor = await Vendor.find({});
+  const vendor = await Vendor.find({}).populate({
+    path: "promotionIds",
+  }); 
   if (vendor) {
     return res.status(200).send({ data: vendor });
   } else {
@@ -107,6 +111,7 @@ exports.updateVendor = async (req, res) => {
     companyCategories,
     contactName,
     contactNumber,
+    contactEmail,
     vendorId,
   } = req.body;
   const [image, image2] = req.files;
@@ -119,6 +124,7 @@ exports.updateVendor = async (req, res) => {
       companyCategories: companyCategories ?? vendor.companyCategories,
       contactName: contactName ?? vendor.contactName,
       contactNumber: contactNumber ?? vendor.contactNumber,
+      contactEmail: contactEmail ?? vendor.contactEmail,
       companyImage: image?.location ?? vendor.companyImage,
       contactImage: image2?.location ?? vendor.contactImage,
     },
