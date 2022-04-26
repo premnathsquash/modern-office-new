@@ -2,6 +2,7 @@ const db = require("../../models");
 
 const Vendor = db.vendor;
 const Promotion = db.promotion;
+const mongoose = db.mongoose;
 
 exports.createVendor = async (req, res) => {
   const {
@@ -96,12 +97,13 @@ exports.listVendor = async (req, res) => {
 };
 
 exports.listPromotion = async (req, res) => {
-  const vendorId = req.query;
-  const promotions = await Vendor.find({ _id: vendorId }).populate({
+  const {vendorId} = req.query;
+  const promotions = await Vendor.findOne({ _id: vendorId })
+ if( promotions.promotionIds.length > 0){
+  const promotions1 = await Vendor.findOne({ _id: vendorId }).populate({
     path: "promotionIds",
   });
-  if (promotions) {
-    return res.status(200).send({ data: promotions[0].promotionIds });
+    return res.status(200).send({ data: promotions1.promotionIds });
   } else {
     return res.status(200).send({ data: "nothing is available" });
   }
