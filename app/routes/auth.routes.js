@@ -97,6 +97,12 @@ module.exports = function (app) {
     controller3.resetPassReq
   );
 
+  app.post(
+    "/send-mobile-email",
+    [authJwt.verifyToken, authJwt.isUser],
+    controller3.checkOtp
+  );
+
   app.get("/logout", controller.logout);
 
   app.use(errors());
