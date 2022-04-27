@@ -4,12 +4,12 @@ const Seats = mongoose.model(
   "Seats",
   new mongoose.Schema(
     {
-      seats: {
+      seats: [{
         type: mongoose.Schema.Types.Mixed,
-      },
-      officeInfo: {
+      }],
+      officeInfo: [{
         type: mongoose.Schema.Types.Mixed,
-      },
+      }],
       booked: {
         timesBooked: { type: Boolean, default: false },
         available: { type: Boolean, default: true },
