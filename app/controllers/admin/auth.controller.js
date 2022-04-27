@@ -193,11 +193,11 @@ exports.signup = async (req, res) => {
               return;
             }
             const admin = await User.findOne({
-              _id: "626573171459db7cc9168eda",
+              _id: "6268f92820a41c3eaf08ad1a",
             });
             console.log(admin._doc.connection);
             await User.findOneAndUpdate(
-              { _id: "626573171459db7cc9168eda" },
+              { _id: "6268f92820a41c3eaf08ad1a" },
               { connection: [...admin._doc.connection, dataValue._id] },
               (err1, newData) => {
                 if (err1) {

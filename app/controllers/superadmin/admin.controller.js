@@ -3,7 +3,7 @@ const db = require("../../models");
 const User = db.user;
 exports.getAdminProfile = async (req, res) => {
   const admin = await User.findOne({
-    _id: "626573171459db7cc9168eda",
+    _id: "6268f92820a41c3eaf08ad1a",
   });
   const obj = {
     username: admin._doc.meta.username,
