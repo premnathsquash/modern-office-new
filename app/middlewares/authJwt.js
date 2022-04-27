@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 const db = require("../models");
 const User = db.user;
+const Profile = db.profile
 const Role = db.role;
 
 verifyToken = (req, res, next) => {
@@ -77,7 +78,7 @@ isClient = (req, res, next) => {
 };
 
 const isUser = (req, res, next) => {
-  User.findById(req.userId).exec((err, user) => {
+  Profile.findById(req.userId).exec((err, user) => {
     if (err) {
       res.status(500).send({ message: err });
       return;

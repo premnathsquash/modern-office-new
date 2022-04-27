@@ -4,6 +4,7 @@ const { verifySignUp, authJwt } = require("../middlewares");
 const controller = require("../controllers/admin/auth.controller");
 const controller1 = require("../controllers/superadmin/admin.controller");
 const controller2 = require("../controllers/superadmin/company.controller");
+const controller3 = require("../controllers/mobile/auth.controller");
 const { storage } = require("../config/s3");
 const upload = multer({ storage }).single("image");
 const multipleUpload = multer({ storage }).array("images");
@@ -48,7 +49,7 @@ module.exports = function (app) {
 
   app.post(
     "/reset-password",
-    [authJwt.verifyToken, authJwt.isClient || authJwt.isAdmin],
+    [authJwt.verifyToken, authJwt.isClient],
     controller.resetPasswordInternal
   );
 
@@ -89,6 +90,11 @@ module.exports = function (app) {
     "/list-companies",
     [authJwt.verifyToken, authJwt.isAdmin],
     controller2.getAllCompanies
+  );
+
+  app.post(
+    "/reset-password-mobile",
+    controller3.resetPassReq
   );
 
   app.get("/logout", controller.logout);

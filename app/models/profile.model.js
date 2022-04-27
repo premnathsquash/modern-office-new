@@ -50,7 +50,7 @@ const Profile = mongoose.model(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
     },
-  })
+  },{strict: false, timestamps: true})
 );
 
 module.exports = Profile;
