@@ -48,7 +48,7 @@ module.exports = function (app) {
 
   app.post(
     "/reset-password",
-    [authJwt.verifyToken, authJwt.isClient],
+    [authJwt.verifyToken, authJwt.isClient || authJwt.isAdmin],
     controller.resetPasswordInternal
   );
 

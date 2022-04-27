@@ -13,6 +13,8 @@ module.exports = function (app) {
 
   app.post("/create-enquire", controller.createEnquire);
 
+  app.get("/list-enquire", controller.listEnquire);
+
   app.use(errors());
   /*
 

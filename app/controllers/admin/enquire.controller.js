@@ -41,3 +41,7 @@ exports.createEnquire = async (req, res) => {
 
   res.status(200).send("Enquery created successfully...");
 };
+exports.listEnquire = async(req, res)=>{
+  const enquires = await Enquire.find({})
+  return res.status(200).send(enquires)
+}
