@@ -10,7 +10,7 @@ const Profile = mongoose.model(
     slug: String,
     email: String,
     department: String,
-    booking: {
+    reservation: {
       allocatedDesk: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Seats",
