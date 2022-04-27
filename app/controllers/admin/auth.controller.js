@@ -195,10 +195,10 @@ exports.signup = async (req, res) => {
             const admin = await User.findOne({
               _id: "626573171459db7cc9168eda",
             });
-            console.log(admin._doc.connection);        
+            console.log(admin._doc.connection);
             await User.findOneAndUpdate(
               { _id: "626573171459db7cc9168eda" },
-              { connection: [...admin._doc.connection,dataValue._id] },
+              { connection: [...admin._doc.connection, dataValue._id] },
               (err1, newData) => {
                 if (err1) {
                   res.status(500).send({ message: err1 });
@@ -313,7 +313,7 @@ exports.userSignup = async (req, res) => {
         allocatedDesk,
         reservedSeats,
         makeAdmin,
-        userGroup: req.userId
+        userGroup: req.userId,
       });
       Role.find(
         {
@@ -370,26 +370,19 @@ exports.userSignup = async (req, res) => {
 };
 
 exports.userLoginIn = async (req, res) => {
-  if (!req.body.email)
-    return res.status(400).end({ res: "please provide email" });
-  if (!req.body.slug)
-    return res.status(400).end({ res: "please provide slug" });
-  Profile.findOne({
-    email: req.body.email,
-    slug: req.body.slug,
-  })
-    .populate("roles", "-__v")
-    .exec((err, user) => {
-      if (err) {
-        res.status(500).send({ message: err });
-        return;
-      }
-      if (!user) {
-        return res.status(404).send({ message: "User Not found." });
-      }
-      console.log(user);
-      
-      const passwordIsValid = bcrypt.compareSync(
+  try {
+    if (!req.body.email)
+      return res.status(400).end({ res: "please provide email" });
+    if (!req.body.slug)
+      return res.status(400).end({ res: "please provide slug" });
+    const user = await Profile.findOne({
+      email: req.body.email,
+      slug: req.body.slug,
+    }).populate("roles");
+    console.log(user, user.id, user.roles.name.toLowerCase());
+
+    /**
+     * const passwordIsValid = bcrypt.compareSync(
         req.body.password,
         user.password
       );
@@ -403,8 +396,8 @@ exports.userLoginIn = async (req, res) => {
         expiresIn: 86400, // 24 hours
       });
       const authorities = user.roles.name.toLowerCase();
-    });
-  return res.status(200).send({
+     */
+    /* return res.status(200).send({
     id: user._id,
     name: user.username,
     email: user.email,
@@ -413,7 +406,14 @@ exports.userLoginIn = async (req, res) => {
     role: authorities,
     slug: user.slug,
     token: token,
-  });
+  }); */
+    return res.status(200).send({ message: "err" });
+  } catch (err) {
+    if (err) {
+      res.status(500).send({ message: err });
+      return;
+    }
+  }
 };
 
 exports.getProfile = async (req, res) => {
@@ -715,7 +715,9 @@ exports.userDeleteProfile = async (req, res) => {
               res.status(500).send({ message: err1 });
               return;
             }
-            const departm = await Departments.findOne({ _id: req.body.departmId });
+            const departm = await Departments.findOne({
+              _id: req.body.departmId,
+            });
             await Departments.findOneAndUpdate(
               { _id: req.body.departmId },
               { users: departm.users - 1 },

@@ -6,7 +6,7 @@ const Profile = mongoose.model(
     firstName: String,
     lastName: String,
     dp: String,
-    pssword: String,
+    password: String,
     slug: String,
     email: String,
     department: String,
