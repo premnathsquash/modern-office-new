@@ -282,9 +282,11 @@ exports.userSignup = async (req, res) => {
     lastName,
     email,
     department,
-    allocatedDesk,
     reservedSeats,
     makeAdmin,
+    floorId,
+    seatId,
+    seatName,
   } = req.body;
   const departm = await Departments.findOne({ _id: department });
   const attend = new Attendance({});
@@ -309,10 +311,15 @@ exports.userSignup = async (req, res) => {
         dp: fileLocation ?? "",
         email,
         department: departm.departments,
-        allocatedDesk,
         reservedSeats,
         makeAdmin,
         userGroup: req.userId,
+        booking: {
+          allocatedDesk: seatId,
+          floor: floorId,
+          seatName: seatName,
+          bookDate: Date.now(),
+        },
       });
       Role.find(
         {
@@ -395,7 +402,7 @@ exports.userLoginIn = async (req, res) => {
 
     const userGrp = await User.findOne({ _id: user.userGroup });
     let planType;
-   
+
     switch (userGrp.stripeProductPrice.productId) {
       case "prod_LLhE8XyggI9emW":
         planType = "Large Yearly";
@@ -436,7 +443,6 @@ exports.userLoginIn = async (req, res) => {
       slug: user.slug,
       token: token,
     });
-
   } catch (err) {
     if (err) {
       res.status(500).send({ message: err });

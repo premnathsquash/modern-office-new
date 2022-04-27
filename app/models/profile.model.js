@@ -10,22 +10,33 @@ const Profile = mongoose.model(
     slug: String,
     email: String,
     department: String,
-    allocatedDesk: String,
+    booking: {
+      allocatedDesk: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Seats",
+      },
+      floor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Floor",
+      },
+      seatName: String,
+      bookDate: Date,
+    },
     reservedSeats: {
       type: Boolean,
-      default: false
+      default: false,
     },
     makeAdmin: {
       type: Boolean,
-      default: false
+      default: false,
     },
-    userGroup:{
+    userGroup: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
     status: {
       type: Boolean,
-      default: true
+      default: true,
     },
     roles: {
       type: mongoose.Schema.Types.ObjectId,
