@@ -1,6 +1,4 @@
-const bcrypt = require("bcryptjs");
 
-const { sendMail } = require("../../config/mailer");
 const db = require("../../models");
 const User = db.user;
 exports.getAdminProfile = async (req, res) => {

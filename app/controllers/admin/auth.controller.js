@@ -313,6 +313,7 @@ exports.userSignup = async (req, res) => {
         allocatedDesk,
         reservedSeats,
         makeAdmin,
+        userGroup: req.userId
       });
       Role.find(
         {
@@ -399,7 +400,7 @@ exports.userLoginIn = async (req, res) => {
       const token = jwt.sign({ id: user.id }, config.secret, {
         expiresIn: 86400, // 24 hours
       });
-      const authorities = user.roles.name.toUpperCase();
+      const authorities = user.roles.name.toLowerCase();
     });
   return res.status(200).send({
     id: user._id,

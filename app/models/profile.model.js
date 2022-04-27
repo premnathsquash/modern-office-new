@@ -19,6 +19,10 @@ const Profile = mongoose.model(
       type: Boolean,
       default: false
     },
+    userGroup:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     status: {
       type: Boolean,
       default: true
@@ -30,6 +34,10 @@ const Profile = mongoose.model(
     attendance: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Attendance",
+    },
+    vendor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vendor",
     },
   })
 );
