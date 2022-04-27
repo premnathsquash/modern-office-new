@@ -314,7 +314,7 @@ exports.userSignup = async (req, res) => {
         reservedSeats,
         makeAdmin,
         userGroup: req.userId,
-        booking: {
+        reservation: {
           allocatedDesk: seatId,
           floor: floorId,
           seatName: seatName,
