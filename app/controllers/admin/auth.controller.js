@@ -387,6 +387,8 @@ exports.userLoginIn = async (req, res) => {
       if (!user) {
         return res.status(404).send({ message: "User Not found." });
       }
+      console.log(user);
+      
       const passwordIsValid = bcrypt.compareSync(
         req.body.password,
         user.password
@@ -406,6 +408,8 @@ exports.userLoginIn = async (req, res) => {
     id: user._id,
     name: user.username,
     email: user.email,
+    image: user?.dp,
+    planType: "",
     role: authorities,
     slug: user.slug,
     token: token,
