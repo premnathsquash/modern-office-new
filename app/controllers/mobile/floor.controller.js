@@ -1,11 +1,16 @@
 const db = require("../../models");
 const Profile = db.profile
+const Floor = db.floor
 exports.mobileFloorDisplay = async (req, res) => {
   try {
     const userProfile = await Profile.findOne({_id: req.userId})
-    console.log(userProfile);
+    const floor = await Floor.findOne({_id: userProfile.reservation.floor }).populate({path: "Seats"})
+    const intermediate = Object.values(floor.Seats.seats[0])
+    const result = intermediate.map(ele=>{
+      return {...ele, available: true}
+    })
     
-    return res.status(200).send({ res: "Email has been sent to you" });
+    return res.status(200).send({ res: result });
   } catch (err) {
     return res.status(500).send({ message: err });
   }
