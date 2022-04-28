@@ -107,7 +107,7 @@ exports.invoices = async (req, res) => {
     const user = await User.findOne({ _id: req.userId });
     const invoices = await stripe.invoices.list({
       customer: user.stripeCustomerId,
-      limit: 1000,
+      limit: 100,
     });
     return res.json({ res: invoices });
   } catch (err) {
