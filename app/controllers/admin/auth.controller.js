@@ -312,7 +312,7 @@ exports.userSignup = async (req, res) => {
         password: bcrypt.hashSync(pssword, 8),
         dp: fileLocation ?? "",
         email,
-        department: departm.id,
+        department: departm.departments,
         reservedSeats,
         makeAdmin,
         userGroup: req.userId,
@@ -641,8 +641,9 @@ exports.getAllProfileusers = async (req, res) => {
       reservation: { bookDate, seatName },
     } = ele;
     const departIntermed = await Departments.findOne({
-      _id: mongoose.Types.ObjectId(department),
-    });  
+      departments: department
+    });
+  
     return {
       attendanceId: attendance._id,
       departmentId: departIntermed._id,
@@ -721,6 +722,7 @@ exports.userUpdateProfile = async (req, res) => {
   }).populate({ path: "profile" });
 
   const tempProfile = profile.profile.find((ele) => ele._id == req.body.id);
+  const departm = await Departments.findOne({ _id: department });
 
   if (tempProfile) {
     await Profile.findOneAndUpdate(
@@ -728,7 +730,7 @@ exports.userUpdateProfile = async (req, res) => {
       {
         firstName: firstName ?? tempProfile.department,
         lastName: lastName ?? tempProfile.department,
-        department: department ?? tempProfile.department,
+        department: departm.departments ?? tempProfile.department,
         reservedSeats: reservedSeats ?? tempProfile.reservedSeats,
         reservation: {
           allocatedDesk: seatId ?? tempProfile.reservation.allocatedDesk,
