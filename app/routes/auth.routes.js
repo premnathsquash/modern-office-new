@@ -99,7 +99,6 @@ module.exports = function (app) {
 
   app.post(
     "/send-mobile-email",
-    [authJwt.verifyToken, authJwt.isUser],
     controller3.checkOtp
   );
 

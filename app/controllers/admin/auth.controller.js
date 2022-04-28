@@ -379,17 +379,21 @@ exports.userSignup = async (req, res) => {
 
 exports.userLoginIn = async (req, res) => {
   try {
-    if (!req.body.email)
+
+    if (!req.body?.email)
       return res.status(400).end({ res: "please provide email" });
-    if (!req.body.slug)
+    if (!req.body?.slug)
       return res.status(400).end({ res: "please provide slug" });
+    if (!req.body?.password)
+      return res.status(400).end({ res: "please provide password" });
+
     const user = await Profile.findOne({
-      email: req.body.email,
-      slug: req.body.slug,
+      email: req.body?.email,
+      slug: req.body?.slug,
     }).populate(["roles", "userGroup"]);
 
     const passwordIsValid = bcrypt.compareSync(
-      req.body.password,
+      req.body?.password,
       user.password
     );
     if (!passwordIsValid) {
@@ -639,6 +643,9 @@ exports.getAllProfileusers = async (req, res) => {
     const departIntermed = await Departments.findOne({
       departments: department,
     });
+    
+    console.log(attendance, departIntermed);
+    
     return {
       attendanceId: attendance._id,
       departmentId: departIntermed._id,
@@ -664,6 +671,7 @@ exports.getAllProfileusers = async (req, res) => {
       seat_Id: seating? seating.id : null
     };
   });
+
   Promise.all(users1).then((data) => {
     return res.status(200).send({
       wfo: { wfoDays: 233, wfoRange: "Weekly", wfo: false },

@@ -40,7 +40,7 @@ module.exports = function (app) {
     controller.deleteFloor
   )
   app.get("/mobile-floor-disp",
-  [authJwt.verifyToken, authJwt.isClient],
+  [authJwt.verifyToken, authJwt.isUser],
   controller3.mobileFloorDisplay
   )
   app.get(
