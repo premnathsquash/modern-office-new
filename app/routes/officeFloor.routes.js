@@ -1,6 +1,7 @@
 const { errors } = require("celebrate");
 const { authJwt } = require("../middlewares");
 const controller = require("../controllers/admin/officeFloor.controller");
+const controller3 = require("../controllers/mobile/floor.controller");
 
 module.exports = function (app) {
   app.post(
@@ -37,6 +38,10 @@ module.exports = function (app) {
     "/delete/:id",
     [authJwt.verifyToken, authJwt.isClient],
     controller.deleteFloor
+  )
+  app.get("/mobile-floor-disp",
+  [authJwt.verifyToken, authJwt.isClient],
+  controller3.mobileFloorDisplay
   )
   app.get(
     "/unreserved-seats",

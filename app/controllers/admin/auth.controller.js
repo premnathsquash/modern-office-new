@@ -660,7 +660,8 @@ exports.getAllProfileusers = async (req, res) => {
       allocatedDate: seating ? bookDate : "",
       seatName: seating? seatName : "",
       floorInfo: {floorName: flooring.name, floorId: flooring.id},
-      seatInfo: seating && seatName ? seating.seats[0][seatName] : null
+      seatInfo: seating && seatName ? seating.seats[0][seatName] : null,
+      seat_Id: seating? seating.id : null
     };
   });
   Promise.all(users1).then((data) => {
