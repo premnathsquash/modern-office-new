@@ -312,7 +312,7 @@ exports.userSignup = async (req, res) => {
         password: bcrypt.hashSync(pssword, 8),
         dp: fileLocation ?? "",
         email,
-        department: departm.departments,
+        department: departm.id,
         reservedSeats,
         makeAdmin,
         userGroup: req.userId,
@@ -621,6 +621,7 @@ exports.getAllProfileusers = async (req, res) => {
   const users = await Profile.find({ slug: user.slug }).populate({
     path: "attendance",
   });
+
   const users1 = users.map(async (ele) => {
     const seating = await Seat.findOne({ _id: ele?.reservation?.allocatedDesk });
     const flooring = await Floor.findOne({ _id: ele?.reservation?.floor });  
@@ -639,13 +640,9 @@ exports.getAllProfileusers = async (req, res) => {
       slug,
       reservation: { bookDate, seatName },
     } = ele;
-   
     const departIntermed = await Departments.findOne({
-      departments: department,
-    });
-    
-    console.log(attendance, departIntermed);
-    
+      _id: mongoose.Types.ObjectId(department),
+    });  
     return {
       attendanceId: attendance._id,
       departmentId: departIntermed._id,
