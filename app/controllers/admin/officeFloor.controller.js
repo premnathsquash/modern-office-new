@@ -3,6 +3,7 @@ const db = require("../../models");
 const Office = db.office;
 const Floor = db.floor;
 const Seats = db.seats;
+const User = db.user;
 const mongoose = db.mongoose;
 const updateFloorToOffice = async (id, officeId) => {
   const office = await Office.findOne({ _id: officeId });
@@ -176,4 +177,9 @@ exports.getFloor = async (req, res, next) => {
   const floor = await Floor.find({ _id: req.params.id }).populate({ path: "Seats" })
   const temp = floor;
   return res.send({res: temp[0]});
+}
+
+exports.unreservedSeats = async (req, res, next) => {
+  const user = await User.findOne({_id: req.userId}).populate({path : "profile"})
+  return res.send({res: "works"});
 }

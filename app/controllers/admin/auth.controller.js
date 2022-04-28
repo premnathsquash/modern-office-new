@@ -14,6 +14,8 @@ const Profile = db.profile;
 const Departments = db.departments;
 const Role = db.role;
 const Token = db.token;
+const Seat = db.seats;
+const Floor = db.floor;
 const OfficeConfigure = db.officeConfigure;
 const Attendance = db.attendance;
 const mongoose = db.mongoose;
@@ -616,6 +618,8 @@ exports.getAllProfileusers = async (req, res) => {
     path: "attendance",
   });
   const users1 = users.map(async (ele) => {
+    const seating = await Seat.findOne({ _id: ele?.reservation?.allocatedDesk });
+    const flooring = await Floor.findOne({ _id: ele?.reservation?.floor });  
     const {
       attendance,
       reservedSeats,
@@ -629,7 +633,9 @@ exports.getAllProfileusers = async (req, res) => {
       department,
       roles,
       slug,
+      reservation: { bookDate, seatName },
     } = ele;
+   
     const departIntermed = await Departments.findOne({
       departments: department,
     });
@@ -651,6 +657,10 @@ exports.getAllProfileusers = async (req, res) => {
       department,
       roles,
       slug,
+      allocatedDate: seating ? bookDate : "",
+      seatName: seating? seatName : "",
+      floorInfo: {floorName: flooring.name, floorId: flooring.id},
+      seatInfo: seating && seatName ? seating.seats[0][seatName] : null
     };
   });
   Promise.all(users1).then((data) => {

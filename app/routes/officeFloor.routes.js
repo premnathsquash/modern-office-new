@@ -38,5 +38,10 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isClient],
     controller.deleteFloor
   )
+  app.get(
+    "/unreserved-seats",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.unreservedSeats
+  );
   app.use(errors());
 };
