@@ -704,9 +704,11 @@ exports.userUpdateProfile = async (req, res) => {
     firstName,
     lastName,
     department,
-    allocatedDesk,
     reservedSeats,
     makeAdmin,
+    floorId,
+    seatId,
+    seatName,
   } = req.body;
   const profile = await User.findOne({
     _id: req.userId,
@@ -722,7 +724,12 @@ exports.userUpdateProfile = async (req, res) => {
         lastName: lastName ?? tempProfile.department,
         department: department ?? tempProfile.department,
         reservedSeats: reservedSeats ?? tempProfile.reservedSeats,
-        allocatedDesk: allocatedDesk ?? tempProfile.allocatedDesk,
+        reservation: {
+          allocatedDesk: seatId ?? tempProfile.reservation.allocatedDesk,
+          floor: floorId ?? tempProfile.reservation.floor,
+          seatName: seatName ?? tempProfile.reservation.seatName,
+          bookDate: Date.now(),
+        },
         makeAdmin: makeAdmin ?? tempProfile.makeAdmin,
         dp: fileLocation ?? tempProfile.dp,
       },
