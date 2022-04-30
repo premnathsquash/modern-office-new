@@ -50,6 +50,17 @@ const Profile = mongoose.model(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
     },
+    claimedInfo:{
+      promotion: [ {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Promotion",
+    }],
+    points: {
+      type: Number,
+      default: 0
+    },
+    claimedDate: Date,
+  },
   },{strict: false, timestamps: true})
 );
 

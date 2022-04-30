@@ -15,6 +15,20 @@ const Promotion = mongoose.model(
       categories: [String],
       validTill: Date,
       link: String,
+      companyClaimed: [
+        {
+          id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+          },
+          profiles: [
+            {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "Profile",
+            }
+          ]
+        },
+      ],
     },
     {
       timestamps: true,
