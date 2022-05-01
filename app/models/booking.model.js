@@ -2,40 +2,49 @@ const mongoose = require("mongoose");
 
 const Booking = mongoose.model(
   "Booking",
-  new mongoose.Schema({
-    profile: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Profile",
-    },
-    seatBook:{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Seats",
-    },
-    seat: String,
-    officeInfo: String,
-    booked: String,
-    desk:{
-      date: String,
-      from: String,
-      to: String,
-      whole: String,
-      cancelled: String,
-      planWeek: String,
-    },
-    conference:{
-      date: String,
-      from: String,
-      to: String,
-      whole: String,
-      cancelled: String,
-      timeframe: String,
-      teammember: [{
+  new mongoose.Schema(
+    {
+      profile: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Profile",
-      }]
-
-    }
-  },{minimize: false, timestamps: true, strict: false})
+      },
+      company: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      seatBook: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Seats",
+      },
+      attendees: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Profile",
+        },
+      ],
+      seat: String,
+      timeZone: {
+        type: String,
+        default: "Australia/Sydney"
+      },
+      desk: {
+        date: String,
+        from: String,
+        to: String,
+        whole: Boolean,
+        cancelled: {
+          type: Boolean,
+          default: false,
+        },
+        recurrence: String,
+        recurrenceDays: [{
+          type: String,
+          enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        }]
+      },
+    },
+    { minimize: false, timestamps: true, strict: false }
+  )
 );
 
 module.exports = Booking;

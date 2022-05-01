@@ -14,6 +14,9 @@ const Seats = mongoose.model(
         timesBooked: { type: Boolean, default: false },
         available: { type: Boolean, default: true },
       },
+      reserved: {
+        type: mongoose.Schema.Types.Mixed,
+      },
     },
     { strict: false }
   )

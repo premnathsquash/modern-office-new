@@ -21,6 +21,12 @@ const Profile = mongoose.model(
       },
       seatName: String,
       bookDate: Date,
+      booking: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Booking",
+        }
+      ]
     },
     reservedSeats: {
       type: Boolean,

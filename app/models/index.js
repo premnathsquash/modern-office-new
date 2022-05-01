@@ -18,6 +18,7 @@ db.officeConfigure = require("./officeConfigure.model");
 db.attendance = require("./attendance.model");
 db.vendor = require("./vendor.model");
 db.promotion = require("./promotion.model");
+db.booking = require("./booking.model");
 
 db.ROLES = ["user", "admin", "client"];
 
