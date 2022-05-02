@@ -379,7 +379,6 @@ exports.userSignup = async (req, res) => {
 
 exports.userLoginIn = async (req, res) => {
   try {
-
     if (!req.body?.email)
       return res.status(400).end({ res: "please provide email" });
     if (!req.body?.slug)
@@ -502,11 +501,11 @@ exports.searchEmail = async (req, res) => {
 };
 
 exports.getProfileCompany = async (req, res) => {
-  try{
+  try {
     const user = await User.findOne({
-      _id: req.userId
+      _id: req.userId,
     });
-    const {company, _id, dp, username, email, slug} = user
+    const { company, _id, dp, username, email, slug } = user;
     const result = {
       _id,
       username: username,
@@ -520,12 +519,12 @@ exports.getProfileCompany = async (req, res) => {
       officecity: company.city,
       officecountry: company.country,
       officepincode: company.zip,
-    }
+    };
     return res.status(200).send(result);
-  }catch (error) {
+  } catch (error) {
     return res.status(500).send({ message: error });
   }
-}
+};
 
 exports.resetPassReq = async (req, res) => {
   const { email } = req.body;
@@ -621,10 +620,10 @@ exports.updateProfile = async (req, res) => {
       {
         username: username ?? user.username,
         email: email ?? user.email,
-        dp: image.location ?? user.dp,
+        dp: image?.location ?? user.dp,
         company: {
           name: companyName ?? user.company.name,
-          companyImg: image2.location ?? user.company.companyImg,
+          companyImg: image2?.location ?? user.company.companyImg,
           address: companyAddress ?? user.company.address,
           city: companyCity ?? user.company.city,
           state: companyState ?? user.company.state,
@@ -649,8 +648,10 @@ exports.getAllProfileusers = async (req, res) => {
   });
 
   const users1 = users.map(async (ele) => {
-    const seating = await Seat.findOne({ _id: ele?.reservation?.allocatedDesk });
-    const flooring = await Floor.findOne({ _id: ele?.reservation?.floor });  
+    const seating = await Seat.findOne({
+      _id: ele?.reservation?.allocatedDesk,
+    });
+    const flooring = await Floor.findOne({ _id: ele?.reservation?.floor });
     const {
       attendance,
       reservedSeats,
@@ -667,9 +668,9 @@ exports.getAllProfileusers = async (req, res) => {
       reservation: { bookDate, seatName },
     } = ele;
     const departIntermed = await Departments.findOne({
-      departments: department
+      departments: department,
     });
-  
+
     return {
       attendanceId: attendance._id,
       departmentId: departIntermed._id,
@@ -689,10 +690,10 @@ exports.getAllProfileusers = async (req, res) => {
       roles,
       slug,
       allocatedDate: seating ? bookDate : "",
-      seatName: seating? seatName : "",
-      floorInfo: {floorName: flooring.name, floorId: flooring.id},
+      seatName: seating ? seatName : "",
+      floorInfo: { floorName: flooring.name, floorId: flooring.id },
       seatInfo: seating && seatName ? seating.seats[0][seatName] : null,
-      seat_Id: seating? seating.id : null
+      seat_Id: seating ? seating.id : null,
     };
   });
 

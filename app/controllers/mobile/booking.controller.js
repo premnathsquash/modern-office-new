@@ -43,13 +43,27 @@ exports.booking = async (req, res) => {
         res.status(500).send({ message: err });
         return;
       }
-      /* console.log( data,  seat.seats[0]/* , user, company );
-      await Seat.findOneAndUpdate({ _id: user.reservation.allocatedDesk }, {}, (err, data1)=>{
+       /* 
+      const checkSeat1 = Object.keys(seat.seats[0]).filter(ele=> ele==bookedSeat)
+      const checkSeat2 = Object.keys(seat.seats[0]).filter(ele=> ele!=bookedSeat)
 
+      console.log(Object.values(seat.seats[0]).some(checkSeat1));
+     
+      if(checkSeat1){
+      await Seat.findOneAndUpdate({ _id: user.reservation.allocatedDesk }, {
+        seats: [seat.seats[0][bookedSeat].timesBooked] +1
+      }, (err1, data1)=>{
+        if (err1) {
+          res.status(500).send({ message: err1 });
+          return;
+        }
+        console.log( data1 );
       }); 
       await Profile.findOneAndUpdate({ _id: req.userId }, {}, (err, data2)=>{
 
-      });   */
+      }); 
+    } 
+    */
 
     });
 
