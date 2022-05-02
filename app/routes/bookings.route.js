@@ -10,6 +10,12 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isUser],
     controller.booking
   );
+
+  app.get(
+    "/bookings/invite-users",
+    [authJwt.verifyToken, authJwt.isUser],
+    controller.listUsers
+  );
   
   app.use(errors());
 };

@@ -35,18 +35,37 @@ exports.booking = async (req, res) => {
         from: date2,
         to: date3,
         recurrence: recurrence,
-        recurrenceDays: recurrenceDays ?? []
-      }
+        recurrenceDays: recurrenceDays ?? [],
+      },
     });
     booking.save(async (err, data) => {
       if (err) {
         res.status(500).send({ message: err });
         return;
       }
-      return res.json({message: "Booking created successfully"})
+      /*  console.log(data, seat);
+      await Seat.findOneAndUpdate({ _id: user.reservation.allocatedDesk }, {}, (err, data1)=>{
+
+      }); */
     });
 
-    return res.send("h");
+    return res.send({ message: "Booking created successfully" });
+  } catch (error) {
+    return res.status(500).send({ message: error });
+  }
+};
+
+exports.listUsers = async (req, res) => {
+  try {
+    const user = await Profile.findOne({ _id: req.userId });
+    const company = await User.findOne({ _id: user.userGroup }).populate({
+      path: "profile",
+    });
+    const result = company.profile.map((el) => {
+      const {id, dp, firstName, lastName, email, slug} = el;
+      return {id, dp, name: `${firstName} ${lastName}`, email, slug}
+    });
+    return res.send(result);
   } catch (error) {
     return res.status(500).send({ message: error });
   }
