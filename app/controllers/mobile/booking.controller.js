@@ -43,28 +43,43 @@ exports.booking = async (req, res) => {
         res.status(500).send({ message: err });
         return;
       }
-       /* 
-      const checkSeat1 = Object.keys(seat.seats[0]).filter(ele=> ele==bookedSeat)
-      const checkSeat2 = Object.keys(seat.seats[0]).filter(ele=> ele!=bookedSeat)
+      const checkSeat1 = [];
+      const checkSeat2 = [];
+      Object.entries(seat.seats[0]).forEach((ele) => {
+        const [key, value] = ele;
+        if (key == bookedSeat) {
+          const newValue = { ...value, timesBooked: value.timesBooked + 1 };
 
-      console.log(Object.values(seat.seats[0]).some(checkSeat1));
-     
-      if(checkSeat1){
-      await Seat.findOneAndUpdate({ _id: user.reservation.allocatedDesk }, {
-        seats: [seat.seats[0][bookedSeat].timesBooked] +1
-      }, (err1, data1)=>{
-        if (err1) {
-          res.status(500).send({ message: err1 });
+          checkSeat1.push(newValue);
+        } else {
+          checkSeat2.push(value);
+        }
+      });
+      const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
+        (a, v) => ({ ...a, [v.name]: v }),
+        {}
+      );
+      await Seat.findOneAndUpdate(
+        { _id: user.reservation.allocatedDesk },
+        {
+          seats: [{ ...changesinObj }],
+        },
+        (err1, data1) => {
+          if (err1) {
+            res.status(500).send({ message: err1 });
+            return;
+          }
+        }
+      );
+      await Profile.findOneAndUpdate({ _id: req.userId }, {
+        points: user?.points + 10 ?? 10,
+        reservation: {...user.reservation, booking: data.id, bookDate: data.createdAt}
+      }, (err2, data2)=>{
+        if (err2) {
+          res.status(500).send({ message: err2 });
           return;
         }
-        console.log( data1 );
-      }); 
-      await Profile.findOneAndUpdate({ _id: req.userId }, {}, (err, data2)=>{
-
-      }); 
-    } 
-    */
-
+      });  
     });
 
     return res.send({ message: "Booking created successfully" });
@@ -80,8 +95,8 @@ exports.listUsers = async (req, res) => {
       path: "profile",
     });
     const result = company.profile.map((el) => {
-      const {id, dp, firstName, lastName, email, slug} = el;
-      return {id, dp, name: `${firstName} ${lastName}`, email, slug}
+      const { id, dp, firstName, lastName, email, slug } = el;
+      return { id, dp, name: `${firstName} ${lastName}`, email, slug };
     });
     return res.send(result);
   } catch (error) {
