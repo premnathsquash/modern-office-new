@@ -53,6 +53,12 @@ module.exports = function (app) {
     controller.resetPasswordInternal
   );
 
+  app.post(
+    "/reset-password-admin",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.resetPasswordInternal
+  );
+
   app.patch(
     "/update-profile",
     multipleUpload,
