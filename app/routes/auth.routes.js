@@ -93,6 +93,12 @@ module.exports = function (app) {
   );
 
   app.get(
+    "/get-profile-client",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.getProfileCompany
+  );
+
+  app.get(
     "/list-companies",
     [authJwt.verifyToken, authJwt.isAdmin],
     controller2.getAllCompanies

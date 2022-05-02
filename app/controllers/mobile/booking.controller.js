@@ -43,13 +43,14 @@ exports.booking = async (req, res) => {
         res.status(500).send({ message: err });
         return;
       }
-     /*   console.log(data, seat, user, company);
+      /* console.log( data,  seat.seats[0]/* , user, company );
       await Seat.findOneAndUpdate({ _id: user.reservation.allocatedDesk }, {}, (err, data1)=>{
 
       }); 
       await Profile.findOneAndUpdate({ _id: req.userId }, {}, (err, data2)=>{
 
-      });  */
+      });   */
+
     });
 
     return res.send({ message: "Booking created successfully" });

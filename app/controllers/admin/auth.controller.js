@@ -501,6 +501,32 @@ exports.searchEmail = async (req, res) => {
   }
 };
 
+exports.getProfileCompany = async (req, res) => {
+  try{
+    const user = await User.findOne({
+      _id: req.userId
+    });
+    const {company, _id, dp, username, email, slug} = user
+    const result = {
+      _id,
+      username: username,
+      userimage: dp,
+      useremail: email,
+      userslug: slug,
+      officename: company.name,
+      officeimage: company.companyImg,
+      officeaddress: company.address,
+      officestate: company.state,
+      officecity: company.city,
+      officecountry: company.country,
+      officepincode: company.zip,
+    }
+    return res.status(200).send(result);
+  }catch (error) {
+    return res.status(500).send({ message: error });
+  }
+}
+
 exports.resetPassReq = async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
