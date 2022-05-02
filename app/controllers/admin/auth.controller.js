@@ -691,7 +691,7 @@ exports.getAllProfileusers = async (req, res) => {
       slug,
       allocatedDate: seating ? bookDate : "",
       seatName: seating ? seatName : "",
-      floorInfo: { floorName: flooring.name, floorId: flooring.id },
+      floorInfo: { floorName: flooring?.name, floorId: flooring?.id },
       seatInfo: seating && seatName ? seating.seats[0][seatName] : null,
       seat_Id: seating ? seating.id : null,
     };
