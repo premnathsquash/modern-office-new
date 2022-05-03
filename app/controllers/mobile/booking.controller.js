@@ -20,7 +20,6 @@ exports.booking = async (req, res) => {
     const user = await Profile.findOne({ _id: req.userId });
     const company = await User.findOne({ _id: user.userGroup });
     const seat = await Seat.findOne({ _id: user.reservation.allocatedDesk });
-    const date1 = new Date(from).toLocaleTimeString();
     const date2 = new Date(from).toLocaleDateString();
     const date3 = new Date(to).toLocaleDateString();
     const booking = new Booking({
@@ -31,7 +30,7 @@ exports.booking = async (req, res) => {
       seat: bookedSeat,
       timeZone: timeZone,
       desk: {
-        date: date1,
+        date: from,
         from: date2,
         to: date3,
         recurrence: recurrence,
@@ -71,15 +70,36 @@ exports.booking = async (req, res) => {
           }
         }
       );
-      await Profile.findOneAndUpdate({ _id: req.userId }, {
-        points: parseInt(user?.points + 10, 10) ?? parseInt(10, 10),
-        reservation: {...user.reservation, booking: data.id, bookDate: data.createdAt}
-      }, (err2, data2)=>{
-        if (err2) {
-          res.status(500).send({ message: err2 });
-          return;
+      await Profile.findOneAndUpdate(
+        { _id: req.userId },
+        {
+          claimedInfo: {
+            promotion: user?.claimedInfo?.promotion,
+            points:
+              Number.parseFloat(user?.claimedInfo?.points) + 10 ??
+              Number.parseFloat(10),
+          },
+          reservation: {
+            ...user.reservation,
+            booking: data.id,
+            bookDate: data.createdAt,
+          },
+        },
+        async (err2, data2) => {
+          if (err2) {
+            res.status(500).send({ message: err2 });
+            return;
+          }
+          const bookingtimes = await Booking.find({
+            profile: data.profile,
+          }).sort({ createdAt: -1 });
+          const intermediateBook = bookingtimes.map((el) => {
+            return ({from: DateTime.fromFormat(el?.desk?.from, "MM/DD/YYYY").setZone(el.timeZone), to: DateTime.fromFormat(el?.desk?.to, "MM/DD/YYYY").setZone(el.timeZone)});
+          });
+          console.log(intermediateBook);
+  
         }
-      });  
+      );
     });
 
     return res.send({ message: "Booking created successfully" });

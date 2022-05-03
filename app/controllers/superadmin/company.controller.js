@@ -17,6 +17,7 @@ exports.getAllCompanies = async (req, res) => {
         }
       }
     );
+    
     return admin1;
   });
 
