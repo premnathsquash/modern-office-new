@@ -35,6 +35,7 @@ require("./app/routes/attendance.route")(app);
 require("./app/routes/promotion.route")(app);
 require("./app/routes/bookings.route")(app);
 require("./app/routes/leaderboard.route")(app);
+require("./app/routes/dashboard.routes")(app);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);

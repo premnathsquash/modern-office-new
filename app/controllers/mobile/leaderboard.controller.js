@@ -1,19 +1,27 @@
 const db = require("../../models");
 const LeaderBoard = db.leaderBoard;
 const Profile = db.profile;
+const User = db.user;
 exports.list = async (req, res) => {
   try {
-    await Profile.find({ _id: req.userId }, async (err, data) => {
+    await Profile.findOne({ _id: req.userId }, async (err, data) => {
       if (err) {
         res.status(500).send({ message: err });
         return;
       }
+      await User.findOne({_id: data.userGroup}, async(err0, data0)=>{
 
-      await LeaderBoard.find({ companyId: data.id }, (err1, data1) => {
-        if (err) {
-          res.status(500).send({ message: err });
+        if (err0) {
+          res.status(500).send({ message: err0 });
           return;
         }
+
+      await LeaderBoard.find({ companyId: data0.id }, (err1, data1) => {
+        if (err1) {
+          res.status(500).send({ message: err1 });
+          return;
+        }
+
         const result = data1.map(async (el) => {
           const interme = el.book.map(el1=>{
             const {reedemInfo, to, from, bookedTime, bookId, coins, coinsSpent} = el1;
@@ -34,6 +42,7 @@ exports.list = async (req, res) => {
           return res.send(data1);
         });
       });
+    })
     });
   } catch (err) {
     return res.status(500).send({ message: error });

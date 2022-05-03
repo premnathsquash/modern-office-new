@@ -1,7 +1,7 @@
 const { errors } = require("celebrate");
 const {  authJwt } = require("../middlewares");
-const controller = require("../controllers/admin/leaderboard.controller");
-const controller1 = require("../controllers/mobile/leaderboard.controller");
+const controller = require("../controllers/admin/dashboard.controller");
+const controller1 = require("../controllers/superadmin/dashboard.controller");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -13,17 +13,20 @@ module.exports = function (app) {
   });
 
   app.get(
-    "/leaderboard/admin/list",
-    [authJwt.verifyToken, authJwt.isClient],
-    controller.list
+    "/dashboard/admin",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller1.dashboard
   );
 
   app.get(
-    "/leaderboard/mobile/list",
-    [authJwt.verifyToken, authJwt.isUser],
-    controller1.list
+    "/dashboard/client/seatinfo",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.seatinfo
   );
+
   
+
+
 
   app.use(errors());
 };
