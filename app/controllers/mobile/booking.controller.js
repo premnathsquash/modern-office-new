@@ -5,6 +5,7 @@ const Profile = db.profile;
 const User = db.user;
 const Seat = db.seats;
 const Booking = db.booking;
+const LeaderBoard = db.leaderBoard;
 
 exports.booking = async (req, res) => {
   try {
@@ -20,8 +21,10 @@ exports.booking = async (req, res) => {
     const user = await Profile.findOne({ _id: req.userId });
     const company = await User.findOne({ _id: user.userGroup });
     const seat = await Seat.findOne({ _id: user.reservation.allocatedDesk });
-    const date2 = new Date(from).toLocaleDateString();
-    const date3 = new Date(to).toLocaleDateString();
+    const date = new Date(new Date(from).setHours(0, 0, 0, 0));
+    const date2 = new Date(from).toLocaleTimeString();
+    const date3 = new Date(to).toLocaleTimeString();
+
     const booking = new Booking({
       profile: user.id,
       company: company.id,
@@ -30,7 +33,9 @@ exports.booking = async (req, res) => {
       seat: bookedSeat,
       timeZone: timeZone,
       desk: {
-        date: from,
+        date: new Intl.DateTimeFormat("en-US", { timeZone: timeZone }).format(
+          date
+        ),
         from: date2,
         to: date3,
         recurrence: recurrence,
@@ -90,14 +95,59 @@ exports.booking = async (req, res) => {
             res.status(500).send({ message: err2 });
             return;
           }
-          const bookingtimes = await Booking.find({
-            profile: data.profile,
-          }).sort({ createdAt: -1 });
-          const intermediateBook = bookingtimes.map((el) => {
-            return ({from: DateTime.fromFormat(el?.desk?.from, "MM/DD/YYYY").setZone(el.timeZone), to: DateTime.fromFormat(el?.desk?.to, "MM/DD/YYYY").setZone(el.timeZone)});
+          const {
+            desk: { date: date1, from, to },
+          } = data;
+          const intial = new Intl.DateTimeFormat("en-US", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+            hourCycle: "h23",
+          }).format(date1);
+          const [day, time] = intial.split(",");
+          const [month, day1, year] = day.split("/");
+          const [hour, minute, second] = time.split(":");
+          const interm = DateTime.utc(
+            parseInt(year),
+            parseInt(month),
+            parseInt(day1),
+            parseInt(hour),
+            parseInt(minute),
+            parseInt(second)
+          );
+      
+          const leaderresult = await LeaderBoard.findOne({
+            companyId: data.company,
+            profileId: data.profile,
           });
-          console.log(intermediateBook);
-  
+          
+          if (!leaderresult) {
+            const leaderinter = new LeaderBoard({
+              companyId: data.company,
+              profileId: data.profile,
+              book: [{ bookId: data.id, bookedTime:  interm, from, to, coins: Number.parseFloat(user?.claimedInfo?.points) + 10 ??
+                Number.parseFloat(10)}],
+            });
+            leaderinter.save((err3, data3) => {
+              if (err) {
+                res.status(500).send({ message: err3 });
+                return;
+              }
+            });
+          }else{
+            await LeaderBoard.findOneAndUpdate({
+              companyId: data.company,
+              profileId: data.profile,
+            }, {}, (err01, data01)=>{
+              if (err01) {
+                res.status(500).send({ message: err01 });
+                return;
+              }
+            })
+          }
         }
       );
     });

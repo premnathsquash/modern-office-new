@@ -34,6 +34,7 @@ require("./app/routes/officeConfigure.routes")(app);
 require("./app/routes/attendance.route")(app);
 require("./app/routes/promotion.route")(app);
 require("./app/routes/bookings.route")(app);
+require("./app/routes/leaderboard.route")(app);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);

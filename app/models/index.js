@@ -19,6 +19,7 @@ db.attendance = require("./attendance.model");
 db.vendor = require("./vendor.model");
 db.promotion = require("./promotion.model");
 db.booking = require("./booking.model");
+db.leaderBoard = require("./leaderBoard");
 
 db.ROLES = ["user", "admin", "client"];
 
