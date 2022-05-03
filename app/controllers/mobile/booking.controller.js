@@ -72,7 +72,7 @@ exports.booking = async (req, res) => {
         }
       );
       await Profile.findOneAndUpdate({ _id: req.userId }, {
-        points: user?.points + 10 ?? 10,
+        points: parseInt(user?.points + 10, 10) ?? parseInt(10, 10),
         reservation: {...user.reservation, booking: data.id, bookDate: data.createdAt}
       }, (err2, data2)=>{
         if (err2) {
