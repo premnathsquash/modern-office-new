@@ -1,9 +1,7 @@
 const db = require("../../models");
-const Profile = db.profile;
 const User = db.user;
 const Office = db.office;
-const Floor = db.floor;
-const Seat = db.seats;
+const Booking = db.booking;
 
 exports.seatinfo = async (req, res) => {
   try {
@@ -40,3 +38,15 @@ exports.seatinfo = async (req, res) => {
     return res.status(500).send({ message: error });
   }
 };
+
+exports.bookingInfo = async (req, res) => {
+  try{
+    const {date} = req.params;
+    const bookData = await Booking.find({})
+    console.log(date, bookData)
+
+    return res.send("c");
+  }catch(err){
+    return res.status(500).send({ message: error });
+  }
+}

@@ -86,7 +86,7 @@ exports.booking = async (req, res) => {
           },
           reservation: {
             ...user.reservation,
-            booking: data.id,
+            booking: [...user.reservation.booking, data.id],
             bookDate: data.createdAt,
           },
         },

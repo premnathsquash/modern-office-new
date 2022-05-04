@@ -24,7 +24,11 @@ module.exports = function (app) {
     controller.seatinfo
   );
 
-  
+  app.get(
+    "/dashboard/client/booking/:date",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.bookingInfo
+  );
 
 
 
