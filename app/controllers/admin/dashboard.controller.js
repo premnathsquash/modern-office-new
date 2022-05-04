@@ -1,7 +1,7 @@
 const db = require("../../models");
 const User = db.user;
 const Office = db.office;
-const Booking = db.booking;
+const Seat = db.seats;
 
 exports.seatinfo = async (req, res) => {
   try {
@@ -24,15 +24,17 @@ exports.seatinfo = async (req, res) => {
           return el.floors;
         })
         .flat(2);
-      const seatArr = seats.map((el) => {
-        const [first] =(el.Seats.seats);
-        const objV = Object.values(first);
-        return (objV);
-      }).flat(2);
-      const arr = ["Wall", "Door", "Toilet", "Diagonal Wall"]
-      const seat1 = seatArr.filter(el=> !arr.includes(el.displayName))
-      const seat2 = seat1.filter(el=> el.timesBooked > 0)
-      return res.send({totalSeats: seat1, bookedSeats: seat2});
+      const seatArr = seats
+        .map((el) => {
+          const [first] = el.Seats.seats;
+          const objV = Object.values(first);
+          return objV;
+        })
+        .flat(2);
+      const arr = ["Wall", "Door", "Toilet", "Diagonal Wall"];
+      const seat1 = seatArr.filter((el) => !arr.includes(el.displayName));
+      const seat2 = seat1.filter((el) => el.timesBooked > 0);
+      return res.send({ totalSeats: seat1, bookedSeats: seat2 });
     });
   } catch (err) {
     return res.status(500).send({ message: error });
@@ -40,13 +42,49 @@ exports.seatinfo = async (req, res) => {
 };
 
 exports.bookingInfo = async (req, res) => {
-  try{
-    const {date} = req.params;
-    const bookData = await Booking.find({})
-    console.log(date, bookData)
-
-    return res.send("c");
-  }catch(err){
-    return res.status(500).send({ message: error });
+  try {
+    const { date } = req.params;
+    const profile = await User.findOne({ _id: req.userId })
+      .populate({ path: "profile" })
+      .populate({
+        path: "profile",
+        populate: {
+          path: "reservation.booking",
+        },
+      });
+    const temp0 = profile.profile
+      .map((el) => {
+        if (el.reservation.booking.length > 0) return el;
+      })
+      .filter((n) => n);
+    const temp1 = temp0.map((el) => {
+      const { id, dp, email, slug, firstName, lastName, reservation } = el;
+      const tempReserv = reservation.booking.map((el1) => {
+        return el1;
+      });
+      return {
+        id,
+        dp,
+        email,
+        slug,
+        firstName,
+        lastName,
+        bookingInfo: tempReserv,
+      };
+    });
+    const temp2 = temp1.map((el) => {
+     return el.bookingInfo.map(async (el2) => {
+        const result0 = await Seat.findOne({ _id: el2.seatBook });
+        const result11 = result0.seats.map((el3) => {
+          return ({seats: el3[el2.seat], meta: {el2, el}});
+        });
+        return ({fromTime: el2.desk.from, toTime: el2.desk.to, date: el2.desk.date, seatName: el2.seat, result11})
+      });
+    });
+    Promise.all(temp2[0]).then(data111=>{
+      return res.send(data111);
+    })
+  } catch (err) {
+    return res.status(500).send({ message: err });
   }
-}
+};
