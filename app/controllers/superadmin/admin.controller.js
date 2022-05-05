@@ -4,9 +4,9 @@ const User = db.user;
 exports.getAdminProfile = async (req, res) => {
   try {
     const admin = await User.findOne({
-      _id: "6268f92820a41c3eaf08ad1a",
+      _id: process.env.adminId,
     });
-    if (req.userId == "6268f92820a41c3eaf08ad1a") {
+    if (req.userId == process.env.adminId) {
       const obj = {
         username: admin._doc.meta.username,
         userimage: admin._doc.dp,

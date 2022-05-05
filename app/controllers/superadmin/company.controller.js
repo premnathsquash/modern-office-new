@@ -4,7 +4,7 @@ const User = db.user;
 
 exports.getAllCompanies = async (req, res) => {
   let admin = await User.findOne({
-    _id: "6268f92820a41c3eaf08ad1a",
+    _id: process.env.adminId,
   });
   let companies = admin._doc.connection.map(async (ele) => {
     const admin1 = await User.findOne(

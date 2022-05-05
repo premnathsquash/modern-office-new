@@ -24,7 +24,7 @@ exports.createAdminUser = async (req, res) => {
         res.status(500).send({ message: err });
         return;
       }
-      const SuperUser = await User.findOne({ _id: "6268f92820a41c3eaf08ad1a" });
+      const SuperUser = await User.findOne({ _id: process.env.adminId });
       await Role.find(
         {
           name: { $in: role },

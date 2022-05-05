@@ -196,10 +196,10 @@ exports.signup = async (req, res) => {
               return;
             }
             const admin = await User.findOne({
-              _id: "6268f92820a41c3eaf08ad1a",
+              _id: process.env.adminId,
             });
             await User.findOneAndUpdate(
-              { _id: "6268f92820a41c3eaf08ad1a" },
+              { _id: process.env.adminId },
               { connection: [...admin._doc.connection, dataValue._id] },
               (err1, newData) => {
                 if (err1) {
