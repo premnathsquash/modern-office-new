@@ -4,6 +4,7 @@ const { verifySignUp, authJwt } = require("../middlewares");
 const controller = require("../controllers/admin/auth.controller");
 const controller1 = require("../controllers/superadmin/admin.controller");
 const controller2 = require("../controllers/superadmin/company.controller");
+const controller21 = require("../controllers/superadmin/user.controller");
 const controller3 = require("../controllers/mobile/auth.controller");
 const { storage } = require("../config/s3");
 const upload = multer({ storage }).single("image");
@@ -57,6 +58,20 @@ module.exports = function (app) {
     "/reset-password-admin",
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.resetPasswordInternal
+  );
+
+  app.post(
+    "/admin-user",
+    upload,
+    [ verifySignUp.checkDuplicateProfilenameOrEmail, authJwt.verifyToken, authJwt.isAdmin],
+    controller21.createAdminUser
+  );
+  
+  app.post(
+    "/admin-user",
+    upload,
+    [ verifySignUp.checkDuplicateProfilenameOrEmail, authJwt.verifyToken, authJwt.isAdmin],
+    controller21.createAdminUser
   );
 
   app.patch(

@@ -22,9 +22,18 @@ exports.officeConfigureUpdate = async (req, res) => {
     const officeConfigure1 = await OfficeConfigure.findOne({
       _id: user.officeConfigure,
     });
+
     await OfficeConfigure.findOneAndUpdate(
       { _id: user.officeConfigure },
-      body,
+      {
+        hotDeskSetup: officeConfigure1.hotDeskSetup,
+        capacity: officeConfigure1.capacity,
+        WeekDayFrom: officeConfigure1.WeekDayFrom,
+        WeekDayTo: officeConfigure1.WeekDayTo,
+        TimeFrom: officeConfigure1.TimeFrom,
+        TimeTo: officeConfigure1.TimeTo,
+        ...body,
+      },
       (err, officeConfigure1) => {
         if (err) {
           return { message: err };

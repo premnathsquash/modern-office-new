@@ -44,7 +44,7 @@ exports.list = async (req, res) => {
       });
     })
     });
-  } catch (err) {
+  } catch (error) {
     return res.status(500).send({ message: error });
   }
 };
