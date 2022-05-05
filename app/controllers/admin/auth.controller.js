@@ -265,10 +265,10 @@ exports.signin = async (req, res) => {
         }
         if (user?._doc?.meta?.status) {
           user.status = true;
-          console.log({...user._doc});
+          console.log({...user.meta});
           
           /* 
-          await User.findOneAndUpdate({_id: user.id}, {_doc:{...user._doc, meta: {...user._doc.meta, lastlogin: new Date()}}}, (err1, data1)=>{
+          await User.findOneAndUpdate({_id: user.id}, {meta:{...user._doc, meta: {...user._doc.meta, lastlogin: new Date()}}}, (err1, data1)=>{
             if (err1) {
               res.status(500).send({ message: err1 });
               return;

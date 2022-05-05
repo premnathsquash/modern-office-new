@@ -63,7 +63,7 @@ module.exports = function (app) {
   app.post(
     "/admin-user",
     upload,
-    [ verifySignUp.checkDuplicateProfilenameOrEmail, authJwt.verifyToken, authJwt.isAdmin],
+    [ verifySignUp.checkDuplicateUsernameOrEmail, authJwt.verifyToken, authJwt.isAdmin],
     controller21.createAdminUser
   );
 
