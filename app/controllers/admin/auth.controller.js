@@ -230,7 +230,7 @@ exports.signin = async (req, res) => {
     email: req.body.email,
   })
     .populate("roles", "-__v")
-    .exec((err, user) => {
+    .exec(async (err, user) => {
       if (err) {
         res.status(500).send({ message: err });
         return;
@@ -256,6 +256,7 @@ exports.signin = async (req, res) => {
         expiresIn: 86400, // 24 hours
       });
 
+
       const authorities = user.roles.name.toLowerCase();
 
       if (authorities == "admin") {
@@ -264,6 +265,17 @@ exports.signin = async (req, res) => {
         }
         if (user?._doc?.meta?.status) {
           user.status = true;
+          console.log({...user._doc});
+          
+          /* 
+          await User.findOneAndUpdate({_id: user.id}, {_doc:{...user._doc, meta: {...user._doc.meta, lastlogin: new Date()}}}, (err1, data1)=>{
+            if (err1) {
+              res.status(500).send({ message: err1 });
+              return;
+            }
+            console.log(data1)
+          }) */
+
           return res.status(200).send({
             id: user._id,
             name: user.username,

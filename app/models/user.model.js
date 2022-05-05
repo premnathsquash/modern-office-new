@@ -58,6 +58,9 @@ const User = mongoose.model(
         type: Boolean,
         default: true,
       },
+      meta: {
+        type: mongoose.Schema.Types.Mixed,
+      },
       trialEnd: String,
     },
     { strict: false, timestamps: true }
