@@ -257,6 +257,9 @@ exports.signin = async (req, res) => {
       });
 
       const authorities = user.roles.name.toLowerCase();
+      if(user?._doc?.meta?.admin){
+        user.subadmin = true
+      }
 
       res.status(200).send({
         id: user._id,
@@ -265,6 +268,7 @@ exports.signin = async (req, res) => {
         role: authorities,
         slug: user.slug,
         token: token,
+        subadmin: user?.subadmin ?? false,
         ...user,
       });
     });
