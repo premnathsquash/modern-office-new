@@ -257,20 +257,50 @@ exports.signin = async (req, res) => {
       });
 
       const authorities = user.roles.name.toLowerCase();
-      if(user?._doc?.meta?.admin){
-        user.subadmin = true
-      }
 
-      res.status(200).send({
-        id: user._id,
-        name: user.username,
-        email: user.email,
-        role: authorities,
-        slug: user.slug,
-        token: token,
-        subadmin: user?.subadmin ?? false,
-        ...user,
-      });
+      if (authorities == "admin") {
+        if (user?._doc?.meta?.admin) {
+          user.subadmin = true;
+        }
+        if (user?._doc?.meta?.status) {
+          user.status = true;
+          return res.status(200).send({
+            id: user._id,
+            name: user.username,
+            email: user.email,
+            role: authorities,
+            slug: user.slug,
+            token: token,
+            subadmin: user?.subadmin ?? false,
+            status: user?.status,
+            ...user,
+          });
+        }
+        if (user?._doc?.meta?.status == false) {
+          return res.status(200).send("Not allowed to login");
+        }
+        return res.status(200).send({
+          id: user._id,
+          name: user.username,
+          email: user.email,
+          role: authorities,
+          slug: user.slug,
+          token: token,
+          subadmin: user?.subadmin ?? false,
+          status: user?.status,
+          ...user,
+        });
+      } else {
+        return res.status(200).send({
+          id: user._id,
+          name: user.username,
+          email: user.email,
+          role: authorities,
+          slug: user.slug,
+          token: token,
+          ...user,
+        });
+      }
     });
 };
 
