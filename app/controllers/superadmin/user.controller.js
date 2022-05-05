@@ -1,9 +1,7 @@
 const { customAlphabet } = require("nanoid");
 const nanoid = customAlphabet("1234567890abcdefghijklmnABCDEFGHIJKLMN", 10);
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-const config = require("../../config/auth.config");
 const db = require("../../models");
 const { sendMail } = require("../../config/mailer");
 
@@ -38,10 +36,16 @@ exports.createAdminUser = async (req, res) => {
           const user = new User({
             username: `${req.body.firstName} ${req.body.lastName}`,
             email: req.body.email,
-            dp: fileLocation,
+            dp: fileLocation ?? "",
             password: bcrypt.hashSync(pssword, 8),
             roles: mongoose.Types.ObjectId(roles[0]._id),
-            meta: { admin: SuperUser.id, firstName: req.body.firstName, lastName: req.body.lastName, status: true, lastlogin: "" },
+            meta: {
+              admin: SuperUser.id,
+              firstName: req.body.firstName,
+              lastName: req.body.lastName,
+              status: true,
+              lastlogin: "",
+            },
           });
           user.save(async (err1, result) => {
             if (err1) {
@@ -60,9 +64,24 @@ exports.createAdminUser = async (req, res) => {
       );
     });
 
-    return res.send("data1");
+    return res.send("Admin created successfully");
   } catch (error) {
     return res.status(500).send({ message: error });
   }
 };
 
+exports.listAdmins = async (req, res) => {
+  try {
+    const users = await User.find({
+      roles: mongoose.Types.ObjectId("623ae46a3c032b9d16c46a3f"),
+    });
+    const intermediate = users.map((el) => {
+      if(el?.email!="info@greenuniverse.com"){
+        return ({id: el.id, dp: el?.dp ?? "", email: el.email, firstName: el?.meta?.firstName, lastName: el?.meta?.lastName, lastlogin: el?.meta?.lastlogin ?? "", status: el?.meta?.status  })
+      }
+    }).filter(el=>el);
+    return res.send(intermediate);
+  } catch (error) {
+    return res.status(500).send({ message: error });
+  }
+};

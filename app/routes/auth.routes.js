@@ -70,7 +70,7 @@ module.exports = function (app) {
   app.get(
     "/admin-users",
     [ authJwt.verifyToken, authJwt.isAdmin],
-    controller21.createAdminUser
+    controller21.listAdmins
   );
 
   app.patch(
