@@ -256,7 +256,6 @@ exports.signin = async (req, res) => {
         expiresIn: 86400, // 24 hours
       });
 
-
       const authorities = user.roles.name.toLowerCase();
 
       if (authorities == "admin") {
@@ -265,16 +264,17 @@ exports.signin = async (req, res) => {
         }
         if (user?._doc?.meta?.status) {
           user.status = true;
-          console.log({...user.meta});
-          
-          /* 
-          await User.findOneAndUpdate({_id: user.id}, {meta:{...user._doc, meta: {...user._doc.meta, lastlogin: new Date()}}}, (err1, data1)=>{
-            if (err1) {
-              res.status(500).send({ message: err1 });
-              return;
+
+          await User.findOneAndUpdate(
+            { _id: user.id },
+            { meta: { ...user.meta, lastlogin: new Date() } },
+            (err1, data1) => {
+              if (err1) {
+                res.status(500).send({ message: err1 });
+                return;
+              }
             }
-            console.log(data1)
-          }) */
+          );
 
           return res.status(200).send({
             id: user._id,
