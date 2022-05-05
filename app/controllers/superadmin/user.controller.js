@@ -41,7 +41,7 @@ exports.createAdminUser = async (req, res) => {
             dp: fileLocation,
             password: bcrypt.hashSync(pssword, 8),
             roles: mongoose.Types.ObjectId(roles[0]._id),
-            meta: { admin: SuperUser.id, firstName: req.body.firstName, lastName: req.body.lastName, status: true },
+            meta: { admin: SuperUser.id, firstName: req.body.firstName, lastName: req.body.lastName, status: true, lastlogin: "" },
           });
           user.save(async (err1, result) => {
             if (err1) {
