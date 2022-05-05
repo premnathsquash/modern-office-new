@@ -1,3 +1,4 @@
+require("dotenv").config()
 const db = require("../../models");
 const User = db.user;
 exports.getAdminProfile = async (req, res) => {

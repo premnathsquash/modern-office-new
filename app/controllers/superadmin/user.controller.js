@@ -1,3 +1,4 @@
+require("dotenv").config()
 const { customAlphabet } = require("nanoid");
 const nanoid = customAlphabet("1234567890abcdefghijklmnABCDEFGHIJKLMN", 10);
 const bcrypt = require("bcryptjs");

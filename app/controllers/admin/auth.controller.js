@@ -1,3 +1,4 @@
+require("dotenv").config()
 const { customAlphabet } = require("nanoid");
 const { epochUtil } = require("epochutils");
 const crypto = require("crypto");
