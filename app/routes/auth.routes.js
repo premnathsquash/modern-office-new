@@ -72,6 +72,18 @@ module.exports = function (app) {
     [ authJwt.verifyToken, authJwt.isAdmin],
     controller21.listAdmins
   );
+  app.patch(
+    "/admin-user/:id",
+    upload,
+    [ authJwt.verifyToken, authJwt.isAdmin],
+    controller21.updateAdminUser
+  );
+
+  app.delete(
+    "/admin-user/:id",
+    [ authJwt.verifyToken, authJwt.isAdmin],
+    controller21.deleteeAdminUser
+  );
 
   app.patch(
     "/update-profile",
