@@ -31,7 +31,11 @@ exports.dashboard = async (req, res) => {
         let temp;
         if (ele1.reservation.booking) {
           temp = ele1.reservation.booking.map((range) => {
-            return { id: range.id, date: new Date(range.desk.date).toISOString().split("T")[0], timeZone: range.timeZone };
+            return {
+              id: range.id,
+              date: new Date(range.desk.date).toISOString().split("T")[0],
+              timeZone: range.timeZone,
+            };
           });
         }
         return {
@@ -43,7 +47,7 @@ exports.dashboard = async (req, res) => {
       return { companyName, companyImg, companyStatus, companyId, proDum };
     });
     Promise.all(companies).then((data) => {
-     const temp =  data.map((ele) => {
+      const temp = data.map((ele) => {
         let total, bookInfo;
         if (ele.proDum) {
           total = ele.proDum.reduce(
@@ -51,40 +55,46 @@ exports.dashboard = async (req, res) => {
             0
           );
 
-          bookInfo = ele.proDum.map((ele1) => {
-            if (ele1.size > 0) {
-              return ele1.elements.bookings.map( (ele2) => {
-                return ele2;
-              });
-            }
-          }).filter(n=>n);
+          bookInfo = ele.proDum
+            .map((ele1) => {
+              if (ele1.size > 0) {
+                return ele1.elements.bookings.map((ele2) => {
+                  return ele2;
+                });
+              }
+            })
+            .filter((n) => n);
         }
-        return {companyTotalBook: total, companyMetaBook: bookInfo, companyName: ele.companyName, compayImage: ele.companyImg, companyStatus: ele.companyStatus, companyId: ele.companyId};
+        return {
+          companyTotalBook: total,
+          companyMetaBook: bookInfo,
+          companyName: ele.companyName,
+          compayImage: ele.companyImg,
+          companyStatus: ele.companyStatus,
+          companyId: ele.companyId,
+        };
       });
-      const temp2 = temp.map(ele=>{
-        const newSet = new Set()
-        const newSet1 = new Set()
-        if(ele.companyMetaBook.length > 0){
-          ele.companyMetaBook.flat(2).map(ele2=>{
-            newSet.add(ele2.date);     
-          })
+      const temp2 = temp.map((ele) => {
+        const newSet = new Set();
+        const newSet1 = new Set();
+        if (ele.companyMetaBook.length > 0) {
+          ele.companyMetaBook.flat(2).map((ele2) => {
+            newSet.add(ele2.date);
+          });
         }
         const checkArr = Array.from(newSet);
-        checkArr.map(check=>{
-          let check1 = 0
-          if(ele.companyMetaBook.length > 0){
-            ele.companyMetaBook.flat(2).map(ele3=>{
-              if(ele3.date == check)
-              check1 += 1
-            })
-            }
-            newSet1.add({[check]:check1});
-        })
-       return {...ele, dashDate: Array.from(newSet1)}
+        checkArr.map((check) => {
+          let check1 = 0;
+          if (ele.companyMetaBook.length > 0) {
+            ele.companyMetaBook.flat(2).map((ele3) => {
+              if (ele3.date == check) check1 += 1;
+            });
+          }
+          newSet1.add({ [check]: check1 });
+        });
+        return { ...ele, dashDate: Array.from(newSet1) };
+      });
 
-      })
-      
-      
       return res.send(temp2);
     });
   } catch (error) {

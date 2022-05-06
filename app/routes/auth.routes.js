@@ -85,6 +85,13 @@ module.exports = function (app) {
     controller21.deleteeAdminUser
   );
 
+  app.post(
+    "/createadmin-client",
+    multipleUpload,
+    [ authJwt.verifyToken, authJwt.isAdmin],
+    controller2.createCompany
+  );
+
   app.patch(
     "/update-profile",
     multipleUpload,
