@@ -91,6 +91,17 @@ module.exports = function (app) {
     [ authJwt.verifyToken, authJwt.isAdmin],
     controller2.createCompany
   );
+  app.patch(
+    "/admin-client/:id",
+    multipleUpload,
+    [ authJwt.verifyToken, authJwt.isAdmin],
+    controller2.updateCompany
+  );
+  app.delete(
+    "/admin-client/:id",
+    [ authJwt.verifyToken, authJwt.isAdmin],
+    controller2.deleteCompany
+  );
 
   app.patch(
     "/update-profile",

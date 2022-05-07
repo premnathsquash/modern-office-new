@@ -10,7 +10,9 @@ const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY);
 
 const db = require("../../models");
 const User = db.user;
+const Profile = db.profile;
 const OfficeConfigure = db.officeConfigure;
+const Departments = db.departments;
 const Role = db.role;
 const mongoose = db.mongoose;
 
@@ -124,7 +126,7 @@ exports.createCompany = async (req, res) => {
             email: req.body.email,
             phone: req.body.phone,
           });
- 
+
           const price = await stripe.prices.create({
             unit_amount: parseInt(req.body?.amount ?? 0, 10) * 100,
             currency: "aud",
@@ -175,5 +177,95 @@ exports.createCompany = async (req, res) => {
     });
   } catch (err) {
     return res.status(500).send({ res: "Something went wrong", err });
+  }
+};
+
+exports.updateCompany = async (req, res) => {
+  try {
+    const productId = "prod_LdyI3fFr4Nm7qT";
+    const price = await stripe.prices.create({
+      unit_amount: parseInt(req.body?.amount ?? 0, 10) * 100,
+      currency: "aud",
+      recurring: { interval: req.body?.interval },
+      product: productId,
+    });
+
+    await User.findOne({ _id: req.params.id }, async (err, data) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+
+      await User.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          stripeProductPrice: { productId: productId, priceId: price.id },
+          maxSeat: req.body?.seat,
+        },
+        (err1, data1) => {
+          if (err1) {
+            res.status(500).send({ message: err1 });
+            return;
+          }
+        }
+      );
+
+      const subscription = await stripe.subscriptions.retrieve(
+        data.stripeSubscriptionId
+      );
+      const subscriptionTemp = await stripe.subscriptions.update(
+        data.stripeSubscriptionId,
+        {
+          proration_behavior: "create_prorations",
+          items: [{ id: subscription.items.data[0].id, price: price.id }],
+          cancel_at_period_end: !req.body.renewal,
+        }
+      );
+      await User.findOneAndUpdate(
+        { _id: req.params.id },
+        { stripeSubscriptionId: subscriptionTemp.id },
+        (err2, data2) => {
+          if (err2) {
+            res.status(500).send({ message: err2 });
+            return;
+          }
+        }
+      );
+      return res.status(200).send("client updated successfully");
+    });
+  } catch (error) {
+    return res.status(500).send({ res: "Something went wrong", error });
+  }
+};
+
+exports.deleteCompany = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id });
+    user.profile.map(async (ele) => {
+      await Profile.findOneAndRemove({ _id: ele });
+    });
+    user.departments.map(async (ele)=>{
+      await Departments.findOneAndRemove({ _id: ele });
+    })
+    await OfficeConfigure.findOneAndRemove({ _id: user.officeConfigure });
+    const user1 = await User.findOne({ _id: process.env.adminId });
+    const newArr = user1._doc.connection.filter((ele) => ele != req.params.id);
+    await stripe.subscriptions.del(user.stripeSubscriptionId).then(async () => {
+      await User.findOneAndRemove({ _id: req.params.id }, async (err) => {
+        await User.findOneAndUpdate(
+          { _id: process.env.adminId },
+          { connection: [...newArr] },
+          (err1, newData) => {
+            if (err1) {
+              res.status(500).send({ message: err1 });
+              return;
+            }
+          }
+        );
+      });
+      return res.json({ res: "deleted successfully" });
+    });
+  } catch (err) {
+    return res.json({ res: "Error in subscription cancelation" });
   }
 };

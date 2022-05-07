@@ -64,7 +64,7 @@ exports.getplans = async(req, res) => {
       }
 
     }
-  })
+  }).filter(n=>n)
   const intermidiate = [
     ...temp
   ];
