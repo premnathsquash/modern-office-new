@@ -6,6 +6,7 @@ const controller1 = require("../controllers/superadmin/admin.controller");
 const controller2 = require("../controllers/superadmin/company.controller");
 const controller21 = require("../controllers/superadmin/user.controller");
 const controller3 = require("../controllers/mobile/auth.controller");
+const controller31 = require("../controllers/mobile/profile.controller");
 const { storage } = require("../config/s3");
 const upload = multer({ storage }).single("image");
 const multipleUpload = multer({ storage }).array("images");
@@ -156,6 +157,25 @@ module.exports = function (app) {
   app.post(
     "/send-mobile-email",
     controller3.checkOtp
+  );
+
+  app.patch(
+    "/mobile-user-profile-image",
+    upload,
+    [ authJwt.verifyToken, authJwt.isUser],
+    controller31.updateProfileImage
+  );
+
+  app.post(
+    "/mobile-user-profile-email",
+    [ authJwt.verifyToken, authJwt.isUser],
+    controller31.sendProfileEmailOtp
+  );
+
+  app.post(
+    "/mobile-user-profile-email-verify",
+    [ authJwt.verifyToken, authJwt.isUser],
+    controller31.verifyProfileEmailOtp
   );
 
   app.get("/logout", controller.logout);

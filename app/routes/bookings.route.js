@@ -1,4 +1,3 @@
-const multer = require("multer");
 
 const { errors } = require("celebrate");
 const { authJwt } = require("../middlewares");
