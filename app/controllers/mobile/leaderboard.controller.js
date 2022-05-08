@@ -21,6 +21,7 @@ exports.list = async (req, res) => {
         });
 
         let result = list.map((ele) => {
+          
           const obj = {
             id: ele.profileId.id,
             teammemberName: `${ele.profileId.firstName} ${ele.profileId.lastName}`,
