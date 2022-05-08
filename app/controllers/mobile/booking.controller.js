@@ -1,4 +1,5 @@
 const { DateTime } = require("luxon");
+const moment = require("moment");
 
 const db = require("../../models");
 const Profile = db.profile;
@@ -78,12 +79,8 @@ exports.booking = async (req, res) => {
       await Profile.findOneAndUpdate(
         { _id: req.userId },
         {
-          claimedInfo: {
-            promotion: user?.claimedInfo?.promotion,
-            points:
-              Number.parseFloat(user?.claimedInfo?.points) + 10 ??
-              Number.parseFloat(10),
-          },
+          points:
+            Number.parseFloat(user?.points) + 10.0 ?? Number.parseFloat(10.0),
           reservation: {
             ...user.reservation,
             booking: [...user.reservation.booking, data.id],
@@ -118,35 +115,97 @@ exports.booking = async (req, res) => {
             parseInt(minute),
             parseInt(second)
           );
-      
+
           const leaderresult = await LeaderBoard.findOne({
             companyId: data.company,
             profileId: data.profile,
           });
-          
+
           if (!leaderresult) {
             const leaderinter = new LeaderBoard({
               companyId: data.company,
               profileId: data.profile,
-              book: [{ bookId: data.id, bookedTime:  interm, from, to, coins: Number.parseFloat(user?.claimedInfo?.points) + 10 ??
-                Number.parseFloat(10)}],
+              book: [
+                {
+                  bookId: data.id,
+                  bookedTime: interm.toLocaleString(),
+                  from,
+                  to,
+                  coins: Number.parseFloat(10),
+                },
+              ],
             });
-            leaderinter.save((err3, data3) => {
+            leaderinter.save(async(err3, data3) => {
               if (err) {
                 res.status(500).send({ message: err3 });
                 return;
               }
-            });
-          }else{
-            await LeaderBoard.findOneAndUpdate({
-              companyId: data.company,
-              profileId: data.profile,
-            }, {}, (err01, data01)=>{
-              if (err01) {
-                res.status(500).send({ message: err01 });
-                return;
+              if (data3.consecutiveDays) {
+                const profile = await Profile.findOne({ _id: req.userId });
+                const leaderboard = await LeaderBoard.findOne({
+                  companyId: data01.companyId,
+                  profileId: data01.profileId,
+                });
               }
-            })
+            });
+          } else {
+            let days = leaderresult.book.map((ele) => ele.bookedTime);
+            days = days.sort((a, b) =>
+              moment(a, "MM-DD-YYYY").isBefore(moment(b, "MM-DD-YYYY")) ? 1 : -1
+            );
+            days = Array.from(new Set(days));
+
+            let concecutionRange = 0;
+
+            let dateCheck = interm.toLocaleString().split("/");
+
+            let intialConsecuation =
+              `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
+                days[0] ||
+              `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` == days[1];
+
+            let intialConsecuation1 =
+              `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` == days[0];
+
+            if (leaderresult.consecutiveDays && intialConsecuation1) {
+              concecutionRange += 1;
+            }
+            await LeaderBoard.findOneAndUpdate(
+              {
+                companyId: data.company,
+                profileId: data.profile,
+              },
+              {
+                consecutiveDays: intialConsecuation ? 1 + concecutionRange : 0,
+                book: [
+                  ...leaderresult.book,
+                  {
+                    bookId: data.id,
+                    bookedTime: interm.toLocaleString(),
+                    from,
+                    to,
+                    coins: Number.parseFloat(10),
+                  },
+                ],
+              },
+              { new: true },
+              async (err01, data01) => {
+                if (err01) {
+                  res.status(500).send({ message: err01 });
+                  return;
+                }
+                if (data01.consecutiveDays) {
+
+                  const profile = await Profile.findOne({ _id: req.userId });
+                  const leaderboard = await LeaderBoard.findOne({
+                    companyId: data01.companyId,
+                    profileId: data01.profileId,
+                  });
+                  await Profile.findOneAndUpdate({ _id: req.userId }, {points:Number.parseFloat(profile.points) +  Number.parseFloat(data01.consecutiveDays * 10)}, { new: true },()=>{})
+                  
+                }
+              }
+            );
           }
         }
       );

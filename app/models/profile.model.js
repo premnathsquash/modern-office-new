@@ -52,21 +52,27 @@ const Profile = mongoose.model(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Attendance",
     },
-    vendor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Vendor",
-    },
-    claimedInfo:{
-      promotion: [ {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Promotion",
-    }],
+    reedemInfo: [
+      {
+        vendorId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Vendor",
+        },
+        promotionId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Promotion",
+        },
+        claimedDate: Date,
+      },
+    ],
     points: {
       type: Number,
       default: 0
     },
-    claimedDate: Date,
-  },
+    pointsSpent: {
+      type: Number,
+      default: 0
+    },
   },{strict: false, timestamps: true})
 );
 

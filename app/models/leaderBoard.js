@@ -12,29 +12,20 @@ const LeaderBoard = mongoose.model(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Profile",
       },
+      consecutiveDays: {
+        type: Number,
+        default: 0
+      },
       book: [
         {
           bookId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Booking",
           },
-          reedemInfo: [
-            {
-              vendorId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Vendor",
-              },
-              promotionId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Promotion",
-              },
-            },
-          ],
           bookedTime: {
             type: mongoose.Schema.Types.Mixed,
           },
           coins: { type: Number, default: 0 },
-          coinsSpent: { type: Number, default: 0 },
         },
       ],
     },
