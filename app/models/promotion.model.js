@@ -17,16 +17,16 @@ const Promotion = mongoose.model(
       link: String,
       companyClaimed: [
         {
-          id: {
+          companyId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
           },
-          profiles: [
+          profiles: 
             {
               type: mongoose.Schema.Types.ObjectId,
               ref: "Profile",
             }
-          ]
+          
         },
       ],
     },

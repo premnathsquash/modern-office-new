@@ -21,12 +21,15 @@ exports.dashboard = async (req, res) => {
             path: "reservation.booking",
           },
         });
+        
       const {
+        id: comapny_Id,
         slug: companyName,
         dp: companyImg,
         _doc: { active: companyStatus },
         profile,
       } = comapnyInd;
+
       const proDum = profile.map((ele1) => {
         let temp;
         if (ele1.reservation.booking) {
@@ -44,9 +47,9 @@ exports.dashboard = async (req, res) => {
         };
       });
 
-      return { companyName, companyImg, companyStatus, companyId, proDum };
+      return {comapny_Id, companyName, companyImg, companyStatus, companyId, proDum };
     });
-    Promise.all(companies).then((data) => {
+    Promise.all(companies).then((data) => { 
       const temp = data.map((ele) => {
         let total, bookInfo;
         if (ele.proDum) {
@@ -66,6 +69,7 @@ exports.dashboard = async (req, res) => {
             .filter((n) => n);
         }
         return {
+          company_id: ele.comapny_Id,
           companyTotalBook: total,
           companyMetaBook: bookInfo,
           companyName: ele.companyName,

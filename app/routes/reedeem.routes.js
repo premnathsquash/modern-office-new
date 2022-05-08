@@ -18,6 +18,12 @@ module.exports = function (app) {
     controller.list
   );
 
+  app.post(
+    "/reedeem/mobile/claim",
+    [authJwt.verifyToken, authJwt.isUser],
+    controller.claiming
+  );
+
 
   app.use(errors());
 }
