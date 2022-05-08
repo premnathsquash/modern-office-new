@@ -1,12 +1,10 @@
 const db = require("../../models");
 
 const Promotion = db.promotion;
-const User = db.user;
-const mongoose = db.mongoose;
 
 exports.listPromotion = async (req, res) => {
   try {
-    const company = await User.findOne({_id:req.userId })
+   // const company = await User.findOne({_id:req.userId })
     await Promotion.find({}, (err, data) => {
       if (err) {
         res.status(500).send({ message: err });
