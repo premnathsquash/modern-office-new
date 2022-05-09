@@ -52,14 +52,14 @@ exports.bookingInfo = async (req, res) => {
           path: "reservation.booking",
         },
       });
-    const temp0 = profile.profile
+    const temp0 = profile?.profile
       .map((el) => {
-        if (el.reservation.booking.length > 0) return el;
+        if (el.reservation?.booking?.length > 0) return el;
       })
       .filter((n) => n);
     const temp1 = temp0.map((el) => {
       const { id, dp, email, slug, firstName, lastName, reservation } = el;
-      const tempReserv = reservation.booking.map((el1) => {
+      const tempReserv = reservation?.booking.map((el1) => {
         return el1;
       });
       return {
@@ -73,22 +73,53 @@ exports.bookingInfo = async (req, res) => {
       };
     });
     const temp2 = temp1.map((el) => {
-     return el.bookingInfo.map(async (el2) => {
+      return el?.bookingInfo.map(async (el2) => {
         const result0 = await Seat.findOne({ _id: el2.seatBook });
         const result11 = result0.seats.map((el3) => {
-          return ({seats: el3[el2.seat], meta: {el2, el}});
+          return { seats: el3[el2.seat], meta: { el2, el } };
         });
-        return ({fromTime: el2.desk.from, toTime: el2.desk.to, date: el2.desk.date, seatName: el2.seat, result11})
+        return {
+          fromTime: el2.desk.from,
+          toTime: el2.desk.to,
+          date: el2.desk.date,
+          seatName: el2.seat,
+          result11,
+        };
       });
     });
-    Promise.all(temp2[0]).then(data111=>{
+    Promise.all(temp2[0]).then((data111) => {
       return res.send(data111);
-    })
+    });
   } catch (err) {
     return res.status(500).send({ message: err });
   }
 };
 
-exports.workFromHomeOrOffice = async(req, res)=>{
+exports.workFromHomeOrOffice = async (req, res) => {
+  try {
+    const users = await User.findOne({ _id: req.userId })
+      .populate({ path: "profile" })
+      .populate({
+        path: "profile",
+        populate: {
+          path: "attendance",
+        },
+      });
+    const result = users.profile.map((ele) => {
+      const obj = {
+        name: `${ele.firstName} ${ele.lastName}`,
+        dp: ele.dp,
+        date: ele.attendance.createdAt,
+        days: ele.attendance.days,
+        workfromoffice: ele.attendance.workfromoffice,
+      };
+      return obj;
+    });
+    const workfromOffice = result.filter(ele=> ele.workfromoffice)
+    const workfromHome = result.filter(ele=> !ele.workfromoffice)
   
-}
+    return res.status(200).send({wrokfromoffice: workfromOffice, workfromHome: workfromHome});
+  } catch (error) {
+    return res.status(500).send({ message: error });
+  }
+};
