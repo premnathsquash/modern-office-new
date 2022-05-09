@@ -232,3 +232,7 @@ exports.listUsers = async (req, res) => {
     return res.status(500).send({ message: error });
   }
 };
+
+exports.bookingHist = async(req, res)=>{
+  
+}

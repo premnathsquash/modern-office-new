@@ -124,4 +124,6 @@ exports.workFromHomeOrOffice = async (req, res) => {
   }
 };
 
-exports.bookingReq = async(req, res)=>{}
+exports.bookingReq = async(req, res)=>{
+  
+}

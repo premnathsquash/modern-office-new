@@ -15,6 +15,12 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isUser],
     controller.listUsers
   );
+
+  app.get(
+    "/bookings/mobile/history",
+    [authJwt.verifyToken, authJwt.isUser],
+    controller.bookingHist
+  );
   
   app.use(errors());
 };
