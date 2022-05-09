@@ -20,6 +20,7 @@ exports.list = async (req, res) => {
           productDescription: ele.description,
           productPointNeeded: ele.pointsNeeded,
           productCoupon: ele.coupon,
+          productUrl: ele.link
         };
         return obj;
       });

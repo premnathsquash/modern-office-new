@@ -178,6 +178,12 @@ module.exports = function (app) {
     controller31.verifyProfileEmailOtp
   );
 
+  app.get(
+    "/mobile-user-profile-score",
+    [ authJwt.verifyToken, authJwt.isUser],
+    controller31.profileScore
+  );
+
   app.get("/logout", controller.logout);
 
   app.use(errors());

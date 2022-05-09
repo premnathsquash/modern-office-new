@@ -26,13 +26,11 @@ exports.updateProfileImage = async (req, res) => {
             res.status(500).send({ message: err1 });
             return;
           }
-          return res
-            .status(200)
-            .send({
-              username: `${data1.firstName} ${data1.lastName}`,
-              email: data1.email,
-              image: data1.dp,
-            });
+          return res.status(200).send({
+            username: `${data1.firstName} ${data1.lastName}`,
+            email: data1.email,
+            image: data1.dp,
+          });
         }
       );
     });
@@ -93,6 +91,28 @@ exports.verifyProfileEmailOtp = async (req, res) => {
       }
     });
   } catch (err) {
+    return res.status(500).send({ res: "Something went wrong", error });
+  }
+};
+
+exports.profileScore = async (req, res) => {
+  try {
+    const user = await Profile.findOne({ _id: req.userId }).populate({
+      model: "User",
+      path: "userGroup",
+    }).populate({
+      path: "userGroup",
+      populate: {
+        path: "profile",
+      },
+    })
+    const {id, dp, email, firstName, lastName, points} = user
+    const remainingUser = user.userGroup.profile.filter(ele => ele.id != id)
+    console.log(remainingUser);
+    
+
+    return res.status(200).send("Testing");
+  } catch (error) {
     return res.status(500).send({ res: "Something went wrong", error });
   }
 };
