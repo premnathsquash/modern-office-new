@@ -25,12 +25,16 @@ module.exports = function (app) {
   );
 
   app.get(
+    "/dashboard/client/attendance",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.workFromHomeOrOffice
+  );
+
+  app.get(
     "/dashboard/client/booking/:date",
     [authJwt.verifyToken, authJwt.isClient],
     controller.bookingInfo
   );
-
-
 
   app.use(errors());
 };

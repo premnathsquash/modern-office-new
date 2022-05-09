@@ -88,3 +88,7 @@ exports.bookingInfo = async (req, res) => {
     return res.status(500).send({ message: err });
   }
 };
+
+exports.workFromHomeOrOffice = async(req, res)=>{
+  
+}
