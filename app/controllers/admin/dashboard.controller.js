@@ -123,3 +123,5 @@ exports.workFromHomeOrOffice = async (req, res) => {
     return res.status(500).send({ message: error });
   }
 };
+
+exports.bookingReq = async(req, res)=>{}
