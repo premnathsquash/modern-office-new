@@ -115,20 +115,33 @@ exports.workFromHomeOrOffice = async (req, res) => {
       };
       return obj;
     });
-    const workfromOffice = result.filter(ele=> ele.workfromoffice)
-    const workfromHome = result.filter(ele=> !ele.workfromoffice)
-  
-    return res.status(200).send({wrokfromoffice: workfromOffice, workfromHome: workfromHome});
+    const workfromOffice = result.filter((ele) => ele.workfromoffice);
+    const workfromHome = result.filter((ele) => !ele.workfromoffice);
+
+    return res
+      .status(200)
+      .send({ wrokfromoffice: workfromOffice, workfromHome: workfromHome });
   } catch (error) {
     return res.status(500).send({ message: error });
   }
 };
 
-exports.bookingReq = async(req, res)=>{
+exports.bookingReq = async (req, res) => {
   try {
-    const { date } = req.params;
+    const company = await User.findOne({ _id: req.userId })
+      .populate({
+        path: "profile",
+      })
+      .populate({
+        path: "profile",
+        populate: {
+          path: "reservation.booking",
+        },
+      });
+    //console.log(company);
+
     return res.status(200).send("Test book req");
   } catch (error) {
     return res.status(500).send({ message: error });
   }
-}
+};

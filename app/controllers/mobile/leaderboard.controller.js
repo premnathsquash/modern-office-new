@@ -2,6 +2,7 @@ const db = require("../../models");
 const LeaderBoard = db.leaderBoard;
 const Profile = db.profile;
 const User = db.user;
+
 exports.list = async (req, res) => {
   try {
     await Profile.findOne({ _id: req.userId }, async (err, data) => {
@@ -9,13 +10,13 @@ exports.list = async (req, res) => {
         res.status(500).send({ message: err });
         return;
       }
+      
       await User.findOne({ _id: data.userGroup }, async (err0, data0) => {
         if (err0) {
           res.status(500).send({ message: err0 });
           return;
         }
-
-        const list = await LeaderBoard.find({ companyId: data.id }).populate({
+        const list = await LeaderBoard.find({ companyId: data0.id }).populate({
           model: "Profile",
           path: "profileId",
         });
