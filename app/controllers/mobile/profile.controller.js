@@ -97,21 +97,32 @@ exports.verifyProfileEmailOtp = async (req, res) => {
 
 exports.profileScore = async (req, res) => {
   try {
-    const user = await Profile.findOne({ _id: req.userId }).populate({
-      model: "User",
-      path: "userGroup",
-    }).populate({
-      path: "userGroup",
-      populate: {
-        path: "profile",
-      },
-    })
-    const {id, dp, email, firstName, lastName, points} = user
-    const remainingUser = user.userGroup.profile.filter(ele => ele.id != id)
-    console.log(remainingUser);
-    
+    const user = await Profile.findOne({ _id: req.userId })
+      .populate({
+        model: "User",
+        path: "userGroup",
+      })
+      .populate({
+        path: "userGroup",
+        populate: {
+          path: "profile",
+        },
+      });
+    const { id, dp, email, firstName, lastName, points } = user;
+    const remainingUser = user.userGroup.profile
+      .filter((ele) => ele.id != id)
+      .sort((a, b) => (a.points > b.points ? -1 : 1));
+    const percent = (points/remainingUser[0].points) * 100;
+    const obj = {
+      currentuser: { id, dp, email, firstName, lastName, points },
+      topcontendor: remainingUser[0].points,
+      message: `You are ${
+        remainingUser[0].points - points
+      } pts behind the top contender`,
+      percent: percent,
+    };
 
-    return res.status(200).send("Testing");
+    return res.status(200).send(obj);
   } catch (error) {
     return res.status(500).send({ res: "Something went wrong", error });
   }
