@@ -234,5 +234,10 @@ exports.listUsers = async (req, res) => {
 };
 
 exports.bookingHist = async(req, res)=>{
-  
+  try {
+    const { date } = req.params;
+    return res.status(200).send("Test book Hist");
+  } catch (error) {
+    return res.status(500).send({ message: error });
+  }
 }

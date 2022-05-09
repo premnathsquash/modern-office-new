@@ -31,7 +31,7 @@ module.exports = function (app) {
   );
 
   app.get(
-    "/dashboard/client/bookingreq",
+    "/dashboard/client/bookingreq/:date",
     [authJwt.verifyToken, authJwt.isClient],
     controller.bookingReq
   );
