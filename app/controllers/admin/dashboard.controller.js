@@ -1,3 +1,4 @@
+const moment = require("moment");
 const db = require("../../models");
 const User = db.user;
 const Office = db.office;
@@ -44,6 +45,9 @@ exports.seatinfo = async (req, res) => {
 exports.bookingInfo = async (req, res) => {
   try {
     const { date } = req.params;
+    const date1 = moment(date).format("MM/DD/YYYY");
+    //console.log(date1);
+
     const profile = await User.findOne({ _id: req.userId })
       .populate({ path: "profile" })
       .populate({
@@ -57,43 +61,43 @@ exports.bookingInfo = async (req, res) => {
         if (el.reservation?.booking?.length > 0) return el;
       })
       .filter((n) => n);
-    const temp1 = temp0.map((el) => {
-      const { id, dp, email, slug, firstName, lastName, reservation } = el;
-      const tempReserv = reservation?.booking.map((el1) => {
-        return el1;
-      });
-      return {
-        id,
-        dp,
-        email,
-        slug,
-        firstName,
-        lastName,
-        bookingInfo: tempReserv,
-      };
-    });
-    const temp2 = temp1.map((el) => {
-      return el?.bookingInfo.map(async (el2) => {
-        const result0 = await Seat.findOne({ _id: el2.seatBook });
-        const result11 = result0.seats.map((el3) => {
-          return { seats: el3[el2.seat], meta: { el2, el } };
+    if (temp0.length > 0) {
+      const temp1 = temp0.map((el) => {
+        const { id, dp, email, slug, firstName, lastName, reservation } = el;
+        const tempReserv = reservation?.booking.map((el1) => {
+          return el1;
         });
         return {
-          fromTime: el2.desk.from,
-          toTime: el2.desk.to,
-          date: el2.desk.date,
-          seatName: el2.seat,
-          result11,
+          id,
+          dp,
+          email,
+          slug,
+          firstName,
+          lastName,
+          bookingInfo: tempReserv,
         };
       });
-    });
-    if(temp2[0]){
-    Promise.all(temp2[0]).then((data111) => {
-      return res.send(data111);
-    });
-  }else{
-    return res.send([]);
-  }
+      const temp2 = temp1.map((el) => {
+        return el?.bookingInfo.map(async (el2) => {
+          const result0 = await Seat.findOne({ _id: el2.seatBook });
+          const result11 = result0.seats.map((el3) => {
+            return { seats: el3[el2.seat], meta: { el2, el } };
+          });
+          return {
+            fromTime: el2.desk.from,
+            toTime: el2.desk.to,
+            date: el2.desk.date,
+            seatName: el2.seat,
+            result11,
+          };
+        });
+      });
+      Promise.all(temp2[0]).then((data111) => {
+        return res.send(data111);
+      });
+    } else {
+      return res.send([]);
+    }
   } catch (err) {
     return res.status(500).send({ message: err });
   }
@@ -142,6 +146,7 @@ exports.bookingReq = async (req, res) => {
           path: "reservation.booking",
         },
       });
+
     //console.log(company);
 
     return res.status(200).send("Test book req");
