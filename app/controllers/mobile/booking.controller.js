@@ -135,7 +135,7 @@ exports.booking = async (req, res) => {
                 },
               ],
             });
-            leaderinter.save(async(err3, data3) => {
+            leaderinter.save(async (err3, data3) => {
               if (err) {
                 res.status(500).send({ message: err3 });
                 return;
@@ -195,14 +195,21 @@ exports.booking = async (req, res) => {
                   return;
                 }
                 if (data01.consecutiveDays) {
-
                   const profile = await Profile.findOne({ _id: req.userId });
                   const leaderboard = await LeaderBoard.findOne({
                     companyId: data01.companyId,
                     profileId: data01.profileId,
                   });
-                  await Profile.findOneAndUpdate({ _id: req.userId }, {points:Number.parseFloat(profile.points) +  Number.parseFloat(data01.consecutiveDays * 10)}, { new: true },()=>{})
-                  
+                  await Profile.findOneAndUpdate(
+                    { _id: req.userId },
+                    {
+                      points:
+                        Number.parseFloat(profile.points) +
+                        Number.parseFloat(data01.consecutiveDays * 10),
+                    },
+                    { new: true },
+                    () => {}
+                  );
                 }
               }
             );
@@ -233,11 +240,38 @@ exports.listUsers = async (req, res) => {
   }
 };
 
-exports.bookingHist = async(req, res)=>{
+exports.bookingHist = async (req, res) => {
   try {
-    
-    return res.status(200).send("Test book Hist");
+    const user = await Profile.findOne({ _id: req.userId })
+      .populate({
+        path: "reservation.booking",
+      })
+      .populate({
+        path: "reservation.booking",
+        populate: { model: "Seats", path: "seatBook" },
+      });
+    const result = user?.reservation?.booking.map((ele) => {
+      return {
+        date: ele.desk.date.toLocaleDateString(),
+        desk: ele.desk,
+        seat: ele.seatBook.seats["0"][ele.seat],
+      };
+    });
+    const today = moment(new Date().toLocaleDateString(), "mm-dd-yyyy");
+
+    const past = result.filter((el) => {
+      return moment(el.date, "mm-dd-yyyy").isBefore(today, 'day');
+    });
+    const present = result.filter((el) => {
+      return moment(el.date, "mm-dd-yyyy").isSame(today, 'day');
+     
+    });
+    const future = result.filter((el) => {
+     return moment(el.date, "mm-dd-yyyy").isAfter(today, 'day');
+    });
+
+    return res.status(200).send({past:past, present: present, future: future });
   } catch (error) {
     return res.status(500).send({ message: error });
   }
-}
+};

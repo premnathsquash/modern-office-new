@@ -22,6 +22,7 @@ const Booking = mongoose.model(
           ref: "Profile",
         },
       ],
+      booked: Boolean,
       seat: String,
       timeZone: {
         type: String,
