@@ -87,9 +87,13 @@ exports.bookingInfo = async (req, res) => {
         };
       });
     });
+    if(temp2[0]){
     Promise.all(temp2[0]).then((data111) => {
       return res.send(data111);
     });
+  }else{
+    return res.send([]);
+  }
   } catch (err) {
     return res.status(500).send({ message: err });
   }

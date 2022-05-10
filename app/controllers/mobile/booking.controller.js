@@ -250,7 +250,9 @@ exports.bookingHist = async (req, res) => {
         path: "reservation.booking",
         populate: { model: "Seats", path: "seatBook" },
       });
+      
     const result = user?.reservation?.booking.map((ele) => {
+      console.log(ele);
       return {
         date: ele.desk.date.toLocaleDateString(),
         desk: ele.desk,
