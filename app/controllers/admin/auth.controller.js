@@ -1,4 +1,4 @@
-require("dotenv").config()
+require("dotenv").config();
 const { customAlphabet } = require("nanoid");
 const { epochUtil } = require("epochutils");
 const crypto = require("crypto");
@@ -438,63 +438,67 @@ exports.userLoginIn = async (req, res) => {
       slug: req.body?.slug,
     }).populate(["roles", "userGroup"]);
 
-    const passwordIsValid = bcrypt.compareSync(
-      req.body?.password,
-      user.password
-    );
-    if (!passwordIsValid) {
-      return res.status(401).send({
-        accessToken: null,
-        message: "Invalid Password!",
+    if (user) {
+      const passwordIsValid = bcrypt.compareSync(
+        req.body?.password,
+        user.password
+      );
+      if (!passwordIsValid) {
+        return res.status(401).send({
+          accessToken: null,
+          message: "Invalid Password!",
+        });
+      }
+      const token = jwt.sign({ id: user.id }, config.secret, {
+        expiresIn: 86400, // 24 hours
       });
+
+      const userGrp = await User.findOne({ _id: user.userGroup });
+      let planType;
+
+      switch (userGrp.stripeProductPrice.productId) {
+        case "prod_LLhE8XyggI9emW":
+          planType = "Large Yearly";
+          break;
+        case "prod_LLhDgrkCb3iMdY":
+          planType = "Large Month";
+          break;
+        case "prod_LLhC9Mi443YJ87":
+          planType = "Medium Yearly";
+          break;
+        case "prod_LLhB9GC3dIcFJh":
+          planType = "Medium Month";
+          break;
+        case "prod_LLhBtcAFb3UKTj":
+          planType = "Small Yearly";
+          break;
+        case "prod_LLhApE4wTig88P":
+          planType = "Small Month";
+          break;
+        case "prod_LLh91siLUTHKza":
+          planType = "Micro Yearly";
+          break;
+        case "prod_LLh8yhbpznJKzL":
+          planType = "Micro Month";
+          break;
+        default:
+          planType = "Enterprise";
+          break;
+      }
+
+      return res.status(200).send({
+        id: user.id,
+        name: `${user.firstName}  ${user.lastName}`,
+        email: user.email,
+        image: user.dp,
+        planType: planType,
+        role: user.roles.name.toLowerCase(),
+        slug: user.slug,
+        token: token,
+      });
+    } else {
+      return res.status(200).send({ message: "user is not registered" });
     }
-    const token = jwt.sign({ id: user.id }, config.secret, {
-      expiresIn: 86400, // 24 hours
-    });
-
-    const userGrp = await User.findOne({ _id: user.userGroup });
-    let planType;
-
-    switch (userGrp.stripeProductPrice.productId) {
-      case "prod_LLhE8XyggI9emW":
-        planType = "Large Yearly";
-        break;
-      case "prod_LLhDgrkCb3iMdY":
-        planType = "Large Month";
-        break;
-      case "prod_LLhC9Mi443YJ87":
-        planType = "Medium Yearly";
-        break;
-      case "prod_LLhB9GC3dIcFJh":
-        planType = "Medium Month";
-        break;
-      case "prod_LLhBtcAFb3UKTj":
-        planType = "Small Yearly";
-        break;
-      case "prod_LLhApE4wTig88P":
-        planType = "Small Month";
-        break;
-      case "prod_LLh91siLUTHKza":
-        planType = "Micro Yearly";
-        break;
-      case "prod_LLh8yhbpznJKzL":
-        planType = "Micro Month";
-        break;
-      default:
-        planType = "Enterprise";
-        break;
-    }
-
-    return res.status(200).send({
-      id: user.id,
-      name: `${user.firstName}  ${user.lastName}`,
-      email: user.email,
-      image: user.dp,
-      planType: planType,
-      role: user.roles.name.toLowerCase(),
-      slug: user.slug,
-      token: token,
-    });
   } catch (err) {
     if (err) {
       res.status(500).send({ message: err });
