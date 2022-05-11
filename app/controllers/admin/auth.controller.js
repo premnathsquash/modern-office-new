@@ -693,6 +693,7 @@ exports.updateProfile = async (req, res) => {
 };
 
 exports.getAllProfileusers = async (req, res) => {
+  try{
   const user = await User.findOne({ _id: req.userId });
   const users = await Profile.find({ slug: user.slug }).populate({
     path: "attendance",
@@ -747,7 +748,7 @@ exports.getAllProfileusers = async (req, res) => {
       seat_Id: seating ? seating.id : null,
     };
   });
-
+if(users1){
   Promise.all(users1).then((data) => {
     return res.status(200).send({
       wfo: { wfoDays: 233, wfoRange: "Weekly", wfo: false },
@@ -757,6 +758,12 @@ exports.getAllProfileusers = async (req, res) => {
       users: data,
     });
   });
+}else{
+  return res.status(200).send([])
+}
+}catch(error){
+  return res.status(500).send({message: error})
+}
 };
 
 exports.editProfileAttendance = async (req, res) => {
