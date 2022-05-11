@@ -7,6 +7,7 @@ const User = db.user;
 const Seat = db.seats;
 const Booking = db.booking;
 const LeaderBoard = db.leaderBoard;
+const mongoose = db.mongoose;
 
 exports.booking = async (req, res) => {
   try {
@@ -249,30 +250,79 @@ exports.bookingHist = async (req, res) => {
       .populate({
         path: "reservation.booking",
         populate: { model: "Seats", path: "seatBook" },
+      })
+      .populate({
+        path: "reservation.booking",
+        populate: { model: "Profile", path: "attendees" },
       });
-      
+
     const result = user?.reservation?.booking.map((ele) => {
-      console.log(ele);
       return {
+        attandess: ele.attendees,
         date: ele.desk.date.toLocaleDateString(),
         desk: ele.desk,
         seat: ele.seatBook.seats["0"][ele.seat],
       };
     });
+
     const today = moment(new Date().toLocaleDateString(), "mm-dd-yyyy");
-
-    const past = result.filter((el) => {
-      return moment(el.date, "mm-dd-yyyy").isBefore(today, 'day');
+    let past = result.filter((el) => {
+      return moment(el.date, "mm-dd-yyyy").isBefore(today, "day");
     });
-    const present = result.filter((el) => {
-      return moment(el.date, "mm-dd-yyyy").isSame(today, 'day');
-     
+    let present = result.filter((el) => {
+      return moment(el.date, "mm-dd-yyyy").isSame(today, "day");
     });
-    const future = result.filter((el) => {
-     return moment(el.date, "mm-dd-yyyy").isAfter(today, 'day');
+    let future = result.filter((el) => {
+      return moment(el.date, "mm-dd-yyyy").isAfter(today, "day");
     });
 
-    return res.status(200).send({past:past, present: present, future: future });
+    past = past.map((el) => {
+      const { attandess } = el;
+      if (attandess.length > 0) {
+        const restData = attandess.map((ele1) => {
+          return {
+            dp: ele1?.dp,
+            userName: `${ele1?.firstName} ${ele1?.lastName}`,
+          };
+        });
+        return { data: { ...el, attandess: restData } };
+      } else {
+        return el;
+      }
+    });
+    present = present.map((el) => {
+      const { attandess } = el;
+
+      if (attandess.length > 0) {
+        const restData = attandess.map((ele1) => {
+          return {
+            dp: ele1?.dp,
+            userName: `${ele1?.firstName} ${ele1?.lastName}`,
+          };
+        });
+        return { data: { ...el, attandess: restData } };
+      } else {
+        return el;
+      }
+    });
+    future = future.map((el) => {
+      const { attandess } = el;
+      if (attandess.length > 0) {
+        const restData = attandess.map((ele1) => {
+          return {
+            dp: ele1?.dp,
+            userName: `${ele1?.firstName} ${ele1?.lastName}`,
+          };
+        });
+        return { data: { ...el, attandess: restData } };
+      } else {
+        return el;
+      }
+    });
+
+    return res
+      .status(200)
+      .send({ past: past, present: present, future: future });
   } catch (error) {
     return res.status(500).send({ message: error });
   }

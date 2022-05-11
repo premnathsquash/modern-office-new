@@ -318,6 +318,7 @@ exports.signin = async (req, res) => {
 };
 
 exports.userSignup = async (req, res) => {
+  try{
   const pssword = nanoid();
   const role = "user";
   let fileLocation;
@@ -422,6 +423,9 @@ exports.userSignup = async (req, res) => {
   } else {
     return res.status(200).send({ res: "user count exceeded" });
   }
+}catch(error){
+  return res.status(200).send({ message: error });
+}
 };
 
 exports.userLoginIn = async (req, res) => {
@@ -693,77 +697,76 @@ exports.updateProfile = async (req, res) => {
 };
 
 exports.getAllProfileusers = async (req, res) => {
-  try{
-  const user = await User.findOne({ _id: req.userId });
-  const users = await Profile.find({ slug: user.slug }).populate({
-    path: "attendance",
-  });
+  try {
+    const user = await User.findOne({ _id: req.userId });
 
-  const users1 = users.map(async (ele) => {
-    const seating = await Seat.findOne({
-      _id: ele?.reservation?.allocatedDesk,
+    const users = await Profile.find({ slug: user.slug }).populate({
+      path: "attendance",
     });
-    const flooring = await Floor.findOne({ _id: ele?.reservation?.floor });
-    const {
-      attendance,
-      reservedSeats,
-      makeAdmin,
-      status,
-      _id,
-      firstName,
-      lastName,
-      dp,
-      email,
-      department,
-      roles,
-      slug,
-      reservation: { bookDate, seatName },
-    } = ele;
-    const departIntermed = await Departments.findOne({
-      departments: department,
+    const users1 = users.map(async (ele) => {
+      const seating = await Seat.findOne({
+        _id: ele?.reservation?.allocatedDesk,
+      });
+      const flooring = await Floor.findOne({ _id: ele?.reservation?.floor });
+      const {
+        attendance,
+        reservedSeats,
+        makeAdmin,
+        status,
+        _id,
+        firstName,
+        lastName,
+        dp,
+        email,
+        department,
+        roles,
+        slug,
+        reservation: { bookDate, seatName },
+      } = ele;
+      const departIntermed = await Departments.findOne({
+        departments: department,
+      });
+      return {
+        attendanceId: attendance._id,
+        departmentId: departIntermed._id,
+        wfo: attendance.workfromoffice,
+        wfoDays: attendance.days,
+        wfoRange: attendance.range,
+        wfoDayStart: attendance.updatedAt,
+        reservedSeats,
+        makeAdmin,
+        status,
+        _id,
+        firstName,
+        lastName,
+        dp,
+        email,
+        department,
+        roles,
+        slug,
+        allocatedDate: seating ? bookDate : "",
+        seatName: seating ? seatName : "",
+        floorInfo: { floorName: flooring?.name, floorId: flooring?.id },
+        seatInfo: seating && seatName ? seating.seats[0][seatName] : null,
+        seat_Id: seating ? seating.id : null,
+      };
     });
-
-    return {
-      attendanceId: attendance._id,
-      departmentId: departIntermed._id,
-      wfo: attendance.workfromoffice,
-      wfoDays: attendance.days,
-      wfoRange: attendance.range,
-      wfoDayStart: attendance.updatedAt,
-      reservedSeats,
-      makeAdmin,
-      status,
-      _id,
-      firstName,
-      lastName,
-      dp,
-      email,
-      department,
-      roles,
-      slug,
-      allocatedDate: seating ? bookDate : "",
-      seatName: seating ? seatName : "",
-      floorInfo: { floorName: flooring?.name, floorId: flooring?.id },
-      seatInfo: seating && seatName ? seating.seats[0][seatName] : null,
-      seat_Id: seating ? seating.id : null,
-    };
-  });
-if(users1){
-  Promise.all(users1).then((data) => {
-    return res.status(200).send({
-      wfo: { wfoDays: 233, wfoRange: "Weekly", wfo: false },
-      departmentToggle: true,
-      autoApprove: false,
-      count: data.length,
-      users: data,
-    });
-  });
-}else{
-  return res.status(200).send([])
-}
-}catch(error){
-  return res.status(500).send({message: error})
-}
+    if (users1) {
+      Promise.all(users1).then((data) => {
+        return res.status(200).send({
+          wfo: { wfoDays: 233, wfoRange: "Weekly", wfo: false },
+          departmentToggle: true,
+          autoApprove: false,
+          count: data.length,
+          users: data,
+        });
+      });
+    } else {
+      return res.status(200).send([]);
+    }
+  } catch (error) {
+    return res.status(500).send({ message: error });
+  }
 };
 
 exports.editProfileAttendance = async (req, res) => {
