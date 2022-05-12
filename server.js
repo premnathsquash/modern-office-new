@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const ws = require("ws");
+const expressWs = require("express-ws");
 const cors = require("cors");
 const { errors } = require("celebrate");
 const dbConfig = require("./app/config/db.config");
@@ -8,40 +8,41 @@ const db = require("./app/models");
 const initial = require("./createRoles");
 const PORT = process.env.PORT || 8080;
 
-const server = express();
-
+const app = express();
+expressWs(app);
 var corsOptions = {
   origin: "*",
 };
-server.use(errors());
-server.use(cors(corsOptions));
-server.use((req, res, next) => {
+app.use(errors());
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
   if (req.originalUrl.startsWith("/webhook")) {
     next();
   } else {
     express.json()(req, res, next);
   }
 });
-server.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
-require("./app/routes/auth.routes")(server);
-require("./app/routes/enquire.routes")(server);
-require("./app/routes/plans.routes")(server);
-require("./app/routes/webhooks.routes")(server);
-require("./app/routes/officeFloor.routes")(server);
-require("./app/routes/stripe.routes")(server);
-require("./app/routes/department.routes")(server);
-require("./app/routes/officeConfigure.routes")(server);
-require("./app/routes/attendance.route")(server);
-require("./app/routes/promotion.route")(server);
-require("./app/routes/bookings.route")(server);
-require("./app/routes/leaderboard.route")(server);
-require("./app/routes/dashboard.routes")(server);
-require("./app/routes/dashboard.routes")(server);
-require("./app/routes/reedeem.routes")(server);
-require("./app/routes/reports.route")(server);
+require("./app/routes/auth.routes")(app);
+require("./app/routes/enquire.routes")(app);
+require("./app/routes/plans.routes")(app);
+require("./app/routes/webhooks.routes")(app);
+require("./app/routes/officeFloor.routes")(app);
+require("./app/routes/stripe.routes")(app);
+require("./app/routes/department.routes")(app);
+require("./app/routes/officeConfigure.routes")(app);
+require("./app/routes/attendance.route")(app);
+require("./app/routes/promotion.route")(app);
+require("./app/routes/bookings.route")(app);
+require("./app/routes/leaderboard.route")(app);
+require("./app/routes/dashboard.routes")(app);
+require("./app/routes/dashboard.routes")(app);
+require("./app/routes/reedeem.routes")(app);
+require("./app/routes/reports.route")(app);
+require("./app/routes/web.notification.route")(app);
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
   db.mongoose
     .connect(`${dbConfig.HOSTURL}`, {
@@ -57,10 +58,4 @@ server.listen(PORT, () => {
       console.error("Connection error", err);
       process.exit();
     });
-});
-
-const wss = new ws.Server({ server });
-wss.on("connection", (ws) => {
-  console.log("Client connected");
-  ws.on("close", () => console.log("Client disconnected"));
 });
