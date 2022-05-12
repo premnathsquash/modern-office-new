@@ -28,11 +28,11 @@ exports.seatinfo = async (req, res) => {
       const seatArr = seats
         .map((el) => {
           const [first] = el.Seats.seats;
-          if(first){
-          const objV = Object.values(first);
-          return objV;
-          }else{
-            return {}
+          if (first) {
+            const objV = Object.values(first);
+            return objV;
+          } else {
+            return {};
           }
         })
         .flat(2);
@@ -139,7 +139,6 @@ exports.workFromHomeOrOffice = async (req, res) => {
 };
 
 exports.bookingReq = async (req, res) => {
-/* 
   try {
     const today = moment(new Date().toLocaleDateString(), "mm-dd-yyyy");
     const company = await User.findOne({ _id: req.userId })
@@ -150,50 +149,61 @@ exports.bookingReq = async (req, res) => {
         path: "profile",
         populate: {
           path: "reservation.booking",
+          populate: [{ model: "Seats", path: "seatBook" }],
         },
       });
 
     if (company.profile.length > 0) {
-      const intermediate = company.profile.map((el) => {
-        const booking = el.reservation.booking.filter((ele1) => {
+      const intermediate1 = company.profile.map((el) => {
+        const {
+          firstName,
+          lastName,
+          dp,
+          reservation: { booking },
+        } = el;
+
+        const result1 = booking.map((el1) => {
+          return { desk: el1.desk, seat1: el1.seat, seatBook: el1.seatBook };
+        });
+        return { firstName, lastName, dp, result1 };
+      });
+      const data = intermediate1.map((el) => {
+        const result = el.result1.map((el1) => {
+          return {
+            recurrenceDays: el1.desk.recurrenceDays,
+            cancelled: el1.desk.cancelled,
+            date: el1.desk.date,
+            from: el1.desk.from,
+            to: el1.desk.to,
+            recurrence: el1.desk.recurrence,
+            seatBook: el1.seatBook.seats["0"][el1.seat1],
+          };
+        });
+        const result1 = result.filter((ele1) => {
           return (
-            moment(ele1.desk.date.toLocaleDateString(), "mm-dd-yyyy").isSame(
+            moment(ele1.date.toLocaleDateString(), "mm-dd-yyyy").isSame(
               today,
               "day"
             ) ||
-            moment(ele1.desk.date.toLocaleDateString(), "mm-dd-yyyy").isAfter(
+            moment(ele1.date.toLocaleDateString(), "mm-dd-yyyy").isAfter(
               today,
               "day"
             )
           );
         });
 
-        const seating = booking.map(async (ele) => {
-          const obj = await Seat.findOne({ _id: ele.seatBook });
-          return obj.seats["0"][ele.seat];
-        });
-
-        return { profile: el, booking: booking, seat: seating };
+        return {
+          username: `${el.firstName} ${el.lastName}`,
+          dp: el.dp,
+          result1,
+        };
       });
 
-      const seat1 = intermediate.map((ele) => {
-        return ele.seat;
-      });
-      const meta = intermediate.map((ele) => {
-        const intermediate1 = ele.booking.map(ele1=>{
-          console.log(ele1.desk)
-        })
-
-        return { profile: ele.profile,  userName:`${ele.profile.firstName} ${ele.profile.lastName}`, dp:ele.profile.dp,  booking: ele.booking };
-      });
-      //console.log(seat1, meta);
-
-      return res.status(200).send("result");
+      return res.status(200).send(data);
     } else {
       return res.status(200).send([]);
     }
   } catch (error) {
     return res.status(500).send({ message: error });
   }
- */
 };
