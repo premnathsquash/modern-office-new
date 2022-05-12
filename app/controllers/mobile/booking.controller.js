@@ -26,7 +26,6 @@ exports.booking = async (req, res) => {
     const date = new Date(new Date(from).setHours(0, 0, 0, 0));
     const date2 = new Date(from).toLocaleTimeString();
     const date3 = new Date(to).toLocaleTimeString();
-
     const booking = new Booking({
       profile: user.id,
       company: company.id,
@@ -217,9 +216,23 @@ exports.booking = async (req, res) => {
           }
         }
       );
+      await LeaderBoard.findOne(
+        {
+          companyId: data.company,
+          profileId: data.profile,
+        },
+        (err9, data9) => {
+          if (err9) {
+            res.status(500).send({ message: err9 });
+            return;
+          }
+          return res.send({
+            message: "Booking created successfully",
+            consecutiveDays: data9.consecutiveDays,
+          });
+        }
+      );
     });
-
-    return res.send({ message: "Booking created successfully" });
   } catch (error) {
     return res.status(500).send({ message: error });
   }
@@ -285,7 +298,7 @@ exports.bookingHist = async (req, res) => {
             userName: `${ele1?.firstName} ${ele1?.lastName}`,
           };
         });
-        return {...el, attandess: restData };
+        return { ...el, attandess: restData };
       } else {
         return el;
       }
@@ -300,7 +313,7 @@ exports.bookingHist = async (req, res) => {
             userName: `${ele1?.firstName} ${ele1?.lastName}`,
           };
         });
-        return  { ...el, attandess: restData } ;
+        return { ...el, attandess: restData };
       } else {
         return el;
       }
