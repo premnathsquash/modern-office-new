@@ -136,7 +136,7 @@ exports.workFromHomeOrOffice = async (req, res) => {
 
 exports.bookingReq = async (req, res) => {
   try {
-   // const today = moment(new Date().toLocaleDateString(), "mm-dd-yyyy");
+   const today = moment((new Date()).toLocaleDateString(), "mm-dd-yyyy")
     const company = await User.findOne({ _id: req.userId })
       .populate({
         path: "profile",
@@ -148,12 +148,21 @@ exports.bookingReq = async (req, res) => {
         },
       });
     if (company.profile.length > 0) {
-      company.profile.map((el) => {
-        console.log(el.reservation.booking);
-        
-       // console.log(moment(el.reservation.bookDate.toLocaleDateString()) /*, moment(el.reservation.bookDate).format("MM/DD/YYYY").isSame(today, 'day') */);
+     const intermediate = company.profile.map((el) => {
+       const booking =  el.reservation.booking.filter(ele1=>{
+          return moment(ele1.desk.date.toLocaleDateString(), "mm-dd-yyyy").isSame(today, 'day') || moment(ele1.desk.date.toLocaleDateString(), "mm-dd-yyyy").isAfter(today, 'day');
+        })
+        return {profile: el, booking: booking}
       });
-      return res.status(200).send([]);
+      const result = intermediate.map(ele=>{
+        const obj = {
+          userName: `${ele?.profile?.firstName} ${ele?.profile?.lastName}`,
+          userImage: ele?.profile?.dp,
+        }
+        return obj
+      })
+
+      return res.status(200).send(result);
     } else {
       return res.status(200).send([]);
     }

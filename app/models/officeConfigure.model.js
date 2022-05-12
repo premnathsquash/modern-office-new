@@ -4,6 +4,7 @@ const OfficeConfigure = mongoose.model(
   "OfficeConfigure",
   new mongoose.Schema(
     {
+      aprovalWorkflow: {type: Boolean, default: false},
       WeekDayFrom: { type: String, default: "" },
       WeekDayTo: { type: String, default: "" },
       TimeFrom: { type: String, default: "" },
