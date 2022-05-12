@@ -707,6 +707,7 @@ exports.getAllProfileusers = async (req, res) => {
       const seating = await Seat.findOne({
         _id: ele?.reservation?.allocatedDesk,
       });
+      
       const flooring = await Floor.findOne({ _id: ele?.reservation?.floor });
       const {
         attendance,
@@ -726,6 +727,10 @@ exports.getAllProfileusers = async (req, res) => {
       const departIntermed = await Departments.findOne({
         departments: department,
       });
+
+      
+
+      
       return {
         attendanceId: attendance._id,
         departmentId: departIntermed._id,
@@ -747,7 +752,7 @@ exports.getAllProfileusers = async (req, res) => {
         allocatedDate: seating ? bookDate : "",
         seatName: seating ? seatName : "",
         floorInfo: { floorName: flooring?.name, floorId: flooring?.id },
-        seatInfo: seating && seatName ? seating.seats[0][seatName] : null,
+        seatInfo: seating && seatName && seating?.seats.length > 0 ? seating.seats[0][seatName] : null,
         seat_Id: seating ? seating.id : null,
       };
     });
