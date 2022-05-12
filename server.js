@@ -38,6 +38,8 @@ require("./app/routes/leaderboard.route")(app);
 require("./app/routes/dashboard.routes")(app);
 require("./app/routes/dashboard.routes")(app);
 require("./app/routes/reedeem.routes")(app);
+require("./app/routes/notification.route")(app);
+require("./app/routes/reports.route")(app);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
