@@ -1,5 +1,5 @@
 const { errors } = require("celebrate");
-
+const controller = require("../controllers/admin/notification.controller");
 module.exports = function (app) {
   app.use(function (req, res, next) {
     res.header(
@@ -9,16 +9,7 @@ module.exports = function (app) {
     next();
   });
 
-  app.ws("/echo", (ws, req) => {
-    console.log("connection");
-    ws.on("message", (msg) => {
-      ws.send(msg);
-    });
-    ws.on('close', () => {
-      console.log('WebSocket was closed')
-  })
-  
-  });
+  app.ws("/echo", controller.check);
 
   app.use(errors());
 };
