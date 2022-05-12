@@ -28,8 +28,12 @@ exports.seatinfo = async (req, res) => {
       const seatArr = seats
         .map((el) => {
           const [first] = el.Seats.seats;
+          if(first){
           const objV = Object.values(first);
           return objV;
+          }else{
+            return {}
+          }
         })
         .flat(2);
       const arr = ["Wall", "Door", "Toilet", "Diagonal Wall"];
