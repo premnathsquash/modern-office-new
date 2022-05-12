@@ -14,6 +14,10 @@ module.exports = function (app) {
     ws.on("message", (msg) => {
       ws.send(msg);
     });
+    ws.on('close', () => {
+      console.log('WebSocket was closed')
+  })
+  
   });
 
   app.use(errors());
