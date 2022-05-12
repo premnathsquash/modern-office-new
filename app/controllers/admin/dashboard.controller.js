@@ -135,8 +135,9 @@ exports.workFromHomeOrOffice = async (req, res) => {
 };
 
 exports.bookingReq = async (req, res) => {
+/* 
   try {
-   const today = moment((new Date()).toLocaleDateString(), "mm-dd-yyyy")
+    const today = moment(new Date().toLocaleDateString(), "mm-dd-yyyy");
     const company = await User.findOne({ _id: req.userId })
       .populate({
         path: "profile",
@@ -147,26 +148,48 @@ exports.bookingReq = async (req, res) => {
           path: "reservation.booking",
         },
       });
-    if (company.profile.length > 0) {
-     const intermediate = company.profile.map((el) => {
-       const booking =  el.reservation.booking.filter(ele1=>{
-          return moment(ele1.desk.date.toLocaleDateString(), "mm-dd-yyyy").isSame(today, 'day') || moment(ele1.desk.date.toLocaleDateString(), "mm-dd-yyyy").isAfter(today, 'day');
-        })
-        return {profile: el, booking: booking}
-      });
-      const result = intermediate.map(ele=>{
-        const obj = {
-          userName: `${ele?.profile?.firstName} ${ele?.profile?.lastName}`,
-          userImage: ele?.profile?.dp,
-        }
-        return obj
-      })
 
-      return res.status(200).send(result);
+    if (company.profile.length > 0) {
+      const intermediate = company.profile.map((el) => {
+        const booking = el.reservation.booking.filter((ele1) => {
+          return (
+            moment(ele1.desk.date.toLocaleDateString(), "mm-dd-yyyy").isSame(
+              today,
+              "day"
+            ) ||
+            moment(ele1.desk.date.toLocaleDateString(), "mm-dd-yyyy").isAfter(
+              today,
+              "day"
+            )
+          );
+        });
+
+        const seating = booking.map(async (ele) => {
+          const obj = await Seat.findOne({ _id: ele.seatBook });
+          return obj.seats["0"][ele.seat];
+        });
+
+        return { profile: el, booking: booking, seat: seating };
+      });
+
+      const seat1 = intermediate.map((ele) => {
+        return ele.seat;
+      });
+      const meta = intermediate.map((ele) => {
+        const intermediate1 = ele.booking.map(ele1=>{
+          console.log(ele1.desk)
+        })
+
+        return { profile: ele.profile,  userName:`${ele.profile.firstName} ${ele.profile.lastName}`, dp:ele.profile.dp,  booking: ele.booking };
+      });
+      //console.log(seat1, meta);
+
+      return res.status(200).send("result");
     } else {
       return res.status(200).send([]);
     }
   } catch (error) {
     return res.status(500).send({ message: error });
   }
+   */
 };
