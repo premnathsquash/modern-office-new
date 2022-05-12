@@ -285,7 +285,7 @@ exports.bookingHist = async (req, res) => {
             userName: `${ele1?.firstName} ${ele1?.lastName}`,
           };
         });
-        return { data: { ...el, attandess: restData } };
+        return {...el, attandess: restData };
       } else {
         return el;
       }
@@ -300,7 +300,7 @@ exports.bookingHist = async (req, res) => {
             userName: `${ele1?.firstName} ${ele1?.lastName}`,
           };
         });
-        return { data: { ...el, attandess: restData } };
+        return  { ...el, attandess: restData } ;
       } else {
         return el;
       }
