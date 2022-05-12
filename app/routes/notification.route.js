@@ -1,7 +1,7 @@
 const { errors } = require("celebrate");
 const ws = require("ws");
 
-const wsServer = new ws.Server({ noServer: true });
+const wsServer = new ws.Server({ port: 3000 });
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -12,16 +12,11 @@ module.exports = function (app) {
     next();
   });
 
-  wsServer.on("connection", (socket) => {
-    socket.on("message", (message) => console.log(message));
-  });
 
-  const server = app.listen(3000);
-  server.on("upgrade", (request, socket, head) => {
-    wsServer.handleUpgrade(request, socket, head, (socket) => {
-      wsServer.emit("connection", socket, request);
-    });
-  });
+  wsServer.on("connection", socket=>{
+    console.log("connection");
+    
+  })
 
   app.use(errors());
 };
