@@ -23,6 +23,7 @@ exports.booking = async (req, res) => {
     const company = await User.findOne({ _id: user.userGroup });
     const seat = await Seat.findOne({ _id: user.reservation.allocatedDesk });
     const date = new Date(new Date(from).setHours(0, 0, 0, 0));
+    const date1 = new Date(new Date(to).setHours(0, 0, 0, 0));
     const date2 = new Date(from).toLocaleTimeString();
     const date3 = new Date(to).toLocaleTimeString();
     //const booking = await Booking.findOne({company: company.id, seatBook: seat.id, seat: bookedSeat,})
@@ -36,11 +37,15 @@ exports.booking = async (req, res) => {
         seat: bookedSeat,
         timeZone: timeZone,
         desk: {
-          date: new Intl.DateTimeFormat("en-US", { timeZone: timeZone }).format(
+          dateFrom: new Intl.DateTimeFormat("en-US", { timeZone: timeZone }).format(
             date
           ),
-          from: date2,
-          to: date3,
+          dateTo: new Intl.DateTimeFormat("en-US", { timeZone: timeZone }).format(
+            date1
+          ),
+          fromTime: date2,
+          toTime: date3,
+          available: false,
           recurrence: recurrence,
           recurrenceDays: recurrenceDays ?? [],
         },
@@ -51,7 +56,7 @@ exports.booking = async (req, res) => {
           res.status(500).send({ message: err });
           return;
         }
-        
+
         await Profile.findOneAndUpdate(
           { _id: req.userId },
           {

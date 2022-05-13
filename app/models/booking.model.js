@@ -29,10 +29,10 @@ const Booking = mongoose.model(
         default: "Australia/Sydney"
       },
       desk: {
-        date: Date,
-        from: String,
-        to: String,
-        whole: Boolean,
+        dateFrom: Date,
+        dateTo: Date,
+        fromTime: String,
+        toTime: String,
         cancelled: {
           type: Boolean,
           default: false,
@@ -43,7 +43,7 @@ const Booking = mongoose.model(
         },
         available:{
           type: Boolean,
-          default: false,
+          default: true,
         },
         booked:{
           type: Boolean,
