@@ -13,15 +13,15 @@ module.exports = function (app) {
   });
 
   app.get(
-    "/reports/client/list",
+    "/reports/client/peak-days",
     [authJwt.verifyToken, authJwt.isClient],
-    controller.list
+    controller.peakDays
   );
 
   app.get(
-    "/reports/admin/list",
+    "/reports/admin/peak-days/:id",
     [authJwt.verifyToken, authJwt.isAdmin],
-    controller1.list
+    controller1.peakDays
   );
 
   app.use(errors());
