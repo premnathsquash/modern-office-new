@@ -318,113 +318,153 @@ exports.signin = async (req, res) => {
 };
 
 exports.userSignup = async (req, res) => {
-  try{
-  const pssword = nanoid();
-  const role = "user";
-  let fileLocation;
-  if (req.file) {
-    const { location } = req.file;
-    fileLocation = location;
-  }
-  const status = true;
-  const {
-    firstName,
-    lastName,
-    email,
-    department,
-    reservedSeats,
-    makeAdmin,
-    floorId,
-    seatId,
-    seatName,
-  } = req.body;
-  const departm = await Departments.findOne({ _id: department });
-  const attend = new Attendance({});
-  const company1 = await User.findOne({
-    _id: req.userId,
-  });
+  try {
+    const pssword = nanoid();
+    const role = "user";
+    let fileLocation;
+    if (req.file) {
+      const { location } = req.file;
+      fileLocation = location;
+    }
+    const status = true;
+    const {
+      firstName,
+      lastName,
+      email,
+      department,
+      reservedSeats,
+      makeAdmin,
+      floorId,
+      seatId,
+      seatName,
+    } = req.body;
 
-  const company2 = company1.departments.find(
-    (ele) => mongoose.Types.ObjectId(ele).toHexString() == departm.id
-  );
-
-  if (company2 && company1.profile.length < company1.maxSeat) {
-    attend.save((error, attend1) => {
-      if (error) {
-        res.status(500).send({ message: error });
+    await Seat.findOne({ _id: seatId }, async (err11, data11) => {
+      if (err11) {
+        res.status(500).send({ message: err11 });
         return;
       }
-      const profile = new Profile({
-        firstName,
-        lastName,
-        password: bcrypt.hashSync(pssword, 8),
-        dp: fileLocation ?? "",
-        email,
-        department: departm.departments,
-        reservedSeats,
-        makeAdmin,
-        userGroup: req.userId,
-        reservation: {
-          allocatedDesk: seatId,
-          floor: floorId,
-          seatName: seatName,
-        },
+      const checkSeat1 = [];
+      const checkSeat2 = [];
+      Object.entries(data11.seats[0]).forEach((ele) => {
+        const [key, value] = ele;
+        if (key == seatName) {
+          const newValue = {
+            ...value,
+            timesBooked: value.timesBooked + 1,
+            available: false,
+          };
+          checkSeat1.push(newValue);
+        } else {
+          checkSeat2.push({ ...value, available: value.available ?? true });
+        }
       });
-      Role.find(
+      const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
+        (a, v) => ({ ...a, [v.name]: v }),
+        {}
+      );
+      await Seat.findOneAndUpdate(
+        { _id: seatId },
         {
-          name: { $in: role },
+          seats: [{ ...changesinObj }],
         },
-        async (err, roles) => {
-          if (err) {
-            res.status(500).send({ message: err });
+        (err1, data1) => {
+          if (err1) {
+            res.status(500).send({ message: err1 });
             return;
           }
-          profile.attendance = mongoose.Types.ObjectId(attend1._id);
-          profile.roles = mongoose.Types.ObjectId(roles[0]._id);
-          profile.status = status;
-          profile.slug = company1.slug;
-          profile.save(async (err, result) => {
+        }
+      );
+    });
+
+    const departm = await Departments.findOne({ _id: department });
+    const attend = new Attendance({});
+    const company1 = await User.findOne({
+      _id: req.userId,
+    });
+
+    const company2 = company1.departments.find(
+      (ele) => mongoose.Types.ObjectId(ele).toHexString() == departm.id
+    );
+
+    if (company2 && company1.profile.length < company1.maxSeat) {
+      attend.save((error, attend1) => {
+        if (error) {
+          res.status(500).send({ message: error });
+          return;
+        }
+        const profile = new Profile({
+          firstName,
+          lastName,
+          password: bcrypt.hashSync(pssword, 8),
+          dp: fileLocation ?? "",
+          email,
+          department: departm.departments,
+          reservedSeats,
+          makeAdmin,
+          userGroup: req.userId,
+          reservation: {
+            allocatedDesk: seatId,
+            floor: floorId,
+            seatName: seatName,
+          },
+        });
+        Role.find(
+          {
+            name: { $in: role },
+          },
+          async (err, roles) => {
             if (err) {
               res.status(500).send({ message: err });
               return;
             }
-            await User.findOneAndUpdate(
-              { _id: company1._id },
-              { profile: [result._id, ...company1.profile] },
-              async (err, profile1) => {
-                if (err) {
-                  return { message: err };
-                }
-                await sendMail(
-                  req.body.email,
-                  "Hydesq – New User Account",
-                  null,
-                  `${email} pass: ${pssword} companySlug: ${company1.slug}`,
-                  null
-                );
+            profile.attendance = mongoose.Types.ObjectId(attend1._id);
+            profile.roles = mongoose.Types.ObjectId(roles[0]._id);
+            profile.status = status;
+            profile.slug = company1.slug;
+
+            profile.save(async (err, result) => {
+              if (err) {
+                res.status(500).send({ message: err });
+                return;
               }
-            );
-            await Departments.findOneAndUpdate(
-              { _id: departm.id },
-              { users: departm.users + 1 },
-              (err, data) => {
-                if (err) {
-                  res.status(500).send({ message: err });
-                  return;
+              await User.findOneAndUpdate(
+                { _id: company1._id },
+                { profile: [result._id, ...company1.profile] },
+                async (err, profile1) => {
+                  if (err) {
+                    return { message: err };
+                  }
+                  await sendMail(
+                    req.body.email,
+                    "Hydesq – New User Account",
+                    null,
+                    `${email} pass: ${pssword} companySlug: ${company1.slug}`,
+                    null
+                  );
                 }
-              }
-            );
-          });
-        }
-      );
-    });
-    return res.status(200).send({ res: "user sign-up successfuly" });
-  } else {
-    return res.status(200).send({ res: "user count exceeded" });
+              );
+              await Departments.findOneAndUpdate(
+                { _id: departm.id },
+                { users: departm.users + 1 },
+                (err, data) => {
+                  if (err) {
+                    res.status(500).send({ message: err });
+                    return;
+                  }
+                }
+              );
+            });
+          }
+        );
+      });
+      return res.status(200).send({ res: "user sign-up successfuly" });
+    } else {
+      return res.status(200).send({ res: "user count exceeded" });
+    }
+  } catch (error) {
+    return res.status(200).send({ message: error });
   }
-}catch(error){
-  return res.status(200).send({ message: error });
-}
 };
 
 exports.userLoginIn = async (req, res) => {
@@ -706,7 +746,7 @@ exports.getAllProfileusers = async (req, res) => {
       const seating = await Seat.findOne({
         _id: ele?.reservation?.allocatedDesk,
       });
-      
+
       const flooring = await Floor.findOne({ _id: ele?.reservation?.floor });
       const {
         attendance,
@@ -727,9 +767,6 @@ exports.getAllProfileusers = async (req, res) => {
         departments: department,
       });
 
-      
-
-      
       return {
         attendanceId: attendance._id,
         departmentId: departIntermed._id,
@@ -751,7 +788,10 @@ exports.getAllProfileusers = async (req, res) => {
         allocatedDate: seating ? bookDate : "",
         seatName: seating ? seatName : "",
         floorInfo: { floorName: flooring?.name, floorId: flooring?.id },
-        seatInfo: seating && seatName && seating?.seats.length > 0 ? seating.seats[0][seatName] : null,
+        seatInfo:
+          seating && seatName && seating?.seats.length > 0
+            ? seating.seats[0][seatName]
+            : null,
         seat_Id: seating ? seating.id : null,
       };
     });

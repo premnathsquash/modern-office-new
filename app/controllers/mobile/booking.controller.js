@@ -7,7 +7,6 @@ const User = db.user;
 const Seat = db.seats;
 const Booking = db.booking;
 const LeaderBoard = db.leaderBoard;
-const mongoose = db.mongoose;
 
 exports.booking = async (req, res) => {
   try {
@@ -26,7 +25,8 @@ exports.booking = async (req, res) => {
     const date = new Date(new Date(from).setHours(0, 0, 0, 0));
     const date2 = new Date(from).toLocaleTimeString();
     const date3 = new Date(to).toLocaleTimeString();
-    //const booking = await Booking.findOne({profile: user.id, company: company.id, seatBook: seat.id, seat: bookedSeat,})
+    //const booking = await Booking.findOne({company: company.id, seatBook: seat.id, seat: bookedSeat,})
+
     if (seat.seats[0][bookedSeat].available) {
       const booking = new Booking({
         profile: user.id,
@@ -51,37 +51,7 @@ exports.booking = async (req, res) => {
           res.status(500).send({ message: err });
           return;
         }
-        const checkSeat1 = [];
-        const checkSeat2 = [];
-        Object.entries(seat.seats[0]).forEach((ele) => {
-          const [key, value] = ele;
-          if (key == bookedSeat) {
-            const newValue = {
-              ...value,
-              timesBooked: value.timesBooked + 1,
-              available: false,
-            };
-            checkSeat1.push(newValue);
-          } else {
-            checkSeat2.push({ ...value, available: value.available ?? true });
-          }
-        });
-        const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
-          (a, v) => ({ ...a, [v.name]: v }),
-          {}
-        );
-        await Seat.findOneAndUpdate(
-          { _id: user.reservation.allocatedDesk },
-          {
-            seats: [{ ...changesinObj }],
-          },
-          (err1, data1) => {
-            if (err1) {
-              res.status(500).send({ message: err1 });
-              return;
-            }
-          }
-        );
+        
         await Profile.findOneAndUpdate(
           { _id: req.userId },
           {
