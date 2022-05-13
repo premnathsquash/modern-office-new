@@ -368,7 +368,6 @@ exports.userSignup = async (req, res) => {
           allocatedDesk: seatId,
           floor: floorId,
           seatName: seatName,
-          bookDate: Date.now(),
         },
       });
       Role.find(

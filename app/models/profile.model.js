@@ -20,7 +20,6 @@ const Profile = mongoose.model(
         ref: "Floor",
       },
       seatName: String,
-      bookDate: Date,
       booking: [
         {
           type: mongoose.Schema.Types.ObjectId,
