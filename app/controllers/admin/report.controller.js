@@ -51,3 +51,4 @@ exports.peakDays = async (req, res) => {
     return res.json({ message: err });
   }
 };
+exports.totalOcc = async (req, res) => {}

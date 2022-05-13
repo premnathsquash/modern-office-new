@@ -19,9 +19,20 @@ module.exports = function (app) {
   );
 
   app.get(
+    "/reports/client/total-occ",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.totalOcc
+  );
+
+  app.get(
     "/reports/admin/peak-days/:id",
     [authJwt.verifyToken, authJwt.isAdmin],
     controller1.peakDays
+  );
+  app.get(
+    "/reports/admin/total-occ/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller1.totalOcc
   );
 
   app.use(errors());

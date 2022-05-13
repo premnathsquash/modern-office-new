@@ -53,7 +53,7 @@ exports.booking = async (req, res) => {
       Object.entries(seat.seats[0]).forEach((ele) => {
         const [key, value] = ele;
         if (key == bookedSeat) {
-          const newValue = { ...value, timesBooked: value.timesBooked + 1 };
+          const newValue = { ...value, timesBooked: value.timesBooked + 1, available: true };
 
           checkSeat1.push(newValue);
         } else {
