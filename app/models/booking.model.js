@@ -37,6 +37,22 @@ const Booking = mongoose.model(
           type: Boolean,
           default: false,
         },
+        approved: {
+          type: Boolean,
+          default: false,
+        },
+        available:{
+          type: Boolean,
+          default: false,
+        },
+        booked:{
+          type: Boolean,
+          default: false,
+        },
+        standBy:{
+          type: Boolean,
+          default: false,
+        },
         recurrence: String,
         recurrenceDays: [{
           type: String,

@@ -41,6 +41,7 @@ require("./app/routes/dashboard.routes")(app);
 require("./app/routes/reedeem.routes")(app);
 require("./app/routes/reports.route")(app);
 require("./app/routes/web.notification.route")(app);
+require("./app/routes/mobile.notification.route")(app);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
