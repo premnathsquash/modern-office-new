@@ -26,8 +26,8 @@ exports.booking = async (req, res) => {
     const date = new Date(new Date(from).setHours(0, 0, 0, 0));
     const date2 = new Date(from).toLocaleTimeString();
     const date3 = new Date(to).toLocaleTimeString();
-    const booking = await Booking.findOne({profile: user.id, company: company.id, seatBook: seat.id, seat: bookedSeat,})
-    if (!seat.seats[0][bookedSeat].available) {
+    //const booking = await Booking.findOne({profile: user.id, company: company.id, seatBook: seat.id, seat: bookedSeat,})
+    if (seat.seats[0][bookedSeat].available) {
       const booking = new Booking({
         profile: user.id,
         company: company.id,
@@ -59,11 +59,11 @@ exports.booking = async (req, res) => {
             const newValue = {
               ...value,
               timesBooked: value.timesBooked + 1,
-              available: value.available ?? false,
+              available: false,
             };
             checkSeat1.push(newValue);
           } else {
-            checkSeat2.push({ ...value, available: true });
+            checkSeat2.push({ ...value, available: value.available ?? true });
           }
         });
         const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
