@@ -26,6 +26,7 @@ exports.booking = async (req, res) => {
     const date = new Date(new Date(from).setHours(0, 0, 0, 0));
     const date2 = new Date(from).toLocaleTimeString();
     const date3 = new Date(to).toLocaleTimeString();
+    if(!seat.seats[0][bookedSeat].available){
     const booking = new Booking({
       profile: user.id,
       company: company.id,
@@ -43,6 +44,7 @@ exports.booking = async (req, res) => {
         recurrenceDays: recurrenceDays ?? [],
       },
     });
+    
     booking.save(async (err, data) => {
       if (err) {
         res.status(500).send({ message: err });
@@ -53,8 +55,7 @@ exports.booking = async (req, res) => {
       Object.entries(seat.seats[0]).forEach((ele) => {
         const [key, value] = ele;
         if (key == bookedSeat) {
-          const newValue = { ...value, timesBooked: value.timesBooked + 1, available: false };
-
+          const newValue = { ...value, timesBooked: value.timesBooked + 1, available: value.available ?? false };
           checkSeat1.push(newValue);
         } else {
           checkSeat2.push({...value, available: true});
@@ -233,6 +234,11 @@ exports.booking = async (req, res) => {
         }
       );
     });
+  }else{
+    return res.send({
+      message: "Booking not possible since already seat is booked",
+    });
+  }
   } catch (error) {
     return res.status(500).send({ message: error });
   }
