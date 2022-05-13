@@ -26,6 +26,7 @@ exports.booking = async (req, res) => {
     const date = new Date(new Date(from).setHours(0, 0, 0, 0));
     const date2 = new Date(from).toLocaleTimeString();
     const date3 = new Date(to).toLocaleTimeString();
+    const booking = await Booking.findOne({profile: user.id, company: company.id, seatBook: seat.id, seat: bookedSeat,})
     if (!seat.seats[0][bookedSeat].available) {
       const booking = new Booking({
         profile: user.id,
