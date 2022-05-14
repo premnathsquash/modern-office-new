@@ -168,6 +168,7 @@ exports.booking = async (req, res) => {
                     const newValue = {
                       ...value,
                       timesBooked: value.timesBooked + 1,
+                      available: false
                     };
                     checkSeat1.push(newValue);
                   } else {
