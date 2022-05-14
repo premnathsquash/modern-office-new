@@ -28,7 +28,6 @@ exports.booking = async (req, res) => {
     const date3 = new Date(to).toLocaleTimeString();
     //const booking = await Booking.findOne({company: company.id, seatBook: seat.id, seat: bookedSeat,})
 
-    if (seat.seats[0][bookedSeat].available) {
       const booking = new Booking({
         profile: user.id,
         company: company.id,
@@ -220,11 +219,7 @@ exports.booking = async (req, res) => {
           }
         );
       });
-    } else {
-      return res.send({
-        message: "Booking not possible since already seat is booked",
-      });
-    }
+    
   } catch (error) {
     return res.status(500).send({ message: error });
   }
