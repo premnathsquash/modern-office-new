@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
-const Notification = mongoose.model(
-  "Notification",
+const Activity = mongoose.model(
+  "Activity",
   new mongoose.Schema(
     {
       email: {
@@ -14,4 +14,4 @@ const Notification = mongoose.model(
   )
 );
 
-module.exports = Notification;
+module.exports = Activity;

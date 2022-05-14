@@ -19,6 +19,7 @@ const Seat = db.seats;
 const Floor = db.floor;
 const OfficeConfigure = db.officeConfigure;
 const Attendance = db.attendance;
+const Notifications = db.notifications;
 const mongoose = db.mongoose;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -36,6 +37,14 @@ exports.signup = async (req, res) => {
   const role = req.body.role || "client";
 
   const officeConfigure = new OfficeConfigure({});
+  const notificatoinConfigure = new Notifications({});
+
+  notificatoinConfigure.save(async(err00, notification)=>{
+    if (err00) {
+      res.status(500).send({ message: err00 });
+      return;
+    }
+    let notificationId = notification.id;
 
   officeConfigure.save(async (err, dataofficeConfigure) => {
     if (err) {
@@ -85,6 +94,7 @@ exports.signup = async (req, res) => {
     });
     user.slug = req.body.companyName;
     user.officeConfigure = officeConfigureId;
+    user.notification = notificationId;
     if (role === "admin") {
       Role.find(
         {
@@ -224,6 +234,8 @@ exports.signup = async (req, res) => {
       }
     );
   });
+})
+
 };
 
 exports.signin = async (req, res) => {

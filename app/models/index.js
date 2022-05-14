@@ -21,6 +21,7 @@ db.promotion = require("./promotion.model");
 db.booking = require("./booking.model");
 db.leaderBoard = require("./leaderBoard.model");
 db.notifications = require("./notifications.model");
+db.activity = require("./activity.model");
 
 db.ROLES = ["user", "admin", "client"];
 
