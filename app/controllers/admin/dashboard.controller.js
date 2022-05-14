@@ -167,8 +167,10 @@ exports.bookingReq = async (req, res) => {
         });
         return { firstName, lastName, dp, result1 };
       });
+
       const data = intermediate1.map((el) => {
-        const result = el.result1.map((el1) => {
+        
+        const result = el?.result1.map((el1) => {
           return {
             recurrenceDays: el1.desk.recurrenceDays,
             cancelled: el1.desk.cancelled,

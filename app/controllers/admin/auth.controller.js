@@ -331,6 +331,7 @@ exports.signin = async (req, res) => {
 
 exports.userSignup = async (req, res) => {
   try {
+    
     const pssword = nanoid();
     const role = "user";
     let fileLocation;
