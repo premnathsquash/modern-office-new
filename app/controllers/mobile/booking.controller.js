@@ -26,86 +26,197 @@ exports.booking = async (req, res) => {
     const date1 = new Date(new Date(to).setHours(0, 0, 0, 0));
     const date2 = new Date(from).toLocaleTimeString();
     const date3 = new Date(to).toLocaleTimeString();
-    //const booking = await Booking.findOne({company: company.id, seatBook: seat.id, seat: bookedSeat,})
 
-      const booking = new Booking({
-        profile: user.id,
-        company: company.id,
-        attendees: attendees ?? [],
-        seatBook: seat.id,
-        seat: bookedSeat,
-        timeZone: timeZone,
-        desk: {
-          dateFrom: new Intl.DateTimeFormat("en-US", { timeZone: timeZone }).format(
-            date
-          ),
-          dateTo: new Intl.DateTimeFormat("en-US", { timeZone: timeZone }).format(
-            date1
-          ),
-          fromTime: date2,
-          toTime: date3,
-          available: false,
-          recurrence: recurrence,
-          recurrenceDays: recurrenceDays ?? [],
-        },
-      });
+    const bookingChecking = await Booking.findOne({
+      company: company.id,
+      seatBook: seat.id,
+      seat: bookedSeat,
+      desk: {
+        dateFrom: new Intl.DateTimeFormat("en-US", {
+          timeZone: timeZone,
+        }).format(date),
+        dateTo: new Intl.DateTimeFormat("en-US", { timeZone: timeZone }).format(
+          date1
+        ),
+        fromTime: date2,
+        toTime: date3,
+      },
+    });
+    
+    console.log(bookingChecking);
+    
+    
 
-      booking.save(async (err, data) => {
-        if (err) {
-          res.status(500).send({ message: err });
-          return;
-        }
+    const booking = new Booking({
+      profile: user.id,
+      company: company.id,
+      attendees: attendees ?? [],
+      seatBook: seat.id,
+      seat: bookedSeat,
+      timeZone: timeZone,
+      desk: {
+        dateFrom: new Intl.DateTimeFormat("en-US", {
+          timeZone: timeZone,
+        }).format(date),
+        dateTo: new Intl.DateTimeFormat("en-US", { timeZone: timeZone }).format(
+          date1
+        ),
+        fromTime: date2,
+        toTime: date3,
+        available: false,
+        recurrence: recurrence,
+        recurrenceDays: recurrenceDays ?? [],
+      },
+    });
 
-        await Profile.findOneAndUpdate(
-          { _id: req.userId },
-          {
-            points:
-              Number.parseFloat(user?.points) + 10.0 ?? Number.parseFloat(10.0),
-            reservation: {
-              ...user.reservation,
-              booking: [...user.reservation.booking, data.id],
-              bookDate: data.createdAt,
-            },
+    booking.save(async (err, data) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+
+      await Profile.findOneAndUpdate(
+        { _id: req.userId },
+        {
+          points:
+            Number.parseFloat(user?.points) + 10.0 ?? Number.parseFloat(10.0),
+          reservation: {
+            ...user.reservation,
+            booking: [...user.reservation.booking, data.id],
+            bookDate: data.createdAt,
           },
-          async (err2, data2) => {
-            if (err2) {
-              res.status(500).send({ message: err2 });
-              return;
-            }
-            const {
-              desk: { date: date1, from, to },
-            } = data;
-            const intial = new Intl.DateTimeFormat("en-US", {
-              year: "numeric",
-              month: "numeric",
-              day: "numeric",
-              hour: "numeric",
-              minute: "numeric",
-              second: "numeric",
-              hourCycle: "h23",
-            }).format(date1);
-            const [day, time] = intial.split(",");
-            const [month, day1, year] = day.split("/");
-            const [hour, minute, second] = time.split(":");
-            const interm = DateTime.utc(
-              parseInt(year),
-              parseInt(month),
-              parseInt(day1),
-              parseInt(hour),
-              parseInt(minute),
-              parseInt(second)
-            );
+        },
+        async (err2, data2) => {
+          if (err2) {
+            res.status(500).send({ message: err2 });
+            return;
+          }
+          const {
+            desk: { date: date1, from, to },
+          } = data;
+          const intial = new Intl.DateTimeFormat("en-US", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+            hourCycle: "h23",
+          }).format(date1);
+          const [day, time] = intial.split(",");
+          const [month, day1, year] = day.split("/");
+          const [hour, minute, second] = time.split(":");
+          const interm = DateTime.utc(
+            parseInt(year),
+            parseInt(month),
+            parseInt(day1),
+            parseInt(hour),
+            parseInt(minute),
+            parseInt(second)
+          );
 
-            const leaderresult = await LeaderBoard.findOne({
+          const leaderresult = await LeaderBoard.findOne({
+            companyId: data.company,
+            profileId: data.profile,
+          });
+
+          if (!leaderresult) {
+            const leaderinter = new LeaderBoard({
               companyId: data.company,
               profileId: data.profile,
+              book: [
+                {
+                  bookId: data.id,
+                  bookedTime: interm.toLocaleString(),
+                  from,
+                  to,
+                  coins: Number.parseFloat(10),
+                },
+              ],
+            });
+            leaderinter.save(async (err3, data3) => {
+              if (err) {
+                res.status(500).send({ message: err3 });
+                return;
+              }
+              if (data3.consecutiveDays) {
+                const profile = await Profile.findOne({ _id: req.userId });
+                const leaderboard = await LeaderBoard.findOne({
+                  companyId: data01.companyId,
+                  profileId: data01.profileId,
+                });
+              }
+            });
+          } else {
+            let days = leaderresult.book.map((ele) => ele.bookedTime);
+            days = days.sort((a, b) =>
+              moment(a, "MM-DD-YYYY").isBefore(moment(b, "MM-DD-YYYY")) ? 1 : -1
+            );
+            days = Array.from(new Set(days));
+
+            let concecutionRange = 0;
+
+            let dateCheck = interm.toLocaleString().split("/");
+
+            let intialConsecuation =
+              `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
+                days[0] ||
+              `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` == days[1];
+
+            let intialConsecuation1 =
+              `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` == days[0];
+
+            if (leaderresult.consecutiveDays && intialConsecuation1) {
+              concecutionRange += 1;
+            }
+
+            await Seat.findOne({ _id: seat.id }, async (err11, data11) => {
+              if (err11) {
+                res.status(500).send({ message: err11 });
+                return;
+              }
+              const checkSeat1 = [];
+              const checkSeat2 = [];
+              Object.entries(data11.seats[0]).forEach((ele) => {
+                const [key, value] = ele;
+                if (key == bookedSeat) {
+                  const newValue = {
+                    ...value,
+                    timesBooked: value.timesBooked + 1,
+                    available: false,
+                  };
+                  checkSeat1.push(newValue);
+                } else {
+                  checkSeat2.push({ ...value });
+                }
+              });
+              const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
+                (a, v) => ({ ...a, [v.name]: v }),
+                {}
+              );
+              await Seat.findOneAndUpdate(
+                { _id: seat.id },
+                {
+                  seats: [{ ...changesinObj }],
+                },
+                (err1, data1) => {
+                  if (err1) {
+                    res.status(500).send({ message: err1 });
+                    return;
+                  }
+                }
+              );
             });
 
-            if (!leaderresult) {
-              const leaderinter = new LeaderBoard({
+            await LeaderBoard.findOneAndUpdate(
+              {
                 companyId: data.company,
                 profileId: data.profile,
+              },
+              {
+                consecutiveDays: intialConsecuation ? 1 + concecutionRange : 0,
                 book: [
+                  ...leaderresult.book,
                   {
                     bookId: data.id,
                     bookedTime: interm.toLocaleString(),
@@ -114,151 +225,52 @@ exports.booking = async (req, res) => {
                     coins: Number.parseFloat(10),
                   },
                 ],
-              });
-              leaderinter.save(async (err3, data3) => {
-                if (err) {
-                  res.status(500).send({ message: err3 });
+              },
+              { new: true },
+              async (err01, data01) => {
+                if (err01) {
+                  res.status(500).send({ message: err01 });
                   return;
                 }
-                if (data3.consecutiveDays) {
+                if (data01.consecutiveDays) {
                   const profile = await Profile.findOne({ _id: req.userId });
                   const leaderboard = await LeaderBoard.findOne({
                     companyId: data01.companyId,
                     profileId: data01.profileId,
                   });
-                }
-              });
-            } else {
-              let days = leaderresult.book.map((ele) => ele.bookedTime);
-              days = days.sort((a, b) =>
-                moment(a, "MM-DD-YYYY").isBefore(moment(b, "MM-DD-YYYY"))
-                  ? 1
-                  : -1
-              );
-              days = Array.from(new Set(days));
-
-              let concecutionRange = 0;
-
-              let dateCheck = interm.toLocaleString().split("/");
-
-              let intialConsecuation =
-                `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
-                  days[0] ||
-                `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
-                  days[1];
-
-              let intialConsecuation1 =
-                `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
-                days[0];
-
-              if (leaderresult.consecutiveDays && intialConsecuation1) {
-                concecutionRange += 1;
-              }
-
-              await Seat.findOne({ _id: seat.id }, async (err11, data11) => {
-                if (err11) {
-                  res.status(500).send({ message: err11 });
-                  return;
-                }
-                const checkSeat1 = [];
-                const checkSeat2 = [];
-                Object.entries(data11.seats[0]).forEach((ele) => {
-                  const [key, value] = ele;
-                  if (key == bookedSeat) {
-                    const newValue = {
-                      ...value,
-                      timesBooked: value.timesBooked + 1,
-                      available: false
-                    };
-                    checkSeat1.push(newValue);
-                  } else {
-                    checkSeat2.push({ ...value, });
-                  }
-                });
-                const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
-                  (a, v) => ({ ...a, [v.name]: v }),
-                  {}
-                );
-                await Seat.findOneAndUpdate(
-                  { _id: seat.id },
-                  {
-                    seats: [{ ...changesinObj }],
-                  },
-                  (err1, data1) => {
-                    if (err1) {
-                      res.status(500).send({ message: err1 });
-                      return;
-                    }
-                  }
-                );
-              });
-
-              await LeaderBoard.findOneAndUpdate(
-                {
-                  companyId: data.company,
-                  profileId: data.profile,
-                },
-                {
-                  consecutiveDays: intialConsecuation
-                    ? 1 + concecutionRange
-                    : 0,
-                  book: [
-                    ...leaderresult.book,
+                  await Profile.findOneAndUpdate(
+                    { _id: req.userId },
                     {
-                      bookId: data.id,
-                      bookedTime: interm.toLocaleString(),
-                      from,
-                      to,
-                      coins: Number.parseFloat(10),
+                      points:
+                        Number.parseFloat(profile.points) +
+                        Number.parseFloat(data01.consecutiveDays * 10),
                     },
-                  ],
-                },
-                { new: true },
-                async (err01, data01) => {
-                  if (err01) {
-                    res.status(500).send({ message: err01 });
-                    return;
-                  }
-                  if (data01.consecutiveDays) {
-                    const profile = await Profile.findOne({ _id: req.userId });
-                    const leaderboard = await LeaderBoard.findOne({
-                      companyId: data01.companyId,
-                      profileId: data01.profileId,
-                    });
-                    await Profile.findOneAndUpdate(
-                      { _id: req.userId },
-                      {
-                        points:
-                          Number.parseFloat(profile.points) +
-                          Number.parseFloat(data01.consecutiveDays * 10),
-                      },
-                      { new: true },
-                      () => {}
-                    );
-                  }
+                    { new: true },
+                    () => {}
+                  );
                 }
-              );
-            }
+              }
+            );
           }
-        );
-        await LeaderBoard.findOne(
-          {
-            companyId: data.company,
-            profileId: data.profile,
-          },
-          (err9, data9) => {
-            if (err9) {
-              res.status(500).send({ message: err9 });
-              return;
-            }
-            return res.send({
-              message: "Booking created successfully",
-              consecutiveDays: data9.consecutiveDays,
-            });
+        }
+      );
+      await LeaderBoard.findOne(
+        {
+          companyId: data.company,
+          profileId: data.profile,
+        },
+        (err9, data9) => {
+          if (err9) {
+            res.status(500).send({ message: err9 });
+            return;
           }
-        );
-      });
-    
+          return res.send({
+            message: "Booking created successfully",
+            consecutiveDays: data9.consecutiveDays,
+          });
+        }
+      );
+    });
   } catch (error) {
     return res.status(500).send({ message: error });
   }

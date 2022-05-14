@@ -140,7 +140,12 @@ exports.workFromHomeOrOffice = async (req, res) => {
 
 exports.bookingReq = async (req, res) => {
   try {
-    const today = moment(new Date().toLocaleDateString(), "mm-dd-yyyy");
+    const {day} = req.query
+    let today = moment(new Date().toLocaleDateString(), "mm-dd-yyyy");
+
+    if(day){
+      today = moment(new Date(day).toLocaleDateString(), "mm-dd-yyyy");
+    }
     const company = await User.findOne({ _id: req.userId })
       .populate({
         path: "profile",
@@ -169,25 +174,27 @@ exports.bookingReq = async (req, res) => {
       });
 
       const data = intermediate1.map((el) => {
-        
         const result = el?.result1.map((el1) => {
           return {
             recurrenceDays: el1.desk.recurrenceDays,
             cancelled: el1.desk.cancelled,
-            date: el1.desk.date,
-            from: el1.desk.from,
-            to: el1.desk.to,
+            approved: el1.desk.approved,
+            booked: el1.desk.booked,
+            dateFrom: el1.desk.dateFrom,
+            dateTo: el1.desk.dateTo,
+            fromTime: el1.desk.fromTime,
+            toTime: el1.desk.toTime,
             recurrence: el1.desk.recurrence,
             seatBook: el1.seatBook.seats["0"][el1.seat1],
           };
         });
         const result1 = result.filter((ele1) => {
           return (
-            moment(ele1.date.toLocaleDateString(), "mm-dd-yyyy").isSame(
+            moment(ele1.dateFrom.toLocaleDateString(), "mm-dd-yyyy").isSame(
               today,
               "day"
             ) ||
-            moment(ele1.date.toLocaleDateString(), "mm-dd-yyyy").isAfter(
+            moment(ele1.dateTo.toLocaleDateString(), "mm-dd-yyyy").isAfter(
               today,
               "day"
             )
