@@ -10,6 +10,10 @@ const Profile = mongoose.model(
     slug: String,
     email: String,
     department: String,
+    notification: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Notification",
+    },
     reservation: {
       allocatedDesk: {
         type: mongoose.Schema.Types.ObjectId,

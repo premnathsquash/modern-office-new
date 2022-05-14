@@ -17,6 +17,10 @@ const User = mongoose.model(
         type: mongoose.Schema.Types.ObjectId,
         ref: "OfficeConfigure",
       },
+      notification: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Notification",
+      },
       profile: [
         {
           type: mongoose.Schema.Types.ObjectId,
