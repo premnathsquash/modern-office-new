@@ -39,203 +39,202 @@ exports.signup = async (req, res) => {
   const officeConfigure = new OfficeConfigure({});
   const notificatoinConfigure = new Notifications({});
 
-  notificatoinConfigure.save(async(err00, notification)=>{
+  notificatoinConfigure.save(async (err00, notification) => {
     if (err00) {
       res.status(500).send({ message: err00 });
       return;
     }
     let notificationId = notification.id;
 
-  officeConfigure.save(async (err, dataofficeConfigure) => {
-    if (err) {
-      res.status(500).send({ message: err });
-      return;
-    }
-    let officeConfigureId = dataofficeConfigure.id;
-
-    let maxCapacity;
-    let minCapacity;
-    switch (productId) {
-      case "prod_LLhE8XyggI9emW":
-      case "prod_LLhDgrkCb3iMdY":
-        minCapacity = 50;
-        maxCapacity = 100;
-        break;
-      case "prod_LLhC9Mi443YJ87":
-      case "prod_LLhB9GC3dIcFJh":
-        minCapacity = 21;
-        maxCapacity = 50;
-        break;
-      case "prod_LLhBtcAFb3UKTj":
-      case "prod_LLhApE4wTig88P":
-        minCapacity = 11;
-        maxCapacity = 20;
-        break;
-      case "prod_LLh91siLUTHKza":
-      case "prod_LLh8yhbpznJKzL":
-        minCapacity = 1;
-        maxCapacity = 10;
-        break;
-      default:
-        minCapacity = 0;
-        maxCapacity = 0;
-        break;
-    }
-
-    const user = new User({
-      username: req.body.username,
-      email: req.body.email,
-      dp: "",
-      password: bcrypt.hashSync(pssword, 8),
-      phone: req.body.phone,
-      job: req.body.job,
-      minSeat: minCapacity,
-      maxSeat: maxCapacity,
-    });
-    user.slug = req.body.companyName;
-    user.officeConfigure = officeConfigureId;
-    user.notification = notificationId;
-    if (role === "admin") {
-      Role.find(
-        {
-          name: { $in: role },
-        },
-        async (err, roles) => {
-          if (err) {
-            res.status(500).send({ message: err });
-            return;
-          }
-          user.roles = mongoose.Types.ObjectId(roles[0]._id);
-          user.save(async (err) => {
-            if (err) {
-              res.status(500).send({ message: err });
-              return;
-            }
-            return res.send({
-              message: "admin was registered successfully!",
-            });
-          });
-        }
-      );
-    }
-
-    if (role === "user") {
-      user.slug = req.body.companyName;
-      Role.find(
-        {
-          name: { $in: role },
-        },
-        async (err, roles) => {
-          if (err) {
-            res.status(500).send({ message: err });
-            return;
-          }
-          user.roles = mongoose.Types.ObjectId(roles[0]._id);
-          user.save(async (err) => {
-            if (err) {
-              res.status(500).send({ message: err });
-              return;
-            }
-            await sendMail(
-              req.body.email,
-              "Hydesq – New Account",
-              null,
-              `${req.body.email} pass: ${pssword} slug: ${req.body.companyName}`,
-              null
-            );
-            return res.send({
-              message: "User was registered successfully!",
-            });
-          });
-        }
-      );
-    }
-
-    user.company = {
-      name: req.body.companyName,
-      companyImg: "",
-      phone: req.body.companyPhone,
-      address: req.body.companyAddress,
-      city: req.body.companyCity,
-      state: req.body.companyState,
-      zip: req.body.companyZip,
-      country: req.body.companyCountry,
-      website: req.body.companyWebsite,
-    };
-
-    Role.find(
-      {
-        name: { $in: role },
-      },
-      async (err, roles) => {
-        if (err) {
-          res.status(500).send({ message: err });
-          return;
-        }
-        user.roles = mongoose.Types.ObjectId(roles[0]._id);
-        if (productId && cardToken && req.body.amount) {
-          const customer = await stripe.customers.create({
-            name: req.body.username,
-            email: req.body.email,
-            phone: req.body.phone,
-          });
-
-          await stripe.customers.createSource(customer.id, {
-            source: cardToken,
-          });
-          const price = await stripe.prices.create({
-            unit_amount: parseInt(req.body.amount, 10) * 100,
-            currency: "aud",
-            recurring: { interval: interval },
-            product: productId,
-          });
-          const subscription = await stripe.subscriptions.create({
-            customer: customer.id,
-            items: [{ price: price.id }],
-            trial_end: trialEnd,
-            cancel_at_period_end: !renewal,
-          });
-          user.stripeSubscriptionId = subscription.id;
-          user.trialEnd = trialEnd;
-          user.stripeCustomerId = customer.id;
-          user.stripeProductPrice.productId = productId;
-          user.stripeProductPrice.priceId = price.id;
-          user.save(async (err, dataValue) => {
-            if (err) {
-              res.status(500).send({ message: err });
-              return;
-            }
-            const admin = await User.findOne({
-              _id: process.env.adminId,
-            });
-            await User.findOneAndUpdate(
-              { _id: process.env.adminId },
-              { connection: [...admin._doc.connection, dataValue._id] },
-              (err1, newData) => {
-                if (err1) {
-                  res.status(500).send({ message: err1 });
-                  return;
-                }
-              }
-            );
-            await sendMail(
-              req.body.email,
-              "Hydesq – New Account",
-              null,
-              `${req.body.email} pass: ${pssword} `,
-              null
-            );
-            return res.send({
-              message: "client was registered successfully!",
-              stripeCustomerId: customer.id,
-            });
-          });
-        }
+    officeConfigure.save(async (err, dataofficeConfigure) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
       }
-    );
-  });
-})
+      let officeConfigureId = dataofficeConfigure.id;
 
+      let maxCapacity;
+      let minCapacity;
+      switch (productId) {
+        case "prod_LLhE8XyggI9emW":
+        case "prod_LLhDgrkCb3iMdY":
+          minCapacity = 50;
+          maxCapacity = 100;
+          break;
+        case "prod_LLhC9Mi443YJ87":
+        case "prod_LLhB9GC3dIcFJh":
+          minCapacity = 21;
+          maxCapacity = 50;
+          break;
+        case "prod_LLhBtcAFb3UKTj":
+        case "prod_LLhApE4wTig88P":
+          minCapacity = 11;
+          maxCapacity = 20;
+          break;
+        case "prod_LLh91siLUTHKza":
+        case "prod_LLh8yhbpznJKzL":
+          minCapacity = 1;
+          maxCapacity = 10;
+          break;
+        default:
+          minCapacity = 0;
+          maxCapacity = 0;
+          break;
+      }
+
+      const user = new User({
+        username: req.body.username,
+        email: req.body.email,
+        dp: "",
+        password: bcrypt.hashSync(pssword, 8),
+        phone: req.body.phone,
+        job: req.body.job,
+        minSeat: minCapacity,
+        maxSeat: maxCapacity,
+      });
+      user.slug = req.body.companyName;
+      user.officeConfigure = officeConfigureId;
+      user.notification = notificationId;
+      if (role === "admin") {
+        Role.find(
+          {
+            name: { $in: role },
+          },
+          async (err, roles) => {
+            if (err) {
+              res.status(500).send({ message: err });
+              return;
+            }
+            user.roles = mongoose.Types.ObjectId(roles[0]._id);
+            user.save(async (err) => {
+              if (err) {
+                res.status(500).send({ message: err });
+                return;
+              }
+              return res.send({
+                message: "admin was registered successfully!",
+              });
+            });
+          }
+        );
+      }
+
+      if (role === "user") {
+        user.slug = req.body.companyName;
+        Role.find(
+          {
+            name: { $in: role },
+          },
+          async (err, roles) => {
+            if (err) {
+              res.status(500).send({ message: err });
+              return;
+            }
+            user.roles = mongoose.Types.ObjectId(roles[0]._id);
+            user.save(async (err) => {
+              if (err) {
+                res.status(500).send({ message: err });
+                return;
+              }
+              await sendMail(
+                req.body.email,
+                "Hydesq – New Account",
+                null,
+                `${req.body.email} pass: ${pssword} slug: ${req.body.companyName}`,
+                null
+              );
+              return res.send({
+                message: "User was registered successfully!",
+              });
+            });
+          }
+        );
+      }
+
+      user.company = {
+        name: req.body.companyName,
+        companyImg: "",
+        phone: req.body.companyPhone,
+        address: req.body.companyAddress,
+        city: req.body.companyCity,
+        state: req.body.companyState,
+        zip: req.body.companyZip,
+        country: req.body.companyCountry,
+        website: req.body.companyWebsite,
+      };
+
+      Role.find(
+        {
+          name: { $in: role },
+        },
+        async (err, roles) => {
+          if (err) {
+            res.status(500).send({ message: err });
+            return;
+          }
+          user.roles = mongoose.Types.ObjectId(roles[0]._id);
+          if (productId && cardToken && req.body.amount) {
+            const customer = await stripe.customers.create({
+              name: req.body.username,
+              email: req.body.email,
+              phone: req.body.phone,
+            });
+
+            await stripe.customers.createSource(customer.id, {
+              source: cardToken,
+            });
+            const price = await stripe.prices.create({
+              unit_amount: parseInt(req.body.amount, 10) * 100,
+              currency: "aud",
+              recurring: { interval: interval },
+              product: productId,
+            });
+            const subscription = await stripe.subscriptions.create({
+              customer: customer.id,
+              items: [{ price: price.id }],
+              trial_end: trialEnd,
+              cancel_at_period_end: !renewal,
+            });
+            user.stripeSubscriptionId = subscription.id;
+            user.trialEnd = trialEnd;
+            user.stripeCustomerId = customer.id;
+            user.stripeProductPrice.productId = productId;
+            user.stripeProductPrice.priceId = price.id;
+            user.save(async (err, dataValue) => {
+              if (err) {
+                res.status(500).send({ message: err });
+                return;
+              }
+              const admin = await User.findOne({
+                _id: process.env.adminId,
+              });
+              await User.findOneAndUpdate(
+                { _id: process.env.adminId },
+                { connection: [...admin._doc.connection, dataValue._id] },
+                (err1, newData) => {
+                  if (err1) {
+                    res.status(500).send({ message: err1 });
+                    return;
+                  }
+                }
+              );
+              await sendMail(
+                req.body.email,
+                "Hydesq – New Account",
+                null,
+                `${req.body.email} pass: ${pssword} `,
+                null
+              );
+              return res.send({
+                message: "client was registered successfully!",
+                stripeCustomerId: customer.id,
+              });
+            });
+          }
+        }
+      );
+    });
+  });
 };
 
 exports.signin = async (req, res) => {
@@ -331,7 +330,6 @@ exports.signin = async (req, res) => {
 
 exports.userSignup = async (req, res) => {
   try {
-    
     const pssword = nanoid();
     const role = "user";
     let fileLocation;
@@ -364,7 +362,6 @@ exports.userSignup = async (req, res) => {
         if (key == seatName) {
           const newValue = {
             ...value,
-            timesBooked: value.timesBooked + 1,
             available: false,
           };
           checkSeat1.push(newValue);

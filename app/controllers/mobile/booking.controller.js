@@ -154,6 +154,44 @@ exports.booking = async (req, res) => {
               if (leaderresult.consecutiveDays && intialConsecuation1) {
                 concecutionRange += 1;
               }
+
+              await Seat.findOne({ _id: seatId }, async (err11, data11) => {
+                if (err11) {
+                  res.status(500).send({ message: err11 });
+                  return;
+                }
+                const checkSeat1 = [];
+                const checkSeat2 = [];
+                Object.entries(data11.seats[0]).forEach((ele) => {
+                  const [key, value] = ele;
+                  if (key == seatName) {
+                    const newValue = {
+                      ...value,
+                      timesBooked: value.timesBooked + 1,
+                    };
+                    checkSeat1.push(newValue);
+                  } else {
+                    checkSeat2.push({ ...value, });
+                  }
+                });
+                const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
+                  (a, v) => ({ ...a, [v.name]: v }),
+                  {}
+                );
+                await Seat.findOneAndUpdate(
+                  { _id: seatId },
+                  {
+                    seats: [{ ...changesinObj }],
+                  },
+                  (err1, data1) => {
+                    if (err1) {
+                      res.status(500).send({ message: err1 });
+                      return;
+                    }
+                  }
+                );
+              });
+
               await LeaderBoard.findOneAndUpdate(
                 {
                   companyId: data.company,
