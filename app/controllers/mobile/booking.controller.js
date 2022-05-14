@@ -155,7 +155,7 @@ exports.booking = async (req, res) => {
                 concecutionRange += 1;
               }
 
-              await Seat.findOne({ _id: seatId }, async (err11, data11) => {
+              await Seat.findOne({ _id: seat.id }, async (err11, data11) => {
                 if (err11) {
                   res.status(500).send({ message: err11 });
                   return;
@@ -179,7 +179,7 @@ exports.booking = async (req, res) => {
                   {}
                 );
                 await Seat.findOneAndUpdate(
-                  { _id: seatId },
+                  { _id: seat.id },
                   {
                     seats: [{ ...changesinObj }],
                   },
