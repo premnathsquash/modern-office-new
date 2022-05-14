@@ -164,7 +164,7 @@ exports.booking = async (req, res) => {
                 const checkSeat2 = [];
                 Object.entries(data11.seats[0]).forEach((ele) => {
                   const [key, value] = ele;
-                  if (key == seatName) {
+                  if (key == bookedSeat) {
                     const newValue = {
                       ...value,
                       timesBooked: value.timesBooked + 1,
