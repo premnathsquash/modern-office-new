@@ -49,7 +49,7 @@ exports.seatinfo = async (req, res) => {
 exports.bookingInfo = async (req, res) => {
   try {
     const { date } = req.params;
-    const date1 = moment(date).format("MM/DD/YYYY");
+    const date1 = moment(date);
     //console.log(date1);
 
     const profile = await User.findOne({ _id: req.userId })
@@ -140,12 +140,13 @@ exports.workFromHomeOrOffice = async (req, res) => {
 
 exports.bookingReq = async (req, res) => {
   try {
-    const {day} = req.query
-    let today = moment(new Date().toLocaleDateString(), "mm-dd-yyyy");
+    const { day } = req.query;
+    let today = moment(new Date().toISOString()).startOf('day').format("MM/DD/YYYY");
 
-    if(day){
-      today = moment(new Date(day).toLocaleDateString(), "mm-dd-yyyy");
+    if (day) {
+      today = moment(new Date(day).toISOString()).startOf('day').format("MM/DD/YYYY");
     }
+
     const company = await User.findOne({ _id: req.userId })
       .populate({
         path: "profile",
@@ -188,19 +189,18 @@ exports.bookingReq = async (req, res) => {
             seatBook: el1.seatBook.seats["0"][el1.seat1],
           };
         });
-        const result1 = result.filter((ele1) => {
-          return (
-            moment(ele1.dateFrom.toLocaleDateString(), "mm-dd-yyyy").isSame(
-              today,
-              "day"
-            ) ||
-            moment(ele1.dateTo.toLocaleDateString(), "mm-dd-yyyy").isAfter(
-              today,
-              "day"
-            )
-          );
-        });
+        let result1;
 
+
+        if (day) {
+          result1 = result.filter((ele1) => {
+            return ele1
+          });
+        } else {
+          result1 = result.filter((ele1) => {
+            return ele1
+          });
+        }
         return {
           username: `${el.firstName} ${el.lastName}`,
           dp: el.dp,
