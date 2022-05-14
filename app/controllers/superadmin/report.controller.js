@@ -63,4 +63,15 @@ exports.peakDays = async (req, res) => {
     return res.json({ res: "Error in read" });
   }
 };
-exports.totalOcc = async (req, res) => {}
+exports.totalOcc = async (req, res) => {
+  try {}catch(error){}
+}
+exports.peakTimesQuiteTimes = async (req, res) => {
+  try {}catch(error){}
+}
+exports.conSingleDesk = async (req, res) => {
+  try {}catch(error){}
+}
+exports.timeUtilization = async (req, res) => {
+  try {}catch(error){}
+}

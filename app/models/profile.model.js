@@ -10,6 +10,22 @@ const Profile = mongoose.model(
     slug: String,
     email: String,
     department: String,
+    darkMode: {
+      type: Boolean,
+      default: false,
+    },
+    emailNotification: {
+      type: Boolean,
+      default: false,
+    },
+    mobileNotification: {
+      type: Boolean,
+      default: false,
+    },
+    onLeave:{
+      type: Boolean,
+      default: false,
+    },
     reservation: {
       allocatedDesk: {
         type: mongoose.Schema.Types.ObjectId,
