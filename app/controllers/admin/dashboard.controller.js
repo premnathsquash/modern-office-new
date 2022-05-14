@@ -141,12 +141,10 @@ exports.workFromHomeOrOffice = async (req, res) => {
 exports.bookingReq = async (req, res) => {
   try {
     const { day } = req.query;
-    let today = moment(new Date().toISOString()).startOf('day').format("MM/DD/YYYY");
-
+    let today = new Date(new Date().toISOString());
     if (day) {
-      today = moment(new Date(day).toISOString()).startOf('day').format("MM/DD/YYYY");
+      today = new Date(new Date(day).toISOString());
     }
-
     const company = await User.findOne({ _id: req.userId })
       .populate({
         path: "profile",
@@ -191,14 +189,25 @@ exports.bookingReq = async (req, res) => {
         });
         let result1;
 
-
         if (day) {
           result1 = result.filter((ele1) => {
-            return ele1
+            return moment(today, "DD/MM/YYYY").isSame(
+              moment(ele1.dateFrom, "DD/MM/YYYY"),
+              "day"
+            );
           });
         } else {
           result1 = result.filter((ele1) => {
-            return ele1
+            return (
+              moment(today, "DD/MM/YYYY").isSame(
+                moment(ele1.dateFrom, "DD/MM/YYYY"),
+                "day"
+              ) ||
+              moment(ele1.dateFrom, "DD/MM/YYYY").isAfter(
+                moment(today, "DD/MM/YYYY"),
+                "day"
+              )
+            );
           });
         }
         return {
