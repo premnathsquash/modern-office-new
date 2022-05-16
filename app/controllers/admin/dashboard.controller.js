@@ -27,7 +27,7 @@ exports.seatinfo = async (req, res) => {
         .flat(2);
       const seatArr = seats
         .map((el) => {
-          const [first] = el.Seats.seats;
+          const [first] = el?.Seats?.seats;
           if (first) {
             const objV = Object.values(first);
             return objV;
