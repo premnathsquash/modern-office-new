@@ -45,10 +45,6 @@ const Booking = mongoose.model(
           type: Boolean,
           default: false,
         },
-        available:{
-          type: Boolean,
-          default: true,
-        },
         booked:{
           type: Boolean,
           default: false,

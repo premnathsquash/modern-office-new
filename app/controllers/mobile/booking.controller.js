@@ -72,7 +72,7 @@ exports.booking = async (req, res) => {
           timeZone: timeZone,
         }).format(date1),
         fromTime: timefrom,
-        available: true,
+        approved: !company.officeConfigure.aprovalWorkflow ? true: false,
         booked: !company.officeConfigure.aprovalWorkflow ? true: false,
         toTime: timeto,
         recurrence: recurrence,

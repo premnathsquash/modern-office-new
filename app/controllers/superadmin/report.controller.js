@@ -59,19 +59,27 @@ exports.peakDays = async (req, res) => {
     } else {
       return res.json({ res: "No data Found" });
     }
-  } catch (err) {
-    return res.json({ res: "Error in read" });
+  } catch (error) {
+    return res.status(500).send({ message: error });
   }
 };
 exports.totalOcc = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
 exports.peakTimesQuiteTimes = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
 exports.conSingleDesk = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
 exports.timeUtilization = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }

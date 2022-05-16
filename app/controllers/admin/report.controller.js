@@ -48,29 +48,47 @@ exports.peakDays = async (req, res) => {
       return res.json({ res: "No data Found" });
     }
   } catch (err) {
-    return res.json({ message: err });
+    return res.status(500).send({ message: error });
   }
 };
 exports.totalOcc = async (req, res) => {
-  try {}catch(error){}
+  try {
+    const startOfWeek =  moment().startOf("isoWeek").format("MM/DD/YYYY");
+    const endOfWeek =  moment().endOf("isoWeek").format("MM/DD/YYYY");
+    
+  }catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
 
 exports.peakTimesQuiteTimes = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
 
 exports.conSingleDesk = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
 exports.timeUtilization = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
 exports.topBootomDesk = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
 exports.shows = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
 exports.userDetailInfo = async (req, res) => {
-  try {}catch(error){}
+  try {}catch(error){
+    return res.status(500).send({ message: error });
+  }
 }
