@@ -14,8 +14,10 @@ const Notification = mongoose.model(
         default: false, },
       profileNotificationUpdateEmail: {type: Boolean,
         default: false, },
-      pushNotifications: { type: mongoose.Schema.Types.Mixed, default: {} },
-      emailNotifications: { type: mongoose.Schema.Types.Mixed, default: {} },
+      pushNotifications: { type: Boolean,
+        default: false,},
+      emailNotifications: { type: Boolean,
+        default: false, },
     },
     { minimize: false, strict: false, timestamps: true }
   )
