@@ -4,13 +4,52 @@ const Notifications = db.notifications;
 
 exports.updateNotification = async (req, res) => {
   try {
+    const {
+      floorPlanNotification50,
+      floorPlanNotification80,
+      floorPlanNotification100,
+      profileNotificationUpdateName,
+      profileNotificationUpdateEmail,
+      pushNotifications,
+      emailNotifications,
+    } = req.body;
     const companyNotification = await User.findOne({
       _id: req.userId,
     }).populate({ path: "notification" });
 
-  
-    console.log(companyNotification);
-    
+    await Notifications.findOneAndUpdate(
+      { _id: companyNotification.notification.id },
+      {
+        floorPlanNotification50:
+          floorPlanNotification50 ??
+          companyNotification?.notification.floorPlanNotification50,
+        floorPlanNotification80:
+          floorPlanNotification80 ??
+          companyNotification?.notification.floorPlanNotification80,
+        floorPlanNotification100:
+          floorPlanNotification100 ??
+          companyNotification?.notification.floorPlanNotification100,
+        profileNotificationUpdateName:
+          profileNotificationUpdateName ??
+          companyNotification?.notification.profileNotificationUpdateName,
+        profileNotificationUpdateEmail:
+          profileNotificationUpdateEmail ??
+          companyNotification?.notification.profileNotificationUpdateEmail,
+        pushNotifications:
+          pushNotifications ??
+          companyNotification?.notification.pushNotifications,
+        emailNotifications:
+          emailNotifications ??
+          companyNotification?.notification.emailNotifications,
+      },
+      { new: true },
+      (err, data) => {
+        if (err) {
+          res.status(500).send({ message: err });
+          return;
+        }
+      }
+    );
   } catch (error) {
     return res.status(500).send({ message: error });
   }
@@ -23,14 +62,19 @@ exports.getNotification = async (req, res) => {
     }).populate({ path: "notification" });
     const result = {
       id: companyNotification?.notification.id,
-      floorPlanNotification50: companyNotification?.notification.floorPlanNotification50,
-      floorPlanNotification80: companyNotification?.notification.floorPlanNotification80,
-      floorPlanNotification100: companyNotification?.notification.floorPlanNotification100,
-      profileNotificationUpdateName: companyNotification?.notification.profileNotificationUpdateName,
-      profileNotificationUpdateEmail: companyNotification?.notification.profileNotificationUpdateEmail,
+      floorPlanNotification50:
+        companyNotification?.notification.floorPlanNotification50,
+      floorPlanNotification80:
+        companyNotification?.notification.floorPlanNotification80,
+      floorPlanNotification100:
+        companyNotification?.notification.floorPlanNotification100,
+      profileNotificationUpdateName:
+        companyNotification?.notification.profileNotificationUpdateName,
+      profileNotificationUpdateEmail:
+        companyNotification?.notification.profileNotificationUpdateEmail,
       pushNotifications: companyNotification?.notification.pushNotifications,
       emailNotifications: companyNotification?.notification.emailNotifications,
-    }
+    };
     return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({ message: error });
