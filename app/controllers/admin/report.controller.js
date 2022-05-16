@@ -11,6 +11,7 @@ exports.peakDays = async (req, res) => {
     const endOfWeek =
       (to && new Date(to).toLocaleDateString()) ??
       moment().endOf("isoWeek").format("MM/DD/YYYY");
+
     const company = await User.findOne({ _id: req.userId }).populate({
       path: "profile",
       populate: {
@@ -26,7 +27,7 @@ exports.peakDays = async (req, res) => {
       });
       result.map((el) => {
         el.bookings.map((ele) => {
-          arr.push(new Date(ele?.desk.date).toLocaleDateString());
+          arr.push(new Date(ele?.desk.dateFrom).toLocaleDateString());
         });
       });
 
@@ -55,7 +56,7 @@ exports.totalOcc = async (req, res) => {
   try {
     const startOfWeek =  moment().startOf("isoWeek").format("MM/DD/YYYY");
     const endOfWeek =  moment().endOf("isoWeek").format("MM/DD/YYYY");
-    
+
   }catch(error){
     return res.status(500).send({ message: error });
   }
