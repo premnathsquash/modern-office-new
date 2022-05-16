@@ -42,6 +42,7 @@ require("./app/routes/reedeem.routes")(app);
 require("./app/routes/reports.route")(app);
 require("./app/routes/web.notification.route")(app);
 require("./app/routes/mobile.notification.route")(app);
+require("./app/routes/notification.settings.routes")(app);
 //require("./app/routes/importexport.route")(app);
 
 app.listen(PORT, () => {
