@@ -37,6 +37,10 @@ const Booking = mongoose.model(
           type: Boolean,
           default: false,
         },
+        noShow: {
+          type: Boolean,
+          default: false,
+        },
         approved: {
           type: Boolean,
           default: false,

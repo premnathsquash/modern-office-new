@@ -58,9 +58,6 @@ exports.totalOcc = async (req, res) => {
 exports.peakTimesQuiteTimes = async (req, res) => {
   try {}catch(error){}
 }
-exports.peakTimesQuiteTimes = async (req, res) => {
-  try {}catch(error){}
-}
 
 exports.conSingleDesk = async (req, res) => {
   try {}catch(error){}

@@ -29,34 +29,29 @@ module.exports = function (app) {
     controller.peakTimesQuiteTimes
   );
   app.get(
-    "/reports/client/total-occ",
+    "/reports/client/con-single-desk",
     [authJwt.verifyToken, authJwt.isClient],
-    controller.totalOcc
+    controller.conSingleDesk
   );
   app.get(
-    "/reports/client/total-occ",
+    "/reports/client/time-utilization",
     [authJwt.verifyToken, authJwt.isClient],
-    controller.totalOcc
+    controller.timeUtilization
   );
   app.get(
-    "/reports/client/total-occ",
+    "/reports/client/top-bootom-desk",
     [authJwt.verifyToken, authJwt.isClient],
-    controller.totalOcc
+    controller.topBootomDesk
   );
   app.get(
-    "/reports/client/total-occ",
+    "/reports/client/shows",
     [authJwt.verifyToken, authJwt.isClient],
-    controller.totalOcc
+    controller.shows
   );
   app.get(
-    "/reports/client/total-occ",
+    "/reports/client/user-detail-nfo",
     [authJwt.verifyToken, authJwt.isClient],
-    controller.totalOcc
-  );
-  app.get(
-    "/reports/client/total-occ",
-    [authJwt.verifyToken, authJwt.isClient],
-    controller.totalOcc
+    controller.userDetailInfo
   );
 
   app.get(
