@@ -56,8 +56,8 @@ exports.updateNotification = async (req, res) => {
           await Profile.findOneAndUpdate(
             { _id: ele._id },
             {
-              emailNotification: emailNotifications,
-              mobileNotification: pushNotifications,
+              emailNotification: emailNotifications ?? ele.emailNotification,
+              mobileNotification: pushNotifications ?? ele.mobileNotification,
             },
             { new: true },
             (err11, data11) => {
@@ -68,6 +68,7 @@ exports.updateNotification = async (req, res) => {
             }
           );
         });
+        return res.status(200).send("Updated successfuly");
       }
     );
   } catch (error) {
