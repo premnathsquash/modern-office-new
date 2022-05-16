@@ -160,6 +160,12 @@ module.exports = function (app) {
   );
 
   app.patch(
+    "/mobile-user-profile-meta",
+    [ authJwt.verifyToken, authJwt.isUser],
+    controller3.updateUserProfile
+  );
+
+  app.patch(
     "/mobile-user-profile-image",
     upload,
     [ authJwt.verifyToken, authJwt.isUser],

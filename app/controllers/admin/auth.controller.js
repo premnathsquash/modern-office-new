@@ -398,7 +398,6 @@ exports.userSignup = async (req, res) => {
       (ele) => mongoose.Types.ObjectId(ele).toHexString() == departm.id
     );
 
-    
     if (company2 && company1.profile.length < company1.maxSeat) {
       attend.save((error, attend1) => {
         if (error) {
@@ -540,12 +539,15 @@ exports.userLoginIn = async (req, res) => {
           planType = "Enterprise";
           break;
       }
-
       return res.status(200).send({
         id: user.id,
         name: `${user.firstName}  ${user.lastName}`,
         email: user.email,
         image: user.dp,
+        emailNotification: user.emailNotification,
+        mobileNotification: user.mobileNotification,
+        onLeave: user.onLeave,
+        darkMode: user.darkMode,
         planType: planType,
         role: user.roles.name.toLowerCase(),
         slug: user.slug,
