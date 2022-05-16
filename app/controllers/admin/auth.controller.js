@@ -392,8 +392,8 @@ exports.userSignup = async (req, res) => {
     const attend = new Attendance({});
     const company1 = await User.findOne({
       _id: req.userId,
-    });
-
+    }).populate({path: "notification"});
+    const company1Notification = company1?.notification
     const company2 = company1.departments.find(
       (ele) => mongoose.Types.ObjectId(ele).toHexString() == departm.id
     );
@@ -414,6 +414,8 @@ exports.userSignup = async (req, res) => {
           reservedSeats,
           makeAdmin,
           userGroup: req.userId,
+          emailNotification: company1Notification?.emailNotifications ?? false,
+          mobileNotification: company1Notification?.pushNotifications ?? false,
           reservation: {
             allocatedDesk: seatId,
             floor: floorId,
