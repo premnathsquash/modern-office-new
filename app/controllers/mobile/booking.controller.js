@@ -22,7 +22,8 @@ exports.booking = async (req, res) => {
     } = req.body;
     let bookingChecking1
     const user = await Profile.findOne({ _id: req.userId });
-    const company = await User.findOne({ _id: user.userGroup });
+    const company = await User.findOne({ _id: user.userGroup }).populate({path: "officeConfigure"});
+
     const seat = await Seat.findOne({ _id: user.reservation.allocatedDesk });
 
     const date = new Date(new Date(from).setHours(0, 0, 0, 0));
@@ -52,7 +53,7 @@ exports.booking = async (req, res) => {
       });
     }
 
-    console.log(timefrom, timeto);
+   
     
 
     //   if (!bookingChecking1) {
@@ -71,6 +72,8 @@ exports.booking = async (req, res) => {
           timeZone: timeZone,
         }).format(date1),
         fromTime: timefrom,
+        available: true,
+        booked: !company.officeConfigure.aprovalWorkflow ? true: false,
         toTime: timeto,
         recurrence: recurrence,
         recurrenceDays: recurrenceDays ?? [],
