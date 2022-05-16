@@ -45,7 +45,7 @@ exports.booking = async (req, res) => {
       );
     });
 
-    if (!bookingChecking1) {
+ //   if (!bookingChecking1) {
       const booking = new Booking({
         profile: user.id,
         company: company.id,
@@ -277,12 +277,12 @@ exports.booking = async (req, res) => {
           }
         );
       });
-    } else {
+   /*  } else {
       return res.send({
         message:
           "Booking not possible with this time since already the seat is allocated on the timeframe",
       });
-    }
+    } */
   } catch (error) {
     return res.status(500).send({ message: error });
   }
