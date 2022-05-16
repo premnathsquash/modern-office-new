@@ -333,7 +333,7 @@ exports.bookingHist = async (req, res) => {
     const result = user?.reservation?.booking.map((ele) => {
       return {
         attandess: ele.attendees,
-        date: ele.desk.date.toLocaleDateString(),
+        date: ele.desk.dateFrom.toLocaleDateString(),
         desk: ele.desk,
         seat: ele.seatBook.seats["0"][ele.seat],
       };
