@@ -1,5 +1,6 @@
 const db = require("../../models");
 const User = db.user;
+const Profile = db.profile;
 const Notifications = db.notifications;
 
 exports.updateNotification = async (req, res) => {
@@ -43,11 +44,30 @@ exports.updateNotification = async (req, res) => {
           companyNotification?.notification.emailNotifications,
       },
       { new: true },
-      (err, data) => {
+      async (err, data) => {
         if (err) {
           res.status(500).send({ message: err });
           return;
         }
+        const profiles = await User.findOne({
+          _id: req.userId,
+        }).populate({ path: "profile" });
+        profiles.profile.map(async (ele) => {
+          await Profile.findOneAndUpdate(
+            { _id: ele._id },
+            {
+              emailNotification: emailNotifications,
+              mobileNotification: pushNotifications,
+            },
+            { new: true },
+            (err11, data11) => {
+              if (err11) {
+                res.status(500).send({ message: err11 });
+                return;
+              }
+            }
+          );
+        });
       }
     );
   } catch (error) {
