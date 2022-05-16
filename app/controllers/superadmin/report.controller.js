@@ -64,22 +64,70 @@ exports.peakDays = async (req, res) => {
   }
 };
 exports.totalOcc = async (req, res) => {
-  try {}catch(error){
+  try {
+    const startOfWeek = moment().clone().startOf('week');
+    const arrFloor = ["Wall", "Door", "Toilet", "Diagonal Wall"];
+    const weekRange = [];
+    const counts = {};
+    const counts1 = {};
+    let start = 0;
+    while (start < 7) {
+      weekRange.push(moment(startOfWeek).add(start, 'days').format("MM/DD/YYYY"))
+      start++
+    }
+    const admin = await User.findOne({ _id: process.env.adminId });
+    const companyTemp = admin._doc.connection.filter(
+      (el) => el.toString() == req.params.id
+    );
+
+    if (companyTemp) {
+
+      const company = await User.findOne({ _id: companyTemp }).populate({
+        path: "profile",
+        populate: {
+          path: "reservation.booking",
+          populate: [{ model: "Seats", path: "seatBook" }],
+        },
+      });
+      const offices = await Office.find({ slug: company.slug }).populate({
+        path: "floors", populate: {
+          path: "Seats",
+        },
+      })
+
+    }else{
+
+    }
+
+    return res.json({ res: "No data Found" });
+  }catch(error){
     return res.status(500).send({ message: error });
   }
 }
 exports.peakTimesQuiteTimes = async (req, res) => {
-  try {}catch(error){
+  try {
+    const startOfWeek =  moment().startOf("isoWeek").format("MM/DD/YYYY");
+    const endOfWeek =  moment().endOf("isoWeek").format("MM/DD/YYYY");
+    return res.json({ res: "No data Found" });
+  }catch(error){
     return res.status(500).send({ message: error });
   }
 }
 exports.conSingleDesk = async (req, res) => {
-  try {}catch(error){
+  try {
+    const startOfWeek =  moment().startOf("isoWeek").format("MM/DD/YYYY");
+    const endOfWeek =  moment().endOf("isoWeek").format("MM/DD/YYYY");
+    return res.json({ res: "No data Found" });
+  }catch(error){
     return res.status(500).send({ message: error });
   }
 }
 exports.timeUtilization = async (req, res) => {
-  try {}catch(error){
+  try {
+    const startOfWeek =  moment().startOf("isoWeek").format("MM/DD/YYYY");
+    const endOfWeek =  moment().endOf("isoWeek").format("MM/DD/YYYY");
+    return res.json({ res: "No data Found" });
+  }catch(error){
     return res.status(500).send({ message: error });
   }
 }
