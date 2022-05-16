@@ -23,11 +23,61 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isClient],
     controller.totalOcc
   );
+  app.get(
+    "/reports/client/peak-times-quite-times",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.peakTimesQuiteTimes
+  );
+  app.get(
+    "/reports/client/total-occ",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.totalOcc
+  );
+  app.get(
+    "/reports/client/total-occ",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.totalOcc
+  );
+  app.get(
+    "/reports/client/total-occ",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.totalOcc
+  );
+  app.get(
+    "/reports/client/total-occ",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.totalOcc
+  );
+  app.get(
+    "/reports/client/total-occ",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.totalOcc
+  );
+  app.get(
+    "/reports/client/total-occ",
+    [authJwt.verifyToken, authJwt.isClient],
+    controller.totalOcc
+  );
 
   app.get(
     "/reports/admin/peak-days/:id",
     [authJwt.verifyToken, authJwt.isAdmin],
     controller1.peakDays
+  );
+  app.get(
+    "/reports/admin/total-occ/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller1.totalOcc
+  );
+  app.get(
+    "/reports/admin/total-occ/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller1.totalOcc
+  );
+  app.get(
+    "/reports/admin/total-occ/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller1.totalOcc
   );
   app.get(
     "/reports/admin/total-occ/:id",
