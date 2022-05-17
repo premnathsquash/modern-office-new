@@ -19,8 +19,9 @@ exports.peakDays = async (req, res) => {
     const company = admin._doc.connection.filter(
       (el) => el.toString() == req.params.id
     );
-    if (company) {
-      const data = await User.findOne({ _id: company }).populate({
+   
+    if (company[0]) {
+      const data = await User.findOne({ _id: company[0] }).populate({
         path: "profile",
         populate: {
           path: "reservation.booking",
@@ -35,7 +36,7 @@ exports.peakDays = async (req, res) => {
         });
         result.map((el) => {
           el.bookings.map((ele) => {
-            arr.push(new Date(ele?.desk.date).toLocaleDateString());
+            arr.push(new Date(ele?.desk.dateFrom).toLocaleDateString());
           });
         });
 
