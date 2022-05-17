@@ -9,7 +9,7 @@ exports.peakDays = async (req, res) => {
     const { from, to } = req.query;
     const startOfWeek =
       (from && new Date(from).toLocaleDateString()) ??
-      moment().startOf("isoWeek").format("MM/DD/YYYY");
+      moment().clone().weekday(0).format("MM/DD/YYYY");
     const endOfWeek =
       (to && new Date(to).toLocaleDateString()) ??
       moment().endOf("isoWeek").format("MM/DD/YYYY");
