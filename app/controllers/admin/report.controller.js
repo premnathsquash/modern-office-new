@@ -133,7 +133,6 @@ exports.totalOcc = async (req, res) => {
       return res.json({ booked: "No booking Found", });
     }
 
-
   } catch (error) {
     return res.status(500).send({ message: error });
   }
@@ -141,9 +140,64 @@ exports.totalOcc = async (req, res) => {
 
 exports.peakTimesQuiteTimes = async (req, res) => {
   try {
-    const startOfWeek = moment().startOf("isoWeek").format("MM/DD/YYYY");
-    const endOfWeek = moment().endOf("isoWeek").format("MM/DD/YYYY");
-    return res.json({ res: "No data Found" });
+    const startOfWeek = moment().clone().startOf('week');
+    const weekRange = [];
+    const counts = {};
+
+    let start = 0;
+    while (start < 7) {
+      weekRange.push({ date: moment(startOfWeek).add(start, 'days').format("MM/DD/YYYY"), day: moment(startOfWeek).add(start, 'days').format("ddd") })
+      start++
+    }
+    const dates = weekRange.map(el => el.date)
+    const days = weekRange.map(el => el.day)
+    
+    const company = await User.findOne({ _id: req.userId }).populate({
+      path: "profile",
+      populate: {
+        path: "reservation.booking",
+      },
+    });
+    if (company.profile.length > 0) {
+      const temp = company.profile.map(el => {
+
+        return el.reservation.booking.map(el1 => el1)
+      }).filter(el => el).flat(4)
+
+      const temp1 = temp.map(el => {
+        if (dates.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || dates.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
+          return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), toDate: moment(el.desk.dateTo).format("MM/DD/YYYY"), fromTime: moment(el.desk.fromTime, "h:mm:ss A").format("HH:mm:ss"), toTime: moment(el.desk.toTime, "h:mm:ss A").format("HH:mm:ss"), booked: el.desk.booked, seatName: el.seat, seatBook: el.seatBook })
+        } else {
+          return null
+        }
+      }).filter(el => el)
+
+      for (const data of temp1) {
+        counts[data.fromDate] = counts[data.fromDate] ? [{ fromTime: data.fromTime, toTime: data.toTime }, ...counts[data.fromDate]] : [{ fromTime: data.fromTime, toTime: data.toTime }]
+      }
+
+      const checking1 = Object.entries(counts).map(([key, value], i) => {
+        const intermediate = value.map((el, i) => {
+          let occurance = 0
+          if (moment(el["fromTime"], "HH:mm:ss").format("HH") == moment(value[i == value.length - 1 ? 0 : i + 1]["fromTime"], "HH:mm:ss").format("HH")) {
+            const result = { [el["fromTime"]]: occurance + 1  }
+            occurance++
+            return result
+          } else {
+            return { [el["fromTime"]]: 1 }
+          }
+        })
+        
+        return { [days[dates.indexOf(key)]]: intermediate }
+
+      })
+      
+      return res.json(checking1);
+    } else {
+      return res.json({ res: "No data Found" });
+    }
+
+
   } catch (error) {
     return res.status(500).send({ message: error });
   }
