@@ -2,6 +2,8 @@ require("dotenv").config();
 const moment = require("moment");
 const db = require("../../models");
 const User = db.user;
+const Office = db.office;
+const mongoose = db.mongoose;
 
 exports.peakDays = async (req, res) => {
   try {
@@ -89,17 +91,71 @@ exports.totalOcc = async (req, res) => {
           populate: [{ model: "Seats", path: "seatBook" }],
         },
       });
+
       const offices = await Office.find({ slug: company.slug }).populate({
         path: "floors", populate: {
           path: "Seats",
         },
       })
 
+      if (company.profile.length > 0) {
+        const bookings = []
+        company.profile.map((el) => {
+          bookings.push(el?.reservation?.booking);
+        })
+        const bookings1 = bookings.flat(4).map(el => {
+          if (weekRange.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || weekRange.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
+  
+            return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), toDate: moment(el.desk.dateTo).format("MM/DD/YYYY"), booked: el.desk.booked, seatName: el.seat, seatBook: el.seatBook })
+          } else {
+            return (null)
+          }
+        }).filter(el => el)
+  
+        const bookings2 = offices.map(el => {
+          if (el.floors.length > 0) {
+            return el.floors.map(el1 => {
+              const [first] = el1?.Seats?.seats
+              if (first) {
+                return Object.values(first);
+              }
+              return null
+            })
+          }
+        }).filter(el => el).flat(4).filter(el => !arrFloor.includes(el.displayName)).filter(el => el?.available ?? false)
+  
+        for (const data of bookings1) {
+  
+          counts[data.fromDate] = counts[data.fromDate] ? counts[data.fromDate] + 1 : 1
+        }
+  
+        for (const data of bookings1) {
+  
+          counts1[data.fromDate] = bookings2.length - counts[data.fromDate]
+        }
+        return res.json({ booked: counts, avail: counts1 });
+  
+      } else {
+        const bookings2 = offices.map(el => {
+          if (el.floors.length > 0) {
+            return el.floors.map(el1 => {
+              const [first] = el1?.Seats?.seats
+              if (first) {
+                return Object.values(first);
+              }
+              return null
+            })
+          }
+        }).filter(el => el).flat(4).filter(el => !arrFloor.includes(el.displayName)).filter(el => el?.available ?? false)
+        console.log(weekRange);
+        return res.json({ booked: "No booking Found", });
+      }
+
     }else{
 
+      return res.json({ res: "No data Found" });
     }
 
-    return res.json({ res: "No data Found" });
   }catch(error){
     return res.status(500).send({ message: error });
   }
