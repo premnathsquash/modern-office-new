@@ -36,7 +36,7 @@ exports.dashboard = async (req, res) => {
           temp = ele1.reservation.booking.map((range) => {
             return {
               id: range.id,
-              date: new Date(range.desk.date).toISOString().split("T")[0],
+              date: new Date(range.desk.dateFrom).toISOString().split("T")[0],
               timeZone: range.timeZone,
             };
           });
