@@ -113,17 +113,22 @@ exports.totalOcc = async (req, res) => {
           }
         }).filter(el => el)
 
-        const bookings2 = offices.map(el => {
+        let bookings2 = offices.flatMap(el => {
           if (el.floors.length > 0) {
             return el.floors.map(el1 => {
-              const [first] = el1?.Seats?.seats
-              if (first) {
+              if (el1?.Seats?.seats.length > 0) {
+                const [first] = el1?.Seats?.seats
                 return Object.values(first);
+
               }
-              return null
             })
+          } else {
+            return null
           }
-        }).filter(el => el).flat(4).filter(el => !arrFloor.includes(el.displayName)).filter(el => el?.available ?? false)
+        }).flat(4).filter(el => {
+          if (el)
+            return !arrFloor.includes(el.displayName)
+        })
 
         for (const data of bookings1) {
 
@@ -137,19 +142,7 @@ exports.totalOcc = async (req, res) => {
         return res.json({ booked: counts, avail: counts1 });
 
       } else {
-        const bookings2 = offices.map(el => {
-          if (el.floors.length > 0) {
-            return el.floors.map(el1 => {
-              const [first] = el1?.Seats?.seats
-              if (first) {
-                return Object.values(first);
-              }
-              return null
-            })
-          }
-        }).filter(el => el).flat(4).filter(el => !arrFloor.includes(el.displayName)).filter(el => el?.available ?? false)
-        console.log(weekRange);
-        return res.json({ booked: "No booking Found", });
+        return res.json({ booked: "No Data Found", });
       }
 
     } else {
@@ -202,7 +195,7 @@ exports.peakTimesQuiteTimes = async (req, res) => {
         const temp = company.profile.map(el => {
           return el?.reservation?.booking.map(el1 => el1)
         }).filter(el => el).flat(4)
-  
+
         if (temp) {
           const temp1 = temp.map(el => {
             if (dates.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || dates.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
@@ -211,23 +204,23 @@ exports.peakTimesQuiteTimes = async (req, res) => {
               return null
             }
           }).filter(el => el)
-  
+
           for (const data of temp1) {
             counts[data.fromDate] = counts[data.fromDate] ? [{ fromTime: moment(data.fromTime, "HH:mm:ss").format("HH"), toTime: moment(data.toTime, "HH:mm:ss").format("HH") }, ...counts[data.fromDate]] : [{ fromTime: moment(data.fromTime, "HH:mm:ss").format("HH"), toTime: moment(data.toTime, "HH:mm:ss").format("HH") }]
           }
-  
+
           const tempory1 = dates.reduce((a, v) => ({ ...a, [v]: null }), {})
-  
+
           const counts1 = { ...tempory1, ...counts }
-  
+
           const newObj = {}
-  
+
           for (const [key, value] of Object.entries(counts1)) {
             newObj[days[dates.indexOf(key)]] = value;
           }
-  
+
           const tempTimeRange = timeRange.reduce((a, v) => ({ ...a, [v]: 0 }), {});
-  
+
           const checking1 = Object.entries(newObj).flatMap(([key, value], i) => {
             let temp = 0
             const check_1 = value.flatMap((el, i) => {
@@ -236,16 +229,16 @@ exports.peakTimesQuiteTimes = async (req, res) => {
               temp1[el["fromTime"]] = temp
               return temp1
             })
-           
-            if (check_1?.length>0) {
+
+            if (check_1?.length > 0) {
               const changes = check_1[check_1?.length - 1];
               return { [key]: { ...tempTimeRange, ...changes } };
             } else {
               return { [key]: { ...tempTimeRange } };
             }
-  
+
           })
-  
+
           return res.json([...checking1]);
         } else {
           return res.json({ res: "No data Found" });

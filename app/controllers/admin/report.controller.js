@@ -2,6 +2,7 @@ const moment = require("moment");
 const db = require("../../models");
 const User = db.user;
 const Office = db.office;
+const Seat = db.seats;
 const mongoose = db.mongoose;
 
 exports.peakDays = async (req, res) => {
@@ -94,43 +95,34 @@ exports.totalOcc = async (req, res) => {
         }
       }).filter(el => el)
 
-      const bookings2 = offices.map(el => {
+      let bookings2 = offices.flatMap(el => {
         if (el.floors.length > 0) {
           return el.floors.map(el1 => {
-            const [first] = el1?.Seats?.seats
-            if (first) {
+            if (el1?.Seats?.seats.length > 0) {
+              const [first] = el1?.Seats?.seats
               return Object.values(first);
+
             }
-            return null
           })
+        } else {
+          return null
         }
-      }).filter(el => el).flat(4).filter(el => !arrFloor.includes(el.displayName)).filter(el => el?.available ?? false)
+      }).flat(4).filter(el=>{
+        if(el)
+        return !arrFloor.includes(el.displayName)
+      })
 
       for (const data of bookings1) {
 
         counts[data.fromDate] = counts[data.fromDate] ? counts[data.fromDate] + 1 : 1
       }
-
       for (const data of bookings1) {
-
         counts1[data.fromDate] = bookings2.length - counts[data.fromDate]
       }
       return res.json({ booked: counts, avail: counts1 });
 
     } else {
-      const bookings2 = offices.map(el => {
-        if (el.floors.length > 0) {
-          return el.floors.map(el1 => {
-            const [first] = el1?.Seats?.seats
-            if (first) {
-              return Object.values(first);
-            }
-            return null
-          })
-        }
-      }).filter(el => el).flat(4).filter(el => !arrFloor.includes(el.displayName)).filter(el => el?.available ?? false)
-      console.log(weekRange);
-      return res.json({ booked: "No booking Found", });
+      return res.json({ booked: "No Data Found", });
     }
 
   } catch (error) {
@@ -208,8 +200,8 @@ exports.peakTimesQuiteTimes = async (req, res) => {
             temp1[el["fromTime"]] = temp
             return temp1
           })
-         
-          if (check_1?.length>0) {
+
+          if (check_1?.length > 0) {
             const changes = check_1[check_1?.length - 1];
             return { [key]: { ...tempTimeRange, ...changes } };
           } else {
@@ -234,9 +226,39 @@ exports.peakTimesQuiteTimes = async (req, res) => {
 
 exports.conSingleDesk = async (req, res) => {
   try {
-    const startOfWeek = moment().startOf("isoWeek").format("MM/DD/YYYY");
-    const endOfWeek = moment().endOf("isoWeek").format("MM/DD/YYYY");
-    return res.json({ res: "No data Found" });
+    const arr = ["one_seater", "two_seater", "four_seater", "six_seater", "eight_seater", "ten_seater"];
+    const newSet = new Set()
+
+    const company = await User.findOne({ _id: req.userId }).populate({
+      path: "profile",
+      populate: {
+        path: "reservation.booking",
+        populate: [{ model: "Seats", path: "seatBook" }],
+      },
+    })
+    if (company.profile.length > 0) {
+      const temp = company.profile.map(el => {
+        return el.reservation.booking.map(el1 => {
+          newSet.add(el1.seatBook._id)
+          return { seatId: el1.seatBook.id, seatName: el1.seat }
+        })
+      }).flat(4)
+      const seatTemp = [...newSet]
+      const seatTemp1 = seatTemp.map(async (el) => {
+        return await Seat.findOne({ _id: el })
+      })
+      Promise.all(seatTemp1).then(data => {
+        data.map(el => {
+
+        })
+        console.log(temp);
+        //  return tempobj.filter((el) => !arr.includes(el.displayName));
+
+      })
+      return res.json({ res: " data Found" });
+    } else {
+      return res.json({ res: "No data Found" });
+    }
   } catch (error) {
     return res.status(500).send({ message: error });
   }
