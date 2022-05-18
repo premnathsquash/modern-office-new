@@ -249,7 +249,7 @@ exports.conSingleDesk = async (req, res) => {
       })
       Promise.all(seatTemp1).then(data => {
         data.map(el => {
-
+          console.log(el);
         })
         console.log(temp);
         //  return tempobj.filter((el) => !arr.includes(el.displayName));
