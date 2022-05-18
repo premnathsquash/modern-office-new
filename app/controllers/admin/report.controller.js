@@ -107,9 +107,9 @@ exports.totalOcc = async (req, res) => {
         } else {
           return null
         }
-      }).flat(4).filter(el=>{
-        if(el)
-        return !arrFloor.includes(el.displayName)
+      }).flat(4).filter(el => {
+        if (el)
+          return !arrFloor.includes(el.displayName)
       })
 
       for (const data of bookings1) {
@@ -191,7 +191,6 @@ exports.peakTimesQuiteTimes = async (req, res) => {
         }
 
         const tempTimeRange = timeRange.reduce((a, v) => ({ ...a, [v]: 0 }), {});
-
         const checking1 = Object.entries(newObj).flatMap(([key, value], i) => {
           let temp = 0
           const check_1 = value.flatMap((el, i) => {
@@ -200,16 +199,13 @@ exports.peakTimesQuiteTimes = async (req, res) => {
             temp1[el["fromTime"]] = temp
             return temp1
           })
-
           if (check_1?.length > 0) {
             const changes = check_1[check_1?.length - 1];
             return { [key]: { ...tempTimeRange, ...changes } };
           } else {
             return { [key]: { ...tempTimeRange } };
           }
-
         })
-
         return res.json([...checking1]);
       } else {
         return res.json({ res: "No data Found" });
@@ -228,7 +224,6 @@ exports.conSingleDesk = async (req, res) => {
   try {
     const arr = ["one_seater", "two_seater", "four_seater", "six_seater", "eight_seater", "ten_seater"];
     const newSet = new Set()
-
     const company = await User.findOne({ _id: req.userId }).populate({
       path: "profile",
       populate: {
@@ -245,17 +240,16 @@ exports.conSingleDesk = async (req, res) => {
       }).flat(4)
       const seatTemp = [...newSet]
       const seatTemp1 = seatTemp.map(async (el) => {
-        return await Seat.findOne({ _id: el })
+        const v0 = await Seat.findOne({ _id: el })
+        const v1 = temp.filter(el1 => el1.seatId == el.toString())
+        return [v0, v1]
       })
       Promise.all(seatTemp1).then(data => {
-        data.map(el => {
-          console.log(el);
-        })
-        console.log(temp);
-        //  return tempobj.filter((el) => !arr.includes(el.displayName));
-
+      // console.log(data[1].length);
+       //console.log(data[0].seats.filter((el) => arr.includes(el?.type)))
+       //console.log(data[0])
+       return res.json({conference: 20, singleDesk: 60, twoseater: 10, fourseater: 0, sixseater: 0, eightseater: 10, tenseater: 0} );
       })
-      return res.json({ res: " data Found" });
     } else {
       return res.json({ res: "No data Found" });
     }
