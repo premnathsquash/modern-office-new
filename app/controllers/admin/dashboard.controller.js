@@ -39,8 +39,8 @@ exports.seatinfo = async (req, res) => {
         })
         .flat(2);
       const arr = ["Wall", "Door", "Toilet", "Diagonal Wall"];
-      const seat1 = seatArr.filter((el) => !arr.includes(el.displayName));
-      const seat2 = seat1.filter((el) => el.timesBooked > 0);
+      const seat1 = seatArr.filter((el) => !arr.includes(el?.displayName));
+      const seat2 = seat1.filter((el) => el?.timesBooked > 0);
       return res.send({ totalSeats: seat1, bookedSeats: seat2 });
     });
   } catch (err) {
