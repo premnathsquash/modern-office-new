@@ -142,6 +142,7 @@ exports.peakTimesQuiteTimes = async (req, res) => {
   try {
     const startOfWeek = moment().clone().startOf('week');
     const weekRange = [];
+    const timeRange = [];
     const counts = {};
 
     let start = 0;
@@ -151,48 +152,76 @@ exports.peakTimesQuiteTimes = async (req, res) => {
     }
     const dates = weekRange.map(el => el.date)
     const days = weekRange.map(el => el.day)
-    
+
     const company = await User.findOne({ _id: req.userId }).populate({
       path: "profile",
       populate: {
         path: "reservation.booking",
       },
-    });
+    })
+      .populate({ path: "officeConfigure" });
+
+    const startTiming = moment(company.officeConfigure?.TimeFrom ?? "00:00:00", "HH:mm:ss").format("HH")
+    const endTiming = moment(company.officeConfigure?.TimeTo ?? "24:00:00", "HH:mm:ss").format("HH")
+
+    let timingcount = parseInt(startTiming)
+    while (timingcount < (parseInt(endTiming) + 1)) {
+      timeRange.push(timingcount)
+      timingcount++
+    }
+
     if (company.profile.length > 0) {
       const temp = company.profile.map(el => {
-
-        return el.reservation.booking.map(el1 => el1)
+        return el?.reservation?.booking.map(el1 => el1)
       }).filter(el => el).flat(4)
 
-      const temp1 = temp.map(el => {
-        if (dates.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || dates.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
-          return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), toDate: moment(el.desk.dateTo).format("MM/DD/YYYY"), fromTime: moment(el.desk.fromTime, "h:mm:ss A").format("HH:mm:ss"), toTime: moment(el.desk.toTime, "h:mm:ss A").format("HH:mm:ss"), booked: el.desk.booked, seatName: el.seat, seatBook: el.seatBook })
-        } else {
-          return null
-        }
-      }).filter(el => el)
-
-      for (const data of temp1) {
-        counts[data.fromDate] = counts[data.fromDate] ? [{ fromTime: data.fromTime, toTime: data.toTime }, ...counts[data.fromDate]] : [{ fromTime: data.fromTime, toTime: data.toTime }]
-      }
-
-      const checking1 = Object.entries(counts).map(([key, value], i) => {
-        const intermediate = value.map((el, i) => {
-          let occurance = 0
-          if (moment(el["fromTime"], "HH:mm:ss").format("HH") == moment(value[i == value.length - 1 ? 0 : i + 1]["fromTime"], "HH:mm:ss").format("HH")) {
-            const result = { [el["fromTime"]]: occurance + 1  }
-            occurance++
-            return result
+      if (temp) {
+        const temp1 = temp.map(el => {
+          if (dates.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || dates.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
+            return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), toDate: moment(el.desk.dateTo).format("MM/DD/YYYY"), fromTime: moment(el.desk.fromTime, "h:mm:ss A").format("HH:mm:ss"), toTime: moment(el.desk.toTime, "h:mm:ss A").format("HH:mm:ss"), booked: el.desk.booked, seatName: el.seat, seatBook: el.seatBook })
           } else {
-            return { [el["fromTime"]]: 1 }
+            return null
           }
-        })
-        
-        return { [days[dates.indexOf(key)]]: intermediate }
+        }).filter(el => el)
 
-      })
-      
-      return res.json(checking1);
+        for (const data of temp1) {
+          counts[data.fromDate] = counts[data.fromDate] ? [{ fromTime: moment(data.fromTime, "HH:mm:ss").format("HH"), toTime: moment(data.toTime, "HH:mm:ss").format("HH") }, ...counts[data.fromDate]] : [{ fromTime: moment(data.fromTime, "HH:mm:ss").format("HH"), toTime: moment(data.toTime, "HH:mm:ss").format("HH") }]
+        }
+
+        const tempory1 = dates.reduce((a, v) => ({ ...a, [v]: null }), {})
+
+        const counts1 = { ...tempory1, ...counts }
+
+        const newObj = {}
+
+        for (const [key, value] of Object.entries(counts1)) {
+          newObj[days[dates.indexOf(key)]] = value;
+        }
+
+        const tempTimeRange = timeRange.reduce((a, v) => ({ ...a, [v]: 0 }), {});
+
+        const checking1 = Object.entries(newObj).flatMap(([key, value], i) => {
+          let temp = 0
+          const check_1 = value.flatMap((el, i) => {
+            let temp1 = {}
+            temp++
+            temp1[el["fromTime"]] = temp
+            return temp1
+          })
+         
+          if (check_1?.length>0) {
+            const changes = check_1[check_1?.length - 1];
+            return { [key]: { ...tempTimeRange, ...changes } };
+          } else {
+            return { [key]: { ...tempTimeRange } };
+          }
+
+        })
+
+        return res.json([...checking1]);
+      } else {
+        return res.json({ res: "No data Found" });
+      }
     } else {
       return res.json({ res: "No data Found" });
     }
