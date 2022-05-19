@@ -180,7 +180,7 @@ exports.peakTimesQuiteTimes = async (req, res) => {
         populate: {
           path: "reservation.booking",
         },
-      });
+      }) .populate({ path: "officeConfigure" });;
 
       const startTiming = moment(company.officeConfigure?.TimeFrom ?? "00:00:00", "HH:mm:ss").format("HH")
       const endTiming = moment(company.officeConfigure?.TimeTo ?? "24:00:00", "HH:mm:ss").format("HH")
