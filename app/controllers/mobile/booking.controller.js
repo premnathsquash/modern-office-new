@@ -42,8 +42,6 @@ exports.booking = async (req, res) => {
 
     if (bookingChecking) {
       bookingChecking1 = bookingChecking.filter((el) => {
-        console.log(el);
-
         return (
           new Date(el.desk.dateFrom).toLocaleDateString() == datefrom &&
           new Date(el.desk.dateTo).toLocaleDateString() == dateto &&
@@ -53,9 +51,6 @@ exports.booking = async (req, res) => {
       });
     }
 
-   
-    
-
     //   if (!bookingChecking1) {
     const booking = new Booking({
       profile: user.id,
@@ -63,6 +58,7 @@ exports.booking = async (req, res) => {
       attendees: attendees ?? [],
       seatBook: seat.id,
       seat: bookedSeat,
+      seatType: seatType,
       timeZone: timeZone,
       desk: {
         dateFrom: new Intl.DateTimeFormat("en-US", {

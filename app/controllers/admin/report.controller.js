@@ -208,8 +208,6 @@ exports.peakTimesQuiteTimes = async (req, res) => {
     } else {
       return res.json({ res: "No data Found" });
     }
-
-
   } catch (error) {
     return res.status(500).send({ message: error });
   }
@@ -266,17 +264,72 @@ exports.conSingleDesk = async (req, res) => {
 }
 exports.timeUtilization = async (req, res) => {
   try {
-    const startOfWeek = moment().startOf("isoWeek").format("MM/DD/YYYY");
-    const endOfWeek = moment().endOf("isoWeek").format("MM/DD/YYYY");
-    return res.json({ res: "No data Found" });
+    const startOfWeek = moment().clone().startOf('week');
+    const weekRange = [];
+    const count = {}
+    const result = {}
+    let start = 0;
+    while (start < 7) {
+      weekRange.push({ date: moment(startOfWeek).add(start, 'days').format("MM/DD/YYYY"), day: moment(startOfWeek).add(start, 'days').format("ddd") })
+      start++
+    }
+
+    const dates = weekRange.map(el => el.date)
+    const days = weekRange.map(el => el.day)
+
+    const company = await User.findOne({ _id: req.userId }).populate({
+      path: "profile",
+      populate: {
+        path: "reservation.booking",
+      },
+    })
+      .populate({ path: "officeConfigure" });
+
+    const startOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayFrom)] ?? (new Date()).toISOString()).clone().startOf('week')
+    const endOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayTo)] ?? (new Date()).toISOString()).clone().endOf('week')
+
+    const startTiming = moment(company.officeConfigure?.TimeFrom ?? "00:00:00", "HH:mm:ss").format("HH")
+    const endTiming = moment(company.officeConfigure?.TimeTo ?? "24:00:00", "HH:mm:ss").format("HH")
+
+    const totalTimeInweek = (parseInt(endTiming) - parseInt(startTiming)) * (moment(endOfWeek1, "MM/DD/YYYY").diff(moment(startOfWeek1, "MM/DD/YYYY"), 'days') + 1)
+
+    console.log(totalTimeInweek);
+
+    if (company.profile.length > 0) {
+
+      let temp = company.profile.flatMap(el => {
+        return el?.reservation?.booking.map(el1 => {
+          return ({ info: moment.duration(moment(el1.desk.toTime, 'HH:mm:ss a').diff(moment(el1.desk.fromTime, 'HH:mm:ss a'))), name: el1.seat });
+        })
+      }).flat(4)
+
+      temp = temp.filter(el => (moment(el.info.dateFrom).isBetween(startOfWeek1, endOfWeek1)))
+
+      temp.map(el => {
+        count[el.name] = count[el.name] ? count[el.name] + Math.abs(parseInt(el.info.asHours())) : Math.abs(parseInt(el.info.asHours()))
+      })
+
+      for (let [key, value] of Object.entries(count)) {
+        result[key] = {
+          deskAvaiPercent: parseInt(((totalTimeInweek - value) / totalTimeInweek) * 100),
+          deskBookPercent: parseInt((value / totalTimeInweek) * 100),
+          deskAvaiTime: parseInt(totalTimeInweek - value),
+          deskBookTime: parseInt(value),
+        }
+      }
+
+      return res.json( result);
+    } else {
+      return res.json({ res: "No data Found" });
+    }
   } catch (error) {
     return res.status(500).send({ message: error });
   }
 }
 exports.topBootomDesk = async (req, res) => {
   try {
-    const startOfWeek = moment().startOf("isoWeek").format("MM/DD/YYYY");
-    const endOfWeek = moment().endOf("isoWeek").format("MM/DD/YYYY");
+    const startOfWeek = moment().startOf("isoWeek").format("MM/DD/YYYY").format("MM/DD/YYYY");
+    const endOfWeek = moment().endOf("isoWeek").format("MM/DD/YYYY").format("MM/DD/YYYY");
     return res.json({ res: "No data Found" });
   } catch (error) {
     return res.status(500).send({ message: error });

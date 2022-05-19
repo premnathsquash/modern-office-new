@@ -24,6 +24,7 @@ const Booking = mongoose.model(
       ],
       booked: Boolean,
       seat: String,
+      seatType: String,
       timeZone: {
         type: String,
         default: "Australia/Sydney"
