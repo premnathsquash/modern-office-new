@@ -1,5 +1,6 @@
 const moment = require("moment");
 const db = require("../../models");
+const { listenerCount } = require("../../models/user.model");
 const User = db.user;
 const Office = db.office;
 const Seat = db.seats;
@@ -186,7 +187,7 @@ exports.peakTimesQuiteTimes = async (req, res) => {
 
         const result = Object.keys(tempory1).map(el => {
           const resultObj = []
-           Object.keys(counts).map(el1 => {
+          Object.keys(counts).map(el1 => {
             if (el == el1) {
               let temp = 0
               let tempObj = {}
@@ -195,7 +196,7 @@ exports.peakTimesQuiteTimes = async (req, res) => {
                 temp++
                 tempObj[tempKey] = temp
               })
-              resultObj.push({[days[dates.indexOf(el)]]: { ...tempory1[el], ...tempObj }});
+              resultObj.push({ [days[dates.indexOf(el)]]: { ...tempory1[el], ...tempObj } });
             }
           })
           return resultObj
@@ -217,7 +218,7 @@ exports.peakTimesQuiteTimes = async (req, res) => {
 exports.conSingleDesk = async (req, res) => {
   try {
     const arr = ["one_seater", "two_seater", "four_seater", "six_seater", "eight_seater", "ten_seater"];
-    const newSet = new Set()
+
     const company = await User.findOne({ _id: req.userId }).populate({
       path: "profile",
       populate: {
@@ -225,33 +226,37 @@ exports.conSingleDesk = async (req, res) => {
         populate: [{ model: "Seats", path: "seatBook" }],
       },
     })
+    const offices = await Office.find({ slug: company.slug }).populate({
+      path: "floors", populate: {
+        path: "Seats",
+      },
+    })
+
     if (company.profile.length > 0) {
       const temp = company.profile.map(el => {
         return el.reservation.booking.map(el1 => {
-          newSet.add(el1.seatBook._id)
-          return { seatId: el1.seatBook.id, seatName: el1.seat }
+          return { seatId: el1.seatBook.id, seatName: el1.seat, type: el1?.seatBook?.seats[0][el1?.seat]?.type }
         })
       }).flat(4)
-      const seatTemp = [...newSet]
-      const seatTemp1 = seatTemp.map(async (el) => {
-        const v0 = await Seat.findOne({ _id: el })
-        const v1 = temp.filter(el1 => el1.seatId == el.toString())
-        return [v0, v1]
-      })
-      Promise.all(seatTemp1).then(data => {
-        data.map(el => {
-          const [model, seatings] = (el);
-          //console.log(Obj);
-          const tempor = model.seats.filter(el => {
-            console.log(el?.type);
-            return arr.includes(el?.type)
-          })
 
-          console.log(seatings.length, tempor.length);
+      let temp2 = offices.map(el => {
+        return el.floors.map(el1 => {
+          if (el1?.Seats?.seats)
+            return Object.values(el1?.Seats?.seats[0]);
         })
-
-        return res.json({ conference: 20, singleDesk: 60, twoseater: 10, fourseater: 0, sixseater: 0, eightseater: 10, tenseater: 0 });
       })
+      temp2 = temp2.flat(4).filter(el => el != undefined).filter(d => arr.includes(d.type))
+      const totalSeating = temp2.length
+      const singleSeat = parseInt((temp.filter(d => d.type == "one_seater").length / totalSeating) * 100)
+      const twoSeat = parseInt((temp.filter(d => d.type == "two_seater").length / totalSeating) * 100)
+      const fourSeat = parseInt((temp.filter(d => d.type == "four_seater").length / totalSeating) * 100)
+      const sixSeat = parseInt((temp.filter(d => d.type == "six_seater").length / totalSeating) * 100)
+      const eightSeat = parseInt((temp.filter(d => d.type == "eight_seater").length / totalSeating) * 100)
+      const tenSeat = parseInt((temp.filter(d => d.type == "ten_seater").length / totalSeating) * 100)
+
+
+      return res.json({ conference: twoSeat + fourSeat + sixSeat + eightSeat + tenSeat, singleDesk: singleSeat, twoseater: twoSeat, fourseater: fourSeat, sixseater: sixSeat, eightseater: eightSeat, tenseater: tenSeat });
+
     } else {
       return res.json({ res: "No data Found" });
     }

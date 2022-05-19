@@ -245,9 +245,58 @@ exports.peakTimesQuiteTimes = async (req, res) => {
 }
 exports.conSingleDesk = async (req, res) => {
   try {
-    const startOfWeek = moment().startOf("isoWeek").format("MM/DD/YYYY");
-    const endOfWeek = moment().endOf("isoWeek").format("MM/DD/YYYY");
-    return res.json({ res: "No data Found" });
+    const arr = ["one_seater", "two_seater", "four_seater", "six_seater", "eight_seater", "ten_seater"];
+    const admin = await User.findOne({ _id: process.env.adminId });
+    const companyTemp = admin._doc.connection.filter(
+      (el) => el.toString() == req.params.id
+    );
+
+    if (companyTemp[0]) {
+      const company = await User.findOne({ _id: companyTemp[0] }).populate({
+        path: "profile",
+        populate: {
+          path: "reservation.booking",
+          populate: [{ model: "Seats", path: "seatBook" }],
+        },
+      });
+      const offices = await Office.find({ slug: company.slug }).populate({
+        path: "floors", populate: {
+          path: "Seats",
+        },
+      })
+      if (company.profile.length > 0) {
+        const temp = company.profile.map(el => {
+          return el.reservation.booking.map(el1 => {
+            return { seatId: el1.seatBook.id, seatName: el1.seat, type: el1?.seatBook?.seats[0][el1?.seat]?.type }
+          })
+        }).flat(4)
+
+        let temp2 = offices.map(el => {
+          return el.floors.map(el1 => {
+            if (el1?.Seats?.seats)
+              return Object.values(el1?.Seats?.seats[0]);
+          })
+        })
+        temp2 = temp2.flat(4).filter(el => el != undefined).filter(d => arr.includes(d.type))
+        const totalSeating = temp2.length
+        const singleSeat = parseInt((temp.filter(d => d.type == "one_seater").length / totalSeating) * 100)
+        const twoSeat = parseInt((temp.filter(d => d.type == "two_seater").length / totalSeating) * 100)
+        const fourSeat = parseInt((temp.filter(d => d.type == "four_seater").length / totalSeating) * 100)
+        const sixSeat = parseInt((temp.filter(d => d.type == "six_seater").length / totalSeating) * 100)
+        const eightSeat = parseInt((temp.filter(d => d.type == "eight_seater").length / totalSeating) * 100)
+        const tenSeat = parseInt((temp.filter(d => d.type == "ten_seater").length / totalSeating) * 100)
+
+
+        return res.json({ conference: twoSeat + fourSeat + sixSeat + eightSeat + tenSeat, singleDesk: singleSeat, twoseater: twoSeat, fourseater: fourSeat, sixseater: sixSeat, eightseater: eightSeat, tenseater: tenSeat });
+
+      } else {
+        return res.json({ res: "No data Found" });
+      }
+
+    } else {
+
+      return res.json({ res: "No data Found" });
+    }
   } catch (error) {
     return res.status(500).send({ message: error });
   }
