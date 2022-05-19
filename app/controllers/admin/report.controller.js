@@ -293,8 +293,6 @@ exports.timeUtilization = async (req, res) => {
 
     const totalTimeInweek = (parseInt(endTiming) - parseInt(startTiming)) * (moment(endOfWeek1, "MM/DD/YYYY").diff(moment(startOfWeek1, "MM/DD/YYYY"), 'days') + 1)
 
-    console.log(totalTimeInweek);
-
     if (company.profile.length > 0) {
 
       let temp = company.profile.flatMap(el => {
