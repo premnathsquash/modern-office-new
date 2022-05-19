@@ -162,51 +162,45 @@ exports.peakTimesQuiteTimes = async (req, res) => {
       timingcount++
     }
 
+    const tempTimeRange = timeRange.reduce((a, v) => ({ ...a, [v]: 0 }), {});
+    const tempory1 = dates.reduce((a, v) => ({ ...a, [v]: tempTimeRange }), {})
+
+
     if (company.profile.length > 0) {
-      const temp = company.profile.map(el => {
+      const temp = company.profile.flatMap(el => {
         return el?.reservation?.booking.map(el1 => el1)
-      }).filter(el => el).flat(4)
+      }).flat(4)
 
       if (temp) {
         const temp1 = temp.map(el => {
           if (dates.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || dates.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
-            return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), toDate: moment(el.desk.dateTo).format("MM/DD/YYYY"), fromTime: moment(el.desk.fromTime, "h:mm:ss A").format("HH:mm:ss"), toTime: moment(el.desk.toTime, "h:mm:ss A").format("HH:mm:ss"), booked: el.desk.booked, seatName: el.seat, seatBook: el.seatBook })
+            return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), fromTime: moment(el.desk.fromTime, "h:mm:ss A").format("HH:mm:ss"), toTime: moment(el.desk.toTime, "h:mm:ss A").format("HH:mm:ss") })
           } else {
             return null
           }
-        }).filter(el => el)
+        })
 
         for (const data of temp1) {
           counts[data.fromDate] = counts[data.fromDate] ? [{ fromTime: moment(data.fromTime, "HH:mm:ss").format("HH"), toTime: moment(data.toTime, "HH:mm:ss").format("HH") }, ...counts[data.fromDate]] : [{ fromTime: moment(data.fromTime, "HH:mm:ss").format("HH"), toTime: moment(data.toTime, "HH:mm:ss").format("HH") }]
         }
 
-        const tempory1 = dates.reduce((a, v) => ({ ...a, [v]: null }), {})
-
-        const counts1 = { ...tempory1, ...counts }
-
-        const newObj = {}
-
-        for (const [key, value] of Object.entries(counts1)) {
-          newObj[days[dates.indexOf(key)]] = value;
-        }
-
-        const tempTimeRange = timeRange.reduce((a, v) => ({ ...a, [v]: 0 }), {});
-        const checking1 = Object.entries(newObj).flatMap(([key, value], i) => {
-          let temp = 0
-          const check_1 = value.flatMap((el, i) => {
-            let temp1 = {}
-            temp++
-            temp1[el["fromTime"]] = temp
-            return temp1
+        const result = Object.keys(tempory1).map(el => {
+          const resultObj = []
+           Object.keys(counts).map(el1 => {
+            if (el == el1) {
+              let temp = 0
+              let tempObj = {}
+              counts[el1].flatMap((el2, i) => {
+                const tempKey = el2?.fromTime;
+                temp++
+                tempObj[tempKey] = temp
+              })
+              resultObj.push({[days[dates.indexOf(el)]]: { ...tempory1[el], ...tempObj }});
+            }
           })
-          if (check_1?.length > 0) {
-            const changes = check_1[check_1?.length - 1];
-            return { [key]: { ...tempTimeRange, ...changes } };
-          } else {
-            return { [key]: { ...tempTimeRange } };
-          }
+          return resultObj
         })
-        return res.json([...checking1]);
+        return res.json(result.flat(4));
       } else {
         return res.json({ res: "No data Found" });
       }
@@ -245,10 +239,18 @@ exports.conSingleDesk = async (req, res) => {
         return [v0, v1]
       })
       Promise.all(seatTemp1).then(data => {
-      // console.log(data[1].length);
-       //console.log(data[0].seats.filter((el) => arr.includes(el?.type)))
-       //console.log(data[0])
-       return res.json({conference: 20, singleDesk: 60, twoseater: 10, fourseater: 0, sixseater: 0, eightseater: 10, tenseater: 0} );
+        data.map(el => {
+          const [model, seatings] = (el);
+          //console.log(Obj);
+          const tempor = model.seats.filter(el => {
+            console.log(el?.type);
+            return arr.includes(el?.type)
+          })
+
+          console.log(seatings.length, tempor.length);
+        })
+
+        return res.json({ conference: 20, singleDesk: 60, twoseater: 10, fourseater: 0, sixseater: 0, eightseater: 10, tenseater: 0 });
       })
     } else {
       return res.json({ res: "No data Found" });
