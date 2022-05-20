@@ -67,9 +67,9 @@ exports.peakDays = async (req, res) => {
     switch(term){
       case "month":
         break;
-      case "month":
+      case "custom":
         break;
-      case "month":
+      case "average":
         break;
       default:
         await weekfilter(from, to)
