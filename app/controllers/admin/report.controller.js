@@ -12,9 +12,6 @@ exports.peakDays = async (req, res) => {
       const startOfWeek = moment().clone().weekday(0).format("MM/DD/YYYY");
       const endOfWeek = moment().clone().endOf("isoWeek").format("MM/DD/YYYY");
 
-      console.log(startOfWeek, endOfWeek );
-
-
       const company = await User.findOne({ _id: req.userId }).populate({
         path: "profile",
         populate: {

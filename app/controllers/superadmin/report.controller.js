@@ -11,9 +11,6 @@ exports.peakDays = async (req, res) => {
     const weekfilter = async () => {
       const startOfWeek = moment().clone().weekday(0).format("MM/DD/YYYY");
       const endOfWeek = moment().clone().endOf("isoWeek").format("MM/DD/YYYY");
-
-      console.log(startOfWeek, endOfWeek );
-
       const admin = await User.findOne({ _id: process.env.adminId });
       const company = admin._doc.connection.filter(
         (el) => el.toString() == req.params.id
