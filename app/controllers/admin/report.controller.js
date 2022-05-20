@@ -56,7 +56,17 @@ exports.peakDays = async (req, res) => {
       }
     }
 
-    await weekfilter(from, to)
+    switch(term){
+      case "month":
+        break;
+      case "month":
+        break;
+      case "month":
+        break;
+      default:
+        await weekfilter(from, to)
+        break;
+    }
   } catch (err) {
     return res.status(500).send({ message: error });
   }

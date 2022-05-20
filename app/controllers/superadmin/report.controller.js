@@ -7,7 +7,7 @@ const mongoose = db.mongoose;
 
 exports.peakDays = async (req, res) => {
   try {
-    const { from, to } = req.query;
+    const { from, to, term } = req.query;
     const weekfilter = async (from, to) => {
       const startOfWeek =
         (from && new Date(from).toLocaleDateString()) ??
@@ -64,7 +64,18 @@ exports.peakDays = async (req, res) => {
         return res.json({ res: "No data Found" });
       }
     }
-    await weekfilter(from, to)
+    switch(term){
+      case "month":
+        break;
+      case "month":
+        break;
+      case "month":
+        break;
+      default:
+        await weekfilter(from, to)
+        break;
+    }
+   
   } catch (error) {
     return res.status(500).send({ message: error });
   }
