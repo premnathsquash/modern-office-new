@@ -8,26 +8,25 @@ const mongoose = db.mongoose;
 exports.peakDays = async (req, res) => {
   try {
     const { from, to, term } = req.query;
+    const admin = await User.findOne({ _id: process.env.adminId });
+    const company = admin._doc.connection.filter(
+      (el) => el.toString() == req.params.id
+    );
     const weekfilter = async () => {
       const startOfWeek = moment().clone().weekday(0).format("MM/DD/YYYY");
       const endOfWeek = moment().clone().endOf("isoWeek").format("MM/DD/YYYY");
-      const admin = await User.findOne({ _id: process.env.adminId });
-      const company = admin._doc.connection.filter(
-        (el) => el.toString() == req.params.id
-      );
-
       if (company[0]) {
-        const data = await User.findOne({ _id: company[0] }).populate({
+        const company1 = await User.findOne({ _id: company[0] }).populate({
           path: "profile",
           populate: {
             path: "reservation.booking",
           },
         });
 
-        if (data.profile.length > 0) {
+        if (company1.profile.length > 0) {
           let arr = [];
           const counts = {};
-          const result = data.profile.map((el) => {
+          const result = company1.profile.map((el) => {
             return { profile: el?.id, bookings: el?.reservation?.booking };
           });
           result.map((el) => {

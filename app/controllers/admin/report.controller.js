@@ -8,16 +8,16 @@ const mongoose = db.mongoose;
 exports.peakDays = async (req, res) => {
   try {
     const { from, to, term } = req.query;
+    const company = await User.findOne({ _id: req.userId }).populate({
+      path: "profile",
+      populate: {
+        path: "reservation.booking",
+      },
+    });
     const weekfilter = async () => {
       const startOfWeek = moment().clone().weekday(0).format("MM/DD/YYYY");
       const endOfWeek = moment().clone().endOf("isoWeek").format("MM/DD/YYYY");
-      const company = await User.findOne({ _id: req.userId }).populate({
-        path: "profile",
-        populate: {
-          path: "reservation.booking",
-        },
-      });
-
+      
       if (company.profile.length > 0) {
         let arr = [];
         const counts = {};
@@ -51,16 +51,22 @@ exports.peakDays = async (req, res) => {
       }
     }
 
-    const monthfilter = async () => { }
-    const customfilter = async () => { }
-    const averagefilter = async () => { }
+    const monthfilter = async () => { 
+
+    }
+    const customfilter = async (from, to) => {
+
+     }
+    const averagefilter = async () => { 
+
+    }
 
     switch (term) {
       case "month":
         await monthfilter()
         break;
       case "custom":
-        await customfilter()
+        await customfilter(from, to)
         break;
       case "average":
         await averagefilter()
@@ -499,6 +505,8 @@ exports.userDetailInfo = async (req, res) => {
         )
         return { userName: `${firstName} ${lastName}`, dp: dp, department: department, booked: bookings.length, timespent: timespent, timeremaing: timeremaing, }
       }).flat(4)
+
+      temp = temp.sort((a,b)=>b.booked - a.booked) 
 
       return res.json({ result: temp, totalTime: totalTimeInweek });
     } else {
