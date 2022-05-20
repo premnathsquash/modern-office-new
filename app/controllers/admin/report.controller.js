@@ -17,7 +17,7 @@ exports.peakDays = async (req, res) => {
     const weekfilter = async () => {
       const startOfWeek = moment().clone().weekday(0).format("MM/DD/YYYY");
       const endOfWeek = moment().clone().endOf("isoWeek").format("MM/DD/YYYY");
-      
+
       if (company.profile.length > 0) {
         let arr = [];
         const counts = {};
@@ -41,23 +41,30 @@ exports.peakDays = async (req, res) => {
         for (const num of arr1) {
           counts[num] = counts[num] ? counts[num] + 1 : 1;
         }
-
-
         return res.json(counts);
-
-
       } else {
         return res.json({ res: "No data Found" });
       }
     }
 
-    const monthfilter = async () => { 
-
+    const monthfilter = async () => {
+      const counts = {}
+      const months = {January: 0, February: 0, March: 0, April: 0, May: 0, June: 0, July: 0, August: 0, September: 0, October: 0, November: 0, December : 0 }
+      if (company.profile.length > 0) {
+        company.profile.map((el) => {
+          el?.reservation?.booking.map(el1=>{
+            counts[moment(el1?.desk?.dateFrom).format('MMMM')] = counts[moment(el1?.desk?.dateFrom).format('MMMM')] ? counts[moment(el1?.desk?.dateFrom).format('MMMM')] + 1 : 1
+          })
+        })
+        return res.json({ ...months, ...counts });
+      } else {
+        return res.json({ res: "No data Found" });
+      }
     }
     const customfilter = async (from, to) => {
 
-     }
-    const averagefilter = async () => { 
+    }
+    const averagefilter = async () => {
 
     }
 
@@ -506,7 +513,7 @@ exports.userDetailInfo = async (req, res) => {
         return { userName: `${firstName} ${lastName}`, dp: dp, department: department, booked: bookings.length, timespent: timespent, timeremaing: timeremaing, }
       }).flat(4)
 
-      temp = temp.sort((a,b)=>b.booked - a.booked) 
+      temp = temp.sort((a, b) => b.booked - a.booked)
 
       return res.json({ result: temp, totalTime: totalTimeInweek });
     } else {
