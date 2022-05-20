@@ -7,14 +7,13 @@ const mongoose = db.mongoose;
 
 exports.peakDays = async (req, res) => {
   try {
-    const { from, to } = req.query;
-    const weekfilter = async (from, to) => {
-      const startOfWeek =
-        (from && new Date(from).toLocaleDateString()) ??
-        moment().clone().weekday(0).format("MM/DD/YYYY");
-      const endOfWeek =
-        (to && new Date(to).toLocaleDateString()) ??
-        moment().endOf("isoWeek").format("MM/DD/YYYY");
+    const { from, to, term } = req.query;
+    const weekfilter = async () => {
+      const startOfWeek = moment().clone().weekday(0).format("MM/DD/YYYY");
+      const endOfWeek = moment().clone().endOf("isoWeek").format("MM/DD/YYYY");
+
+      console.log(startOfWeek, endOfWeek );
+
 
       const company = await User.findOne({ _id: req.userId }).populate({
         path: "profile",
@@ -64,10 +63,10 @@ exports.peakDays = async (req, res) => {
       case "average":
         break;
       default:
-        await weekfilter(from, to)
+        await weekfilter()
         break;
     }
-  } catch (err) {
+  } catch (error) {
     return res.status(500).send({ message: error });
   }
 };
