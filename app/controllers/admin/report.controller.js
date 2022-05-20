@@ -376,8 +376,9 @@ exports.topBootomDesk = async (req, res) => {
       checking = checking.map(el=>{
         return {...el, img: seatImage[el.name]};
       })
-      const result = checking.sort((a, b) => b.bookingFreq - a.bookingFreq)
-      return res.json({ top: result.slice(5), bottom: result.slice(-5) });
+      const result = checking.sort((a, b) => b.timeHour - a.timeHour)
+    
+      return res.json({ top: result.slice(0, 5), bottom: result.slice(-5) });
     } else {
       return res.json({ res: "No data Found" });
     }
