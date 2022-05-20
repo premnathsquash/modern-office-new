@@ -459,6 +459,8 @@ exports.userDetailInfo = async (req, res) => {
     })
       .populate({ path: "officeConfigure" });
 
+      console.log(company);
+
     const startOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayFrom)] ?? (new Date()).toISOString()).clone().startOf('week')
     const endOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayTo)] ?? (new Date()).toISOString()).clone().endOf('week')
 

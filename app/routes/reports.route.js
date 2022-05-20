@@ -65,19 +65,19 @@ module.exports = function (app) {
     controller1.totalOcc
   );
   app.get(
-    "/reports/admin/total-occ/:id",
+    "/reports/admin/peak-times-quite-times/:id",
     [authJwt.verifyToken, authJwt.isAdmin],
-    controller1.totalOcc
+    controller1.peakTimesQuiteTimes
   );
   app.get(
-    "/reports/admin/total-occ/:id",
+    "/reports/admin/con-single-desk/:id",
     [authJwt.verifyToken, authJwt.isAdmin],
-    controller1.totalOcc
+    controller1.conSingleDesk
   );
   app.get(
-    "/reports/admin/total-occ/:id",
+    "/reports/admin/time-utilization/:id",
     [authJwt.verifyToken, authJwt.isAdmin],
-    controller1.totalOcc
+    controller1.timeUtilization
   );
 
   app.use(errors());
