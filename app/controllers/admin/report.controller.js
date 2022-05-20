@@ -422,13 +422,13 @@ exports.shows = async (req, res) => {
         return { userName: el.userName, dp: el?.dp, desk: newDesk }
       })
 
-      temp.map(el=>{
-        console.log();
+      temp = temp.map(el=>{
+        const booking = el?.desk.filter(el1=> el1.booked)
+        const noShowing = el?.desk.filter(el1=> el1.cancelled)
+        const {userName, dp} = (el);
+        return {userName, dp, noofbooking: booking.length, noofnoshow:noShowing.length }
       })
-
-      //username, dp, noofbooking, noofnoshow
-
-      return res.json({ top: result.slice(5), bottom: result.slice(-5) });
+      return res.json(temp);
     } else {
       return res.json({ res: "No data Found" });
     }
