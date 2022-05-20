@@ -12,16 +12,17 @@ exports.peakDays = async (req, res) => {
     const company = admin._doc.connection.filter(
       (el) => el.toString() == req.params.id
     );
-    const weekfilter = async () => {
-      const startOfWeek = moment().clone().weekday(0).format("MM/DD/YYYY");
-      const endOfWeek = moment().clone().endOf("isoWeek").format("MM/DD/YYYY");
-      if (company[0]) {
-        const company1 = await User.findOne({ _id: company[0] }).populate({
-          path: "profile",
-          populate: {
-            path: "reservation.booking",
-          },
-        });
+    if (company[0]) {
+      const company1 = await User.findOne({ _id: company[0] }).populate({
+        path: "profile",
+        populate: {
+          path: "reservation.booking",
+        },
+      });
+
+      const weekfilter = async () => {
+        const startOfWeek = moment().clone().weekday(0).format("MM/DD/YYYY");
+        const endOfWeek = moment().clone().endOf("isoWeek").format("MM/DD/YYYY");
 
         if (company1.profile.length > 0) {
           let arr = [];
@@ -54,29 +55,45 @@ exports.peakDays = async (req, res) => {
           }
           return res.json(counts);
         }
-      } else {
-        return res.json({ res: "No data Found" });
       }
-    }
-    const monthfilter = async () => { }
-    const customfilter = async () => { }
-    const averagefilter = async () => { }
+      const monthfilter = async () => {
+        const counts = {}
+        const months = { January: 0, February: 0, March: 0, April: 0, May: 0, June: 0, July: 0, August: 0, September: 0, October: 0, November: 0, December: 0 }
+        if (company1.profile.length > 0) {
+          company1.profile.map((el) => {
+            el?.reservation?.booking.map(el1 => {
+              counts[moment(el1?.desk?.dateFrom).format('MMMM')] = counts[moment(el1?.desk?.dateFrom).format('MMMM')] ? counts[moment(el1?.desk?.dateFrom).format('MMMM')] + 1 : 1
+            })
 
-    switch (term) {
-      case "month":
-        await monthfilter()
-        break;
-      case "custom":
-        await customfilter()
-        break;
-      case "average":
-        await averagefilter()
-        break;
-      default:
-        await weekfilter()
-        break;
+          })
+
+          return res.json({ ...months, ...counts });
+        } else {
+          return res.json({ res: "No data Found" });
+        }
+      }
+      const customfilter = async (from, to) => { }
+      const averagefilter = async () => { }
+
+      switch (term) {
+        case "month":
+          await monthfilter()
+          break;
+        case "custom":
+          await customfilter(from, to)
+          break;
+        case "average":
+          await averagefilter()
+          break;
+        default:
+          await weekfilter()
+          break;
+      }
+
+    } else {
+      return res.json({ res: "No data Found" });
     }
-   
+
   } catch (error) {
     return res.status(500).send({ message: error });
   }
