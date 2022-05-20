@@ -1,6 +1,5 @@
 const moment = require("moment");
 const db = require("../../models");
-const { listenerCount } = require("../../models/user.model");
 const User = db.user;
 const Office = db.office;
 const Seat = db.seats;
