@@ -59,12 +59,19 @@ exports.peakDays = async (req, res) => {
         return res.json({ res: "No data Found" });
       }
     }
-    switch(term){
+    const monthfilter = async () => { }
+    const customfilter = async () => { }
+    const averagefilter = async () => { }
+
+    switch (term) {
       case "month":
+        await monthfilter()
         break;
       case "custom":
+        await customfilter()
         break;
       case "average":
+        await averagefilter()
         break;
       default:
         await weekfilter()
