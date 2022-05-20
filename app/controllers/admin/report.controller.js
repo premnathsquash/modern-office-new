@@ -8,55 +8,55 @@ const mongoose = db.mongoose;
 exports.peakDays = async (req, res) => {
   try {
     const { from, to } = req.query;
-    const weekfilter = (from, to)=>{
-    const startOfWeek =
-      (from && new Date(from).toLocaleDateString()) ??
-      moment().clone().weekday(0).format("MM/DD/YYYY");
-    const endOfWeek =
-      (to && new Date(to).toLocaleDateString()) ??
-      moment().endOf("isoWeek").format("MM/DD/YYYY");
+    const weekfilter = async (from, to) => {
+      const startOfWeek =
+        (from && new Date(from).toLocaleDateString()) ??
+        moment().clone().weekday(0).format("MM/DD/YYYY");
+      const endOfWeek =
+        (to && new Date(to).toLocaleDateString()) ??
+        moment().endOf("isoWeek").format("MM/DD/YYYY");
 
-    const company = await User.findOne({ _id: req.userId }).populate({
-      path: "profile",
-      populate: {
-        path: "reservation.booking",
-      },
-    });
-
-    if (company.profile.length > 0) {
-      let arr = [];
-      const counts = {};
-      const result = company.profile.map((el) => {
-        return { profile: el?.id, bookings: el?.reservation?.booking };
+      const company = await User.findOne({ _id: req.userId }).populate({
+        path: "profile",
+        populate: {
+          path: "reservation.booking",
+        },
       });
-      result.map((el) => {
-        el.bookings.map((ele) => {
-          arr.push(new Date(ele?.desk.dateFrom).toLocaleDateString());
+
+      if (company.profile.length > 0) {
+        let arr = [];
+        const counts = {};
+        const result = company.profile.map((el) => {
+          return { profile: el?.id, bookings: el?.reservation?.booking };
         });
-      });
+        result.map((el) => {
+          el.bookings.map((ele) => {
+            arr.push(new Date(ele?.desk.dateFrom).toLocaleDateString());
+          });
+        });
 
-      const arr1 = arr.filter(
-        (el) =>
-          moment(el, "mm-dd-yyyy").isSame(moment(startOfWeek, "mm-dd-yyyy")) ||
-          moment(el, "mm-dd-yyyy").isAfter(moment(startOfWeek, "mm-dd-yyyy")) &&
-          moment(el, "mm-dd-yyyy").isBefore(moment(endOfWeek, "mm-dd-yyyy")) ||
-          moment(el, "mm-dd-yyyy").isSame(moment(endOfWeek, "mm-dd-yyyy"))
-      );
+        const arr1 = arr.filter(
+          (el) =>
+            moment(el, "mm-dd-yyyy").isSame(moment(startOfWeek, "mm-dd-yyyy")) ||
+            moment(el, "mm-dd-yyyy").isAfter(moment(startOfWeek, "mm-dd-yyyy")) &&
+            moment(el, "mm-dd-yyyy").isBefore(moment(endOfWeek, "mm-dd-yyyy")) ||
+            moment(el, "mm-dd-yyyy").isSame(moment(endOfWeek, "mm-dd-yyyy"))
+        );
 
-      for (const num of arr1) {
-        counts[num] = counts[num] ? counts[num] + 1 : 1;
+        for (const num of arr1) {
+          counts[num] = counts[num] ? counts[num] + 1 : 1;
+        }
+
+
+        return res.json(counts);
+
+
+      } else {
+        return res.json({ res: "No data Found" });
       }
-
-
-      return res.json(counts);
-    
-
-    } else {
-      return res.json({ res: "No data Found" });
     }
-  }
 
-  weekfilter(from, to)
+    await weekfilter(from, to)
   } catch (err) {
     return res.status(500).send({ message: error });
   }
