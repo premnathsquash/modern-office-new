@@ -342,6 +342,118 @@ exports.topBootomDesk = async (req, res) => {
       path: "profile",
       populate: {
         path: "reservation.booking",
+        populate: [{ model: "Seats", path: "seatBook" }],
+      },
+    }).populate({ path: "officeConfigure" });
+
+    const startOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayFrom)] ?? (new Date()).toISOString()).clone().startOf('week')
+    const endOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayTo)] ?? (new Date()).toISOString()).clone().endOf('week')
+
+
+    if (company.profile.length > 0) {
+
+      let temp = company.profile.flatMap(el => {
+        return el?.reservation?.booking.map(el1 => {
+          newSet.add(el1.seat)
+          return ({ info: Math.abs(parseInt(moment.duration(moment(el1.desk.toTime, 'HH:mm:ss a').diff(moment(el1.desk.fromTime, 'HH:mm:ss a'))).asHours())), name: el1.seat, img:el1?.seatBook?.seats[0][el1?.seat]?.image });
+        })
+      }).flat(4)
+
+      temp = temp.filter(el => (moment(el.info.dateFrom).isBetween(startOfWeek1, endOfWeek1)))
+      const seatImage = {}
+      let checking = [...newSet].map(el => {
+        let increment = 0
+        let timeHour = 0
+        temp.map(el1 => {
+          if (el == el1.name) {
+            seatImage[el1.name] =(el1.img)
+            increment++
+            timeHour += el1.info
+          }
+        })
+        return { name: el, timeHour: timeHour, bookingFreq: increment }
+      })
+      checking = checking.map(el=>{
+        return {...el, img: seatImage[el.name]};
+      })
+      const result = checking.sort((a, b) => b.bookingFreq - a.bookingFreq)
+      return res.json({ top: result.slice(5), bottom: result.slice(-5) });
+    } else {
+      return res.json({ res: "No data Found" });
+    }
+  } catch (error) {
+    return res.status(500).send({ message: error });
+  }
+}
+exports.shows = async (req, res) => {
+  try {
+    const startOfWeek = moment().clone().startOf('week');
+    const weekRange = [];
+    let start = 0;
+    while (start < 7) {
+      weekRange.push({ date: moment(startOfWeek).add(start, 'days').format("MM/DD/YYYY"), day: moment(startOfWeek).add(start, 'days').format("ddd") })
+      start++
+    }
+
+    const dates = weekRange.map(el => el.date)
+    const days = weekRange.map(el => el.day)
+
+    const company = await User.findOne({ _id: req.userId }).populate({
+      path: "profile",
+      populate: {
+        path: "reservation.booking",
+      },
+    })
+      .populate({ path: "officeConfigure" });
+
+    const startOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayFrom)] ?? (new Date()).toISOString()).clone().startOf('week')
+    const endOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayTo)] ?? (new Date()).toISOString()).clone().endOf('week')
+
+    if (company.profile.length > 0) {
+      let temp = company.profile.flatMap(el => {
+        const deskResult = el?.reservation?.booking.map(el1 => {
+          return el1.desk
+        })
+        return { userName: `${el?.firstName} ${el?.lastName}`, dp: el?.dp, desk: deskResult }
+      })
+
+      temp = temp.map(el => {
+        const newDesk = el.desk.filter(el1 => (moment(el1.dateFrom).isBetween(startOfWeek1, endOfWeek1)))
+        return { userName: el.userName, dp: el?.dp, desk: newDesk }
+      })
+
+      temp.map(el=>{
+        console.log();
+      })
+
+      //username, dp, noofbooking, noofnoshow
+
+      return res.json({ top: result.slice(5), bottom: result.slice(-5) });
+    } else {
+      return res.json({ res: "No data Found" });
+    }
+  } catch (error) {
+    return res.status(500).send({ message: error });
+  }
+}
+exports.userDetailInfo = async (req, res) => {
+  try {
+    const startOfWeek = moment().clone().startOf('week');
+    const weekRange = [];
+    const newSet = new Set()
+    let start = 0;
+    while (start < 7) {
+      weekRange.push({ date: moment(startOfWeek).add(start, 'days').format("MM/DD/YYYY"), day: moment(startOfWeek).add(start, 'days').format("ddd") })
+      start++
+    }
+
+    const dates = weekRange.map(el => el.date)
+    const days = weekRange.map(el => el.day)
+
+    const company = await User.findOne({ _id: req.userId }).populate({
+      path: "profile",
+      populate: {
+        path: "reservation.booking",
       },
     })
       .populate({ path: "officeConfigure" });
@@ -351,8 +463,6 @@ exports.topBootomDesk = async (req, res) => {
 
     const startTiming = moment(company.officeConfigure?.TimeFrom ?? "00:00:00", "HH:mm:ss").format("HH")
     const endTiming = moment(company.officeConfigure?.TimeTo ?? "24:00:00", "HH:mm:ss").format("HH")
-
-    const totalTimeInweek = (parseInt(endTiming) - parseInt(startTiming)) * (moment(endOfWeek1, "MM/DD/YYYY").diff(moment(startOfWeek1, "MM/DD/YYYY"), 'days') + 1)
 
     if (company.profile.length > 0) {
 
@@ -376,29 +486,14 @@ exports.topBootomDesk = async (req, res) => {
         })
         return { name: el, timeHour: timeHour, bookingFreq: increment }
       })
-      const result = checking.sort((a,b)=>b.bookingFreq-a.bookingFreq)
-      return res.json({top: result.slice(5), bottom: result.slice(-5) });
+      const result = checking.sort((a, b) => b.bookingFreq - a.bookingFreq)
+
+      //username, dp, booked, timespend, timeshow, timeremain, department, proccess(mon-fri)
+
+      return res.json({ top: result.slice(5), bottom: result.slice(-5) });
     } else {
       return res.json({ res: "No data Found" });
     }
-  } catch (error) {
-    return res.status(500).send({ message: error });
-  }
-}
-exports.shows = async (req, res) => {
-  try {
-    const startOfWeek = moment().startOf("isoWeek").format("MM/DD/YYYY");
-    const endOfWeek = moment().endOf("isoWeek").format("MM/DD/YYYY");
-    return res.json({ res: "No data Found" });
-  } catch (error) {
-    return res.status(500).send({ message: error });
-  }
-}
-exports.userDetailInfo = async (req, res) => {
-  try {
-    const startOfWeek = moment().startOf("isoWeek").format("MM/DD/YYYY");
-    const endOfWeek = moment().endOf("isoWeek").format("MM/DD/YYYY");
-    return res.json({ res: "No data Found" });
   } catch (error) {
     return res.status(500).send({ message: error });
   }
