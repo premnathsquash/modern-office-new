@@ -355,7 +355,7 @@ exports.topBootomDesk = async (req, res) => {
       let temp = company.profile.flatMap(el => {
         return el?.reservation?.booking.map(el1 => {
           newSet.add(el1.seat)
-          return ({ info: Math.abs(parseInt(moment.duration(moment(el1.desk.toTime, 'HH:mm:ss a').diff(moment(el1.desk.fromTime, 'HH:mm:ss a'))).asHours())), name: el1.seat, img:el1?.seatBook?.seats[0][el1?.seat]?.image });
+          return ({ info: Math.abs(parseInt(moment.duration(moment(el1.desk.toTime, 'HH:mm:ss a').diff(moment(el1.desk.fromTime, 'HH:mm:ss a'))).asHours())), name: el1.seat, img: el1?.seatBook?.seats[0][el1?.seat]?.image });
         })
       }).flat(4)
 
@@ -366,18 +366,18 @@ exports.topBootomDesk = async (req, res) => {
         let timeHour = 0
         temp.map(el1 => {
           if (el == el1.name) {
-            seatImage[el1.name] =(el1.img)
+            seatImage[el1.name] = (el1.img)
             increment++
             timeHour += el1.info
           }
         })
         return { name: el, timeHour: timeHour, bookingFreq: increment }
       })
-      checking = checking.map(el=>{
-        return {...el, img: seatImage[el.name]};
+      checking = checking.map(el => {
+        return { ...el, img: seatImage[el.name] };
       })
       const result = checking.sort((a, b) => b.timeHour - a.timeHour)
-    
+
       return res.json({ top: result.slice(0, 5), bottom: result.slice(-5) });
     } else {
       return res.json({ res: "No data Found" });
@@ -423,11 +423,11 @@ exports.shows = async (req, res) => {
         return { userName: el.userName, dp: el?.dp, desk: newDesk }
       })
 
-      temp = temp.map(el=>{
-        const booking = el?.desk.filter(el1=> el1.booked)
-        const noShowing = el?.desk.filter(el1=> el1.cancelled)
-        const {userName, dp} = (el);
-        return {userName, dp, noofbooking: booking.length, noofnoshow:noShowing.length }
+      temp = temp.map(el => {
+        const booking = el?.desk.filter(el1 => el1.booked)
+        const noShowing = el?.desk.filter(el1 => el1.cancelled)
+        const { userName, dp } = (el);
+        return { userName, dp, noofbooking: booking.length, noofnoshow: noShowing.length }
       })
       return res.json(temp);
     } else {
@@ -440,6 +440,7 @@ exports.shows = async (req, res) => {
 exports.userDetailInfo = async (req, res) => {
   try {
     const startOfWeek = moment().clone().startOf('week');
+    const today = moment()
     const weekRange = [];
     const newSet = new Set()
     let start = 0;
@@ -459,41 +460,30 @@ exports.userDetailInfo = async (req, res) => {
     })
       .populate({ path: "officeConfigure" });
 
-      console.log(company);
-
     const startOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayFrom)] ?? (new Date()).toISOString()).clone().startOf('week')
     const endOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayTo)] ?? (new Date()).toISOString()).clone().endOf('week')
 
     const startTiming = moment(company.officeConfigure?.TimeFrom ?? "00:00:00", "HH:mm:ss").format("HH")
     const endTiming = moment(company.officeConfigure?.TimeTo ?? "24:00:00", "HH:mm:ss").format("HH")
 
+    const totalTimeInweek = (parseInt(endTiming) - parseInt(startTiming)) * (moment(endOfWeek1, "MM/DD/YYYY").diff(moment(startOfWeek1, "MM/DD/YYYY"), 'days') + 1)
+
     if (company.profile.length > 0) {
 
       let temp = company.profile.flatMap(el => {
-        return el?.reservation?.booking.map(el1 => {
-          newSet.add(el1.seat)
-          return ({ info: Math.abs(parseInt(moment.duration(moment(el1.desk.toTime, 'HH:mm:ss a').diff(moment(el1.desk.fromTime, 'HH:mm:ss a'))).asHours())), name: el1.seat });
-        })
+        const { firstName, lastName, dp, department } = el
+        const bookings = el?.reservation?.booking.map(el1 => el1)
+        let timespent = bookings.filter(el1 => (moment(el1.desk.dateFrom).isBefore(today)))
+        let timeremaing = bookings.filter(el1 => (moment(el1.desk.dateFrom).isBetween(today, endOfWeek1)))
+
+        timespent = timespent.reduce((acc, curr) => Math.abs(parseInt(moment.duration(moment(curr?.desk?.toTime, 'HH:mm:ss a').diff(moment(curr?.desk?.fromTime, 'HH:mm:ss a'))).asHours())), 0
+        )
+        timeremaing = timeremaing.reduce((acc, curr) => Math.abs(parseInt(moment.duration(moment(curr?.desk?.toTime, 'HH:mm:ss a').diff(moment(curr?.desk?.fromTime, 'HH:mm:ss a'))).asHours())), 0
+        )
+        return { userName: `${firstName} ${lastName}`, dp: dp, department: department, booked: bookings.length, timespent: timespent, timeremaing: timeremaing, }
       }).flat(4)
 
-      temp = temp.filter(el => (moment(el.info.dateFrom).isBetween(startOfWeek1, endOfWeek1)))
-
-      const checking = [...newSet].map(el => {
-        let increment = 0
-        let timeHour = 0
-        temp.map(el1 => {
-          if (el == el1.name) {
-            increment++
-            timeHour += el1.info
-          }
-        })
-        return { name: el, timeHour: timeHour, bookingFreq: increment }
-      })
-      const result = checking.sort((a, b) => b.bookingFreq - a.bookingFreq)
-
-      //username, dp, booked, timespend, timeshow, timeremain, department, proccess(mon-fri)
-
-      return res.json({ top: result.slice(5), bottom: result.slice(-5) });
+      return res.json({ result: temp, totalTime: totalTimeInweek });
     } else {
       return res.json({ res: "No data Found" });
     }
