@@ -8,60 +8,63 @@ const mongoose = db.mongoose;
 exports.peakDays = async (req, res) => {
   try {
     const { from, to } = req.query;
-    const startOfWeek =
-      (from && new Date(from).toLocaleDateString()) ??
-      moment().clone().weekday(0).format("MM/DD/YYYY");
-    const endOfWeek =
-      (to && new Date(to).toLocaleDateString()) ??
-      moment().endOf("isoWeek").format("MM/DD/YYYY");
+    const weekfilter = (from, to) => {
+      const startOfWeek =
+        (from && new Date(from).toLocaleDateString()) ??
+        moment().clone().weekday(0).format("MM/DD/YYYY");
+      const endOfWeek =
+        (to && new Date(to).toLocaleDateString()) ??
+        moment().endOf("isoWeek").format("MM/DD/YYYY");
 
-    const admin = await User.findOne({ _id: process.env.adminId });
-    const company = admin._doc.connection.filter(
-      (el) => el.toString() == req.params.id
-    );
+      const admin = await User.findOne({ _id: process.env.adminId });
+      const company = admin._doc.connection.filter(
+        (el) => el.toString() == req.params.id
+      );
 
-    if (company[0]) {
-      const data = await User.findOne({ _id: company[0] }).populate({
-        path: "profile",
-        populate: {
-          path: "reservation.booking",
-        },
-      });
-
-      if (data.profile.length > 0) {
-        let arr = [];
-        const counts = {};
-        const result = data.profile.map((el) => {
-          return { profile: el?.id, bookings: el?.reservation?.booking };
+      if (company[0]) {
+        const data = await User.findOne({ _id: company[0] }).populate({
+          path: "profile",
+          populate: {
+            path: "reservation.booking",
+          },
         });
-        result.map((el) => {
-          el.bookings.map((ele) => {
-            arr.push(new Date(ele?.desk.dateFrom).toLocaleDateString());
+
+        if (data.profile.length > 0) {
+          let arr = [];
+          const counts = {};
+          const result = data.profile.map((el) => {
+            return { profile: el?.id, bookings: el?.reservation?.booking };
           });
-        });
+          result.map((el) => {
+            el.bookings.map((ele) => {
+              arr.push(new Date(ele?.desk.dateFrom).toLocaleDateString());
+            });
+          });
 
-        const arr1 = arr.filter(
-          (el) =>
-            moment(el, "mm-dd-yyyy").isSame(
-              moment(startOfWeek, "mm-dd-yyyy")
-            ) ||
-            (moment(el, "mm-dd-yyyy").isAfter(
-              moment(startOfWeek, "mm-dd-yyyy")
-            ) &&
-              moment(el, "mm-dd-yyyy").isBefore(
-                moment(endOfWeek, "mm-dd-yyyy")
-              )) ||
-            moment(el, "mm-dd-yyyy").isSame(moment(endOfWeek, "mm-dd-yyyy"))
-        );
+          const arr1 = arr.filter(
+            (el) =>
+              moment(el, "mm-dd-yyyy").isSame(
+                moment(startOfWeek, "mm-dd-yyyy")
+              ) ||
+              (moment(el, "mm-dd-yyyy").isAfter(
+                moment(startOfWeek, "mm-dd-yyyy")
+              ) &&
+                moment(el, "mm-dd-yyyy").isBefore(
+                  moment(endOfWeek, "mm-dd-yyyy")
+                )) ||
+              moment(el, "mm-dd-yyyy").isSame(moment(endOfWeek, "mm-dd-yyyy"))
+          );
 
-        for (const num of arr1) {
-          counts[num] = counts[num] ? counts[num] + 1 : 1;
+          for (const num of arr1) {
+            counts[num] = counts[num] ? counts[num] + 1 : 1;
+          }
+          return res.json(counts);
         }
-        return res.json(counts);
+      } else {
+        return res.json({ res: "No data Found" });
       }
-    } else {
-      return res.json({ res: "No data Found" });
     }
+    weekfilter(from, to)
   } catch (error) {
     return res.status(500).send({ message: error });
   }
@@ -180,7 +183,7 @@ exports.peakTimesQuiteTimes = async (req, res) => {
         populate: {
           path: "reservation.booking",
         },
-      }) .populate({ path: "officeConfigure" });;
+      }).populate({ path: "officeConfigure" });;
 
       const startTiming = moment(company.officeConfigure?.TimeFrom ?? "00:00:00", "HH:mm:ss").format("HH")
       const endTiming = moment(company.officeConfigure?.TimeTo ?? "24:00:00", "HH:mm:ss").format("HH")
@@ -330,31 +333,31 @@ exports.timeUtilization = async (req, res) => {
         },
       })
         .populate({ path: "officeConfigure" });
-  
+
       const startOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayFrom)] ?? (new Date()).toISOString()).clone().startOf('week')
       const endOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayTo)] ?? (new Date()).toISOString()).clone().endOf('week')
-  
+
       const startTiming = moment(company.officeConfigure?.TimeFrom ?? "00:00:00", "HH:mm:ss").format("HH")
       const endTiming = moment(company.officeConfigure?.TimeTo ?? "24:00:00", "HH:mm:ss").format("HH")
-  
+
       const totalTimeInweek = (parseInt(endTiming) - parseInt(startTiming)) * (moment(endOfWeek1, "MM/DD/YYYY").diff(moment(startOfWeek1, "MM/DD/YYYY"), 'days') + 1)
-  
+
       console.log(totalTimeInweek);
-  
+
       if (company.profile.length > 0) {
-  
+
         let temp = company.profile.flatMap(el => {
           return el?.reservation?.booking.map(el1 => {
             return ({ info: moment.duration(moment(el1.desk.toTime, 'HH:mm:ss a').diff(moment(el1.desk.fromTime, 'HH:mm:ss a'))), name: el1.seat });
           })
         }).flat(4)
-  
+
         temp = temp.filter(el => (moment(el.info.dateFrom).isBetween(startOfWeek1, endOfWeek1)))
-  
+
         temp.map(el => {
           count[el.name] = count[el.name] ? count[el.name] + Math.abs(parseInt(el.info.asHours())) : Math.abs(parseInt(el.info.asHours()))
         })
-  
+
         for (let [key, value] of Object.entries(count)) {
           result[key] = {
             deskAvaiPercent: parseInt(((totalTimeInweek - value) / totalTimeInweek) * 100),
@@ -363,13 +366,13 @@ exports.timeUtilization = async (req, res) => {
             deskBookTime: parseInt(value),
           }
         }
-  
-        return res.json( result);
+
+        return res.json(result);
       } else {
         return res.json({ res: "No data Found" });
       }
 
-    }else{
+    } else {
       return res.json({ res: "No data Found" });
     }
 
