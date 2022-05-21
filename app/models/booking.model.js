@@ -30,8 +30,8 @@ const Booking = mongoose.model(
         default: "Australia/Sydney"
       },
       desk: {
-        dateFrom: Date,
-        dateTo: Date,
+        dateFrom: String,
+        dateTo: String,
         fromTime: String,
         toTime: String,
         cancelled: {

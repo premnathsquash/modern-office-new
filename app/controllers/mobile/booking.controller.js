@@ -21,38 +21,26 @@ exports.booking = async (req, res) => {
       recurrenceDays,
       timeZone,
     } = req.body;
-    let bookingChecking1
     const user = await Profile.findOne({ _id: req.userId });
-    const company = await User.findOne({ _id: user.userGroup }).populate({path: "officeConfigure"});
-
+    const company = await User.findOne({ _id: user.userGroup }).populate({ path: "officeConfigure" });
     const seat = await Seat.findOne({ _id: user.reservation.allocatedDesk });
+    let bookingChecking1;
+    const date = moment(from).utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISOString()
+    const date1 = moment(to).utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISOString()
 
-    const date = new Date(new Date(from).setHours(0, 0, 0, 0));
-    const date1 = new Date(new Date(to).setHours(0, 0, 0, 0));
-    const datefrom = new Date(from).toLocaleDateString();
-    const dateto = new Date(to).toLocaleDateString();
-    const timefrom = new Date(from).toLocaleTimeString();
-    const timeto = new Date(to).toLocaleTimeString();
+    const timefrom = moment(from).format('hh:mm A');
+    const timeto = moment(to).format('hh:mm A');
 
-    const bookingChecking = await Booking.find({
+    const bookingChecking = await Booking.findOne({
       company: company.id,
       seatBook: seat.id,
       seat: bookedSeat,
+      "desk.dateFrom": date,
+      "desk.dateTo": date1,
+      "desk.fromTime": timefrom,
+      "desk.toTime": timeto,
     });
-
-
-    if (bookingChecking) {
-      bookingChecking1 = bookingChecking.filter((el) => {
-        return (
-          new Date(el.desk.dateFrom).toLocaleDateString() == datefrom &&
-          new Date(el.desk.dateTo).toLocaleDateString() == dateto &&
-          el.desk.fromTime == timefrom &&
-          el.desk.toTime == timeto
-        );
-      });
-    }
-
-    //   if (!bookingChecking1) {
+    if(!bookingChecking){
     const booking = new Booking({
       profile: user.id,
       company: company.id,
@@ -62,20 +50,18 @@ exports.booking = async (req, res) => {
       seatType: seatType,
       timeZone: timeZone,
       desk: {
-        dateFrom: new Intl.DateTimeFormat("en-US", {
-          timeZone: timeZone,
-        }).format(date),
-        dateTo: new Intl.DateTimeFormat("en-US", {
-          timeZone: timeZone,
-        }).format(date1),
+        dateFrom: date,
+        dateTo: date1,
         fromTime: timefrom,
-        approved: !company.officeConfigure.aprovalWorkflow ? true: false,
-        booked: !company.officeConfigure.aprovalWorkflow ? true: false,
+        approved: !company.officeConfigure.aprovalWorkflow ? true : false,
+        booked: !company.officeConfigure.aprovalWorkflow ? true : false,
         toTime: timeto,
         recurrence: recurrence,
         recurrenceDays: recurrenceDays ?? [],
       },
     });
+
+
 
     booking.save(async (err, data) => {
       if (err) {
@@ -285,12 +271,12 @@ exports.booking = async (req, res) => {
         }
       );
     });
-    /*  } else {
+     } else {
        return res.send({
          message:
            "Booking not possible with this time since already the seat is allocated on the timeframe",
        });
-     } */
+     } 
   } catch (error) {
     return res.status(500).send({ message: error });
   }
