@@ -49,10 +49,10 @@ exports.peakDays = async (req, res) => {
 
     const monthfilter = async () => {
       const counts = {}
-      const months = {January: 0, February: 0, March: 0, April: 0, May: 0, June: 0, July: 0, August: 0, September: 0, October: 0, November: 0, December : 0 }
+      const months = { January: 0, February: 0, March: 0, April: 0, May: 0, June: 0, July: 0, August: 0, September: 0, October: 0, November: 0, December: 0 }
       if (company.profile.length > 0) {
         company.profile.map((el) => {
-          el?.reservation?.booking.map(el1=>{
+          el?.reservation?.booking.map(el1 => {
             counts[moment(el1?.desk?.dateFrom).format('MMMM')] = counts[moment(el1?.desk?.dateFrom).format('MMMM')] ? counts[moment(el1?.desk?.dateFrom).format('MMMM')] + 1 : 1
           })
         })
@@ -63,9 +63,13 @@ exports.peakDays = async (req, res) => {
     }
     const customfilter = async (from, to) => {
 
+      const startOfDate = moment(from);
+      const endOfDate = moment(to);
+      console.log(startOfDate, endOfDate);
+
     }
     const averagefilter = async () => {
-
+      console.log("j");
     }
 
     switch (term) {
@@ -87,18 +91,9 @@ exports.peakDays = async (req, res) => {
   }
 };
 exports.totalOcc = async (req, res) => {
-  try {
-    const startOfWeek = moment().clone().startOf('week');
-    const arrFloor = ["Wall", "Door", "Toilet", "Diagonal Wall"];
-    const weekRange = [];
-    const counts = {};
-    const counts1 = {};
-    let start = 0;
-    while (start < 7) {
-      weekRange.push(moment(startOfWeek).add(start, 'days').format("MM/DD/YYYY"))
-      start++
-    }
 
+  try {
+    const { from, to, term } = req.query;
     const company = await User.findOne({ _id: req.userId }).populate({
       path: "profile",
       populate: {
@@ -111,49 +106,88 @@ exports.totalOcc = async (req, res) => {
         path: "Seats",
       },
     })
-
-    if (company.profile.length > 0) {
-      const bookings = []
-      company.profile.map((el) => {
-        bookings.push(el?.reservation?.booking);
-      })
-      const bookings1 = bookings.flat(4).map(el => {
-        if (weekRange.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || weekRange.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
-
-          return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), toDate: moment(el.desk.dateTo).format("MM/DD/YYYY"), booked: el.desk.booked, seatName: el.seat, seatBook: el.seatBook })
-        } else {
-          return (null)
-        }
-      }).filter(el => el)
-
-      let bookings2 = offices.flatMap(el => {
-        if (el.floors.length > 0) {
-          return el.floors.map(el1 => {
-            if (el1?.Seats?.seats.length > 0) {
-              const [first] = el1?.Seats?.seats
-              return Object.values(first);
-
-            }
-          })
-        } else {
-          return null
-        }
-      }).flat(4).filter(el => {
-        if (el)
-          return !arrFloor.includes(el.displayName)
-      })
-
-      for (const data of bookings1) {
-
-        counts[data.fromDate] = counts[data.fromDate] ? counts[data.fromDate] + 1 : 1
+    const weekfilter = async () => {
+      const startOfWeek = moment().clone().startOf('week');
+      const arrFloor = ["Wall", "Door", "Toilet", "Diagonal Wall"];
+      const weekRange = [];
+      const counts = {};
+      const counts1 = {};
+      let start = 0;
+      while (start < 7) {
+        weekRange.push(moment(startOfWeek).add(start, 'days').format("MM/DD/YYYY"))
+        start++
       }
-      for (const data of bookings1) {
-        counts1[data.fromDate] = bookings2.length - counts[data.fromDate]
-      }
-      return res.json({ booked: counts, avail: counts1 });
 
-    } else {
-      return res.json({ booked: "No Data Found", });
+      if (company.profile.length > 0) {
+        const bookings = []
+        company.profile.map((el) => {
+          bookings.push(el?.reservation?.booking);
+        })
+        const bookings1 = bookings.flat(4).map(el => {
+          if (weekRange.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || weekRange.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
+
+            return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), toDate: moment(el.desk.dateTo).format("MM/DD/YYYY"), booked: el.desk.booked, seatName: el.seat, seatBook: el.seatBook })
+          } else {
+            return (null)
+          }
+        }).filter(el => el)
+
+        let bookings2 = offices.flatMap(el => {
+          if (el.floors.length > 0) {
+            return el.floors.map(el1 => {
+              if (el1?.Seats?.seats.length > 0) {
+                const [first] = el1?.Seats?.seats
+                return Object.values(first);
+
+              }
+            })
+          } else {
+            return null
+          }
+        }).flat(4).filter(el => {
+          if (el)
+            return !arrFloor.includes(el.displayName)
+        })
+
+        for (const data of bookings1) {
+
+          counts[data.fromDate] = counts[data.fromDate] ? counts[data.fromDate] + 1 : 1
+        }
+        for (const data of bookings1) {
+          counts1[data.fromDate] = bookings2.length - counts[data.fromDate]
+        }
+        return res.json({ booked: counts, avail: counts1 });
+
+      } else {
+        return res.json({ booked: "No Data Found", });
+      }
+    }
+
+    const monthfilter = async () => { }
+
+    const customfilter = async (from, to) => {
+
+      const startOfDate = moment(from);
+      const endOfDate = moment(to);
+      console.log(startOfDate, endOfDate);
+
+    }
+    const singleDatefilter = async () => {
+      console.log("j");
+    }
+    switch (term) {
+      case "month":
+        await monthfilter()
+        break;
+      case "custom":
+        await customfilter(from, to)
+        break;
+      case "single":
+        await singleDatefilter()
+        break;
+      default:
+        await weekfilter()
+        break;
     }
 
   } catch (error) {
@@ -245,7 +279,6 @@ exports.peakTimesQuiteTimes = async (req, res) => {
 
 exports.conSingleDesk = async (req, res) => {
   try {
-    const arr = ["one_seater", "two_seater", "four_seater", "six_seater", "eight_seater", "ten_seater"];
 
     const company = await User.findOne({ _id: req.userId }).populate({
       path: "profile",
@@ -259,35 +292,65 @@ exports.conSingleDesk = async (req, res) => {
         path: "Seats",
       },
     })
+    const weekfilter = async () => {
 
-    if (company.profile.length > 0) {
-      const temp = company.profile.map(el => {
-        return el.reservation.booking.map(el1 => {
-          return { seatId: el1.seatBook.id, seatName: el1.seat, type: el1?.seatBook?.seats[0][el1?.seat]?.type }
+      const arr = ["one_seater", "two_seater", "four_seater", "six_seater", "eight_seater", "ten_seater"];
+
+
+
+      if (company.profile.length > 0) {
+        const temp = company.profile.map(el => {
+          return el.reservation.booking.map(el1 => {
+            return { seatId: el1.seatBook.id, seatName: el1.seat, type: el1?.seatBook?.seats[0][el1?.seat]?.type }
+          })
+        }).flat(4)
+
+        let temp2 = offices.map(el => {
+          return el.floors.map(el1 => {
+            if (el1?.Seats?.seats)
+              return Object.values(el1?.Seats?.seats[0]);
+          })
         })
-      }).flat(4)
-
-      let temp2 = offices.map(el => {
-        return el.floors.map(el1 => {
-          if (el1?.Seats?.seats)
-            return Object.values(el1?.Seats?.seats[0]);
-        })
-      })
-      temp2 = temp2.flat(4).filter(el => el != undefined).filter(d => arr.includes(d.type))
-      const totalSeating = temp2.length
-      const singleSeat = parseInt((temp.filter(d => d.type == "one_seater").length / totalSeating) * 100)
-      const twoSeat = parseInt((temp.filter(d => d.type == "two_seater").length / totalSeating) * 100)
-      const fourSeat = parseInt((temp.filter(d => d.type == "four_seater").length / totalSeating) * 100)
-      const sixSeat = parseInt((temp.filter(d => d.type == "six_seater").length / totalSeating) * 100)
-      const eightSeat = parseInt((temp.filter(d => d.type == "eight_seater").length / totalSeating) * 100)
-      const tenSeat = parseInt((temp.filter(d => d.type == "ten_seater").length / totalSeating) * 100)
+        temp2 = temp2.flat(4).filter(el => el != undefined).filter(d => arr.includes(d.type))
+        const totalSeating = temp2.length
+        const singleSeat = parseInt((temp.filter(d => d.type == "one_seater").length / totalSeating) * 100)
+        const twoSeat = parseInt((temp.filter(d => d.type == "two_seater").length / totalSeating) * 100)
+        const fourSeat = parseInt((temp.filter(d => d.type == "four_seater").length / totalSeating) * 100)
+        const sixSeat = parseInt((temp.filter(d => d.type == "six_seater").length / totalSeating) * 100)
+        const eightSeat = parseInt((temp.filter(d => d.type == "eight_seater").length / totalSeating) * 100)
+        const tenSeat = parseInt((temp.filter(d => d.type == "ten_seater").length / totalSeating) * 100)
 
 
-      return res.json({ conference: twoSeat + fourSeat + sixSeat + eightSeat + tenSeat, singleDesk: singleSeat, twoseater: twoSeat, fourseater: fourSeat, sixseater: sixSeat, eightseater: eightSeat, tenseater: tenSeat });
+        return res.json({ conference: twoSeat + fourSeat + sixSeat + eightSeat + tenSeat, singleDesk: singleSeat, twoseater: twoSeat, fourseater: fourSeat, sixseater: sixSeat, eightseater: eightSeat, tenseater: tenSeat });
 
-    } else {
-      return res.json({ res: "No data Found" });
+      } else {
+        return res.json({ res: "No data Found" });
+      }
     }
+
+    const monthfilter = async () => { }
+
+    const customfilter = async (from, to) => {
+
+      const startOfDate = moment(from);
+      const endOfDate = moment(to);
+      console.log(startOfDate, endOfDate);
+
+    }
+
+
+    switch (term) {
+      case "month":
+        await monthfilter()
+        break;
+      case "custom":
+        await customfilter(from, to)
+        break;
+      default:
+        await weekfilter()
+        break;
+    }
+
   } catch (error) {
     return res.status(500).send({ message: error });
   }

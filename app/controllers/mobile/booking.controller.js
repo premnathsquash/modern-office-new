@@ -13,6 +13,7 @@ exports.booking = async (req, res) => {
   try {
     const {
       bookedSeat,
+      seatType,
       attendees,
       from,
       to,

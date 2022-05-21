@@ -72,8 +72,15 @@ exports.peakDays = async (req, res) => {
           return res.json({ res: "No data Found" });
         }
       }
-      const customfilter = async (from, to) => { }
-      const averagefilter = async () => { }
+      const customfilter = async (from, to) => {
+        const startOfDate = moment(from);
+        const endOfDate = moment(to);
+        console.log(startOfDate, endOfDate);
+
+      }
+      const averagefilter = async () => {
+        console.log("j");
+      }
 
       switch (term) {
         case "month":
@@ -100,16 +107,6 @@ exports.peakDays = async (req, res) => {
 };
 exports.totalOcc = async (req, res) => {
   try {
-    const startOfWeek = moment().clone().startOf('week');
-    const arrFloor = ["Wall", "Door", "Toilet", "Diagonal Wall"];
-    const weekRange = [];
-    const counts = {};
-    const counts1 = {};
-    let start = 0;
-    while (start < 7) {
-      weekRange.push(moment(startOfWeek).add(start, 'days').format("MM/DD/YYYY"))
-      start++
-    }
     const admin = await User.findOne({ _id: process.env.adminId });
     const companyTemp = admin._doc.connection.filter(
       (el) => el.toString() == req.params.id
@@ -125,56 +122,96 @@ exports.totalOcc = async (req, res) => {
         },
       });
 
-      const offices = await Office.find({ slug: company.slug }).populate({
-        path: "floors", populate: {
-          path: "Seats",
-        },
-      })
-
-      if (company.profile.length > 0) {
-        const bookings = []
-        company.profile.map((el) => {
-          bookings.push(el?.reservation?.booking);
-        })
-        const bookings1 = bookings.flat(4).map(el => {
-          if (weekRange.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || weekRange.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
-
-            return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), toDate: moment(el.desk.dateTo).format("MM/DD/YYYY"), booked: el.desk.booked, seatName: el.seat, seatBook: el.seatBook })
-          } else {
-            return (null)
-          }
-        }).filter(el => el)
-
-        let bookings2 = offices.flatMap(el => {
-          if (el.floors.length > 0) {
-            return el.floors.map(el1 => {
-              if (el1?.Seats?.seats.length > 0) {
-                const [first] = el1?.Seats?.seats
-                return Object.values(first);
-
-              }
-            })
-          } else {
-            return null
-          }
-        }).flat(4).filter(el => {
-          if (el)
-            return !arrFloor.includes(el.displayName)
-        })
-
-        for (const data of bookings1) {
-
-          counts[data.fromDate] = counts[data.fromDate] ? counts[data.fromDate] + 1 : 1
+      const weekfilter = async () => {
+        const startOfWeek = moment().clone().startOf('week');
+        const arrFloor = ["Wall", "Door", "Toilet", "Diagonal Wall"];
+        const weekRange = [];
+        const counts = {};
+        const counts1 = {};
+        let start = 0;
+        while (start < 7) {
+          weekRange.push(moment(startOfWeek).add(start, 'days').format("MM/DD/YYYY"))
+          start++
         }
 
-        for (const data of bookings1) {
 
-          counts1[data.fromDate] = bookings2.length - counts[data.fromDate]
+        const offices = await Office.find({ slug: company.slug }).populate({
+          path: "floors", populate: {
+            path: "Seats",
+          },
+        })
+
+        if (company.profile.length > 0) {
+          const bookings = []
+          company.profile.map((el) => {
+            bookings.push(el?.reservation?.booking);
+          })
+          const bookings1 = bookings.flat(4).map(el => {
+            if (weekRange.includes(moment(el.desk.dateFrom).format("MM/DD/YYYY")) || weekRange.includes(moment(el.desk.dateTo).format("MM/DD/YYYY"))) {
+
+              return ({ fromDate: moment(el.desk.dateFrom).format("MM/DD/YYYY"), toDate: moment(el.desk.dateTo).format("MM/DD/YYYY"), booked: el.desk.booked, seatName: el.seat, seatBook: el.seatBook })
+            } else {
+              return (null)
+            }
+          }).filter(el => el)
+
+          let bookings2 = offices.flatMap(el => {
+            if (el.floors.length > 0) {
+              return el.floors.map(el1 => {
+                if (el1?.Seats?.seats.length > 0) {
+                  const [first] = el1?.Seats?.seats
+                  return Object.values(first);
+
+                }
+              })
+            } else {
+              return null
+            }
+          }).flat(4).filter(el => {
+            if (el)
+              return !arrFloor.includes(el.displayName)
+          })
+
+          for (const data of bookings1) {
+
+            counts[data.fromDate] = counts[data.fromDate] ? counts[data.fromDate] + 1 : 1
+          }
+
+          for (const data of bookings1) {
+
+            counts1[data.fromDate] = bookings2.length - counts[data.fromDate]
+          }
+          return res.json({ booked: counts, avail: counts1 });
+
+        } else {
+          return res.json({ booked: "No Data Found", });
         }
-        return res.json({ booked: counts, avail: counts1 });
+      }
+      const monthfilter = async () => { }
 
-      } else {
-        return res.json({ booked: "No Data Found", });
+      const customfilter = async (from, to) => {
+
+        const startOfDate = moment(from);
+        const endOfDate = moment(to);
+        console.log(startOfDate, endOfDate);
+
+      }
+      const singleDatefilter = async () => {
+        console.log("j");
+      }
+      switch (term) {
+        case "month":
+          await monthfilter()
+          break;
+        case "custom":
+          await customfilter(from, to)
+          break;
+        case "single":
+          await singleDatefilter()
+          break;
+        default:
+          await weekfilter()
+          break;
       }
 
     } else {
