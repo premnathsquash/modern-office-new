@@ -446,7 +446,7 @@ exports.userSignup = async (req, res) => {
                 userId: result.id,
                 companyId: req.userId
               })
-              activities.save(async((err41, data41)=>{
+              activities.save(async(err41, data41)=>{
                 if (err41) {
                   res.status(500).send({ message: err41 });
                   return;
@@ -458,7 +458,7 @@ exports.userSignup = async (req, res) => {
                     return;
                   }
                 })
-              }))
+              })
               await User.findOneAndUpdate(
                 { _id: company1._id },
                 { profile: [result._id, ...company1.profile] },
