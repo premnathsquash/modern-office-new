@@ -5,7 +5,7 @@ const Activity = mongoose.model(
   new mongoose.Schema(
     {
       userId: {type : String , unique : true},
-      companyId: {type : String , unique : true},
+      companyId: {type : String },
       email: {
         type: String,
       },

@@ -390,10 +390,20 @@ exports.userSignup = async (req, res) => {
     });
 
     const departm = await Departments.findOne({ _id: department });
+    await Departments.findOneAndUpdate(
+      { _id: departm.id },
+      { users: departm.users + 1 },
+      (err, data) => {
+        if (err) {
+          res.status(500).send({ message: err });
+          return;
+        }
+      }
+    );
     const attend = new Attendance({});
     const company1 = await User.findOne({
       _id: req.userId,
-    }).populate({path: "notification"});
+    }).populate({ path: "notification" });
     const company1Notification = company1?.notification
     const company2 = company1.departments.find(
       (ele) => mongoose.Types.ObjectId(ele).toHexString() == departm.id
@@ -437,55 +447,38 @@ exports.userSignup = async (req, res) => {
             profile.status = status;
             profile.slug = company1.slug;
 
-            profile.save(async (err, result) => {
-              if (err) {
-                res.status(500).send({ message: err });
+            const result = await profile.save()
+
+            const activities = new Activity({
+              userId: result.id,
+              companyId: req.userId
+            })
+            const data41 = await activities.save()
+
+            profile.notification = data41._id
+            profile.save(async (err42, result) => {
+              if (err42) {
+                res.status(500).send({ message: err42 });
                 return;
               }
-              const activities = new Activity({
-                userId: result.id,
-                companyId: req.userId
-              })
-              activities.save(async(err41, data41)=>{
-                if (err41) {
-                  res.status(500).send({ message: err41 });
-                  return;
+            })
+            await User.findOneAndUpdate(
+              { _id: company1._id },
+              { profile: [result._id, ...company1.profile] },
+              async (err, profile1) => {
+                if (err) {
+                  return { message: err };
                 }
-                profile.notification = data41._id
-                profile.save(async (err42, result) => {
-                  if (err42) {
-                    res.status(500).send({ message: err42 });
-                    return;
-                  }
-                })
-              })
-              await User.findOneAndUpdate(
-                { _id: company1._id },
-                { profile: [result._id, ...company1.profile] },
-                async (err, profile1) => {
-                  if (err) {
-                    return { message: err };
-                  }
-                  await sendMail(
-                    req.body.email,
-                    "Hydesq – New User Account",
-                    null,
-                    `${email} pass: ${pssword} companySlug: ${company1.slug}`,
-                    null
-                  );
-                }
-              );
-              await Departments.findOneAndUpdate(
-                { _id: departm.id },
-                { users: departm.users + 1 },
-                (err, data) => {
-                  if (err) {
-                    res.status(500).send({ message: err });
-                    return;
-                  }
-                }
-              );
-            });
+                await sendMail(
+                  req.body.email,
+                  "Hydesq – New User Account",
+                  null,
+                  `${email} pass: ${pssword} companySlug: ${company1.slug}`,
+                  null
+                );
+              }
+            );
+
           }
         );
       });

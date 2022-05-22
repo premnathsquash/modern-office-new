@@ -24,6 +24,10 @@ exports.booking = async (req, res) => {
     } = req.body;
     const user = await Profile.findOne({ _id: req.userId });
     const company = await User.findOne({ _id: user.userGroup }).populate({ path: "officeConfigure" });
+    const activity = await Activity.findOne({ userId: req.userId, companyId: user.userGroup });
+
+    console.log(activity);
+
     const seat = await Seat.findOne({ _id: user.reservation.allocatedDesk });
     let bookingChecking1;
     const date = moment(from).utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISOString()
