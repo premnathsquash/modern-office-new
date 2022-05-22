@@ -124,6 +124,7 @@ exports.booking = async (req, res) => {
                   ? 1
                   : -1
               );
+              
               days = Array.from(new Set(days));
 
               let concecutionRange = 0;
@@ -230,7 +231,8 @@ exports.booking = async (req, res) => {
             }
           }
         );
-        await Activity.findOneAndUpdate({ _id: activity._id }, { notifications: ["You have booked a seat", ...activity.notifications] }, { new: true }, (err10, data10) => {
+        const notifyObj = {activityTitle: "You have booked a seat", message: `${bookedSeat} has been booked`, fromDate: date, todate: date1, timefrom, timeto}
+        await Activity.findOneAndUpdate({ _id: activity._id }, { notifications: [notifyObj, ...activity.notifications] }, { new: true }, (err10, data10) => {
           if (err10) {
             res.status(500).send({ message: err10 });
             return;
