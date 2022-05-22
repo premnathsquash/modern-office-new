@@ -26,8 +26,6 @@ exports.booking = async (req, res) => {
     const company = await User.findOne({ _id: user.userGroup }).populate({ path: "officeConfigure" });
     const activity = await Activity.findOne({ userId: req.userId, companyId: user.userGroup });
 
-    console.log(activity);
-
     const seat = await Seat.findOne({ _id: user.reservation.allocatedDesk });
     let bookingChecking1;
     const date = moment(from).utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISOString()
@@ -45,214 +43,222 @@ exports.booking = async (req, res) => {
       "desk.fromTime": timefrom,
       "desk.toTime": timeto,
     });
-    if(!bookingChecking){
-    const booking = new Booking({
-      profile: user.id,
-      company: company.id,
-      attendees: attendees ?? [],
-      seatBook: seat.id,
-      seat: bookedSeat,
-      seatType: seatType,
-      timeZone: timeZone,
-      desk: {
-        dateFrom: date,
-        dateTo: date1,
-        fromTime: timefrom,
-        approved: !company.officeConfigure.aprovalWorkflow ? true : false,
-        booked: !company.officeConfigure.aprovalWorkflow ? true : false,
-        toTime: timeto,
-        recurrence: recurrence,
-        recurrenceDays: recurrenceDays ?? [],
-      },
-    });
-    booking.save(async (err, data) => {
-      if (err) {
-        res.status(500).send({ message: err });
-        return;
-      }
 
-      await Profile.findOneAndUpdate(
-        { _id: req.userId },
-        {
-          points:
-            Number.parseFloat(user?.points) + 10.0 ?? Number.parseFloat(10.0),
-          reservation: {
-            ...user.reservation,
-            booking: [...user.reservation.booking, data.id],
-            bookDate: data.createdAt,
-          },
+    if (!(bookingChecking.length > 0)) {
+      const booking = new Booking({
+        profile: user.id,
+        company: company.id,
+        attendees: attendees ?? [],
+        seatBook: seat.id,
+        seat: bookedSeat,
+        seatType: seatType,
+        timeZone: timeZone,
+        desk: {
+          dateFrom: date,
+          dateTo: date1,
+          fromTime: timefrom,
+          approved: !company.officeConfigure.aprovalWorkflow ? true : false,
+          booked: !company.officeConfigure.aprovalWorkflow ? true : false,
+          toTime: timeto,
+          recurrence: recurrence,
+          recurrenceDays: recurrenceDays ?? [],
         },
-        async (err2, data2) => {
-          if (err2) {
-            res.status(500).send({ message: err2 });
-            return;
-          }
-          
-          const {
-            desk: { dateFrom: date1, fromTime, toTime },
-          } = data;
+      });
+      booking.save(async (err, data) => {
+        if (err) {
+          res.status(500).send({ message: err });
+          return;
+        }
 
-          const leaderresult = await LeaderBoard.findOne({
-            companyId: data.company,
-            profileId: data.profile,
-          });
-
-          if (!leaderresult) {
-            const leaderinter = new LeaderBoard({
-              companyId: data.company,
-              profileId: data.profile,
-              book: [
-                {
-                  bookId: data.id,
-                  bookedTime: date1,
-                  fromTime,
-                  toTime,
-                  consecutiveDays: 0,
-                  coins: Number.parseFloat(10),
-                },
-              ],
-            });
-            leaderinter.save(async (err3, data3) => {
-              if (err) {
-                res.status(500).send({ message: err3 });
-                return;
-              }});
-          } else {
-            let days = leaderresult.book.map((ele) => ele.bookedTime);
-            days = days.sort((a, b) =>
-              moment(a, "MM-DD-YYYY").isBefore(moment(b, "MM-DD-YYYY"))
-                ? 1
-                : -1
-            );
-            days = Array.from(new Set(days));
-
-            let concecutionRange = 0;
-
-            let dateCheck = interm.toLocaleString().split("/");
-
-            let intialConsecuation =
-              `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
-              days[0] ||
-              `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
-              days[1];
-
-            let intialConsecuation1 =
-              `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
-              days[0];
-
-            if (leaderresult?.consecutiveDays && intialConsecuation1) {
-              concecutionRange += 1;
+        await Profile.findOneAndUpdate(
+          { _id: req.userId },
+          {
+            points:
+              Number.parseFloat(user?.points) + 10.0 ?? Number.parseFloat(10.0),
+            reservation: {
+              ...user.reservation,
+              booking: [...user.reservation.booking, data.id],
+              bookDate: data.createdAt,
+            },
+          },
+          async (err2, data2) => {
+            if (err2) {
+              res.status(500).send({ message: err2 });
+              return;
             }
 
-            await Seat.findOne({ _id: seat.id }, async (err11, data11) => {
-              if (err11) {
-                res.status(500).send({ message: err11 });
-                return;
-              }
-              const checkSeat1 = [];
-              const checkSeat2 = [];
-              Object.entries(data11.seats[0]).forEach((ele) => {
-                const [key, value] = ele;
-                if (key == bookedSeat) {
-                  const newValue = {
-                    ...value,
-                    timesBooked: value.timesBooked + 1,
-                    available: false,
-                  };
-                  checkSeat1.push(newValue);
-                } else {
-                  checkSeat2.push({ ...value });
-                }
-              });
-              const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
-                (a, v) => ({ ...a, [v.name]: v }),
-                {}
-              );
-              await Seat.findOneAndUpdate(
-                { _id: seat.id },
-                {
-                  seats: [{ ...changesinObj }],
-                },
-                (err1, data1) => {
-                  if (err1) {
-                    res.status(500).send({ message: err1 });
-                    return;
-                  }
-                }
-              );
+            const {
+              desk: { dateFrom: date1, fromTime, toTime },
+            } = data;
+
+            const leaderresult = await LeaderBoard.findOne({
+              companyId: data.company,
+              profileId: data.profile,
             });
 
-            await LeaderBoard.findOneAndUpdate(
-              {
+            if (!leaderresult) {
+              const leaderinter = new LeaderBoard({
                 companyId: data.company,
                 profileId: data.profile,
-              },
-              {
-                consecutiveDays: intialConsecuation
-                  ? 1 + concecutionRange
-                  : 0,
                 book: [
-                  ...leaderresult.book,
                   {
                     bookId: data.id,
-                    bookedTime: interm.toLocaleString(),
-                    from,
-                    to,
+                    bookedTime: date1,
+                    fromTime,
+                    toTime,
+                    consecutiveDays: 0,
                     coins: Number.parseFloat(10),
                   },
                 ],
-              },
-              { new: true },
-              async (err01, data01) => {
-                if (err01) {
-                  res.status(500).send({ message: err01 });
+              });
+              leaderinter.save(async (err3, data3) => {
+                if (err) {
+                  res.status(500).send({ message: err3 });
                   return;
                 }
-                if (data01?.consecutiveDays) {
-                  const profile = await Profile.findOne({ _id: req.userId });
-                  const leaderboard = await LeaderBoard.findOne({
-                    companyId: data01.companyId,
-                    profileId: data01.profileId,
-                  });
-                  await Profile.findOneAndUpdate(
-                    { _id: req.userId },
-                    {
-                      points:
-                        Number.parseFloat(profile.points) +
-                        Number.parseFloat(data01?.consecutiveDays * 10),
-                    },
-                    { new: true },
-                    () => { }
-                  );
-                }
+              });
+            } else {
+              let days = leaderresult.book.map((ele) => ele.bookedTime);
+              days = days.sort((a, b) =>
+                moment(a, "MM-DD-YYYY").isBefore(moment(b, "MM-DD-YYYY"))
+                  ? 1
+                  : -1
+              );
+              days = Array.from(new Set(days));
+
+              let concecutionRange = 0;
+
+              let dateCheck = interm.toLocaleString().split("/");
+
+              let intialConsecuation =
+                `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
+                days[0] ||
+                `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
+                days[1];
+
+              let intialConsecuation1 =
+                `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
+                days[0];
+
+              if (leaderresult?.consecutiveDays && intialConsecuation1) {
+                concecutionRange += 1;
               }
-            );
+
+              await Seat.findOne({ _id: seat.id }, async (err11, data11) => {
+                if (err11) {
+                  res.status(500).send({ message: err11 });
+                  return;
+                }
+                const checkSeat1 = [];
+                const checkSeat2 = [];
+                Object.entries(data11.seats[0]).forEach((ele) => {
+                  const [key, value] = ele;
+                  if (key == bookedSeat) {
+                    const newValue = {
+                      ...value,
+                      timesBooked: value.timesBooked + 1,
+                      available: false,
+                    };
+                    checkSeat1.push(newValue);
+                  } else {
+                    checkSeat2.push({ ...value });
+                  }
+                });
+                const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
+                  (a, v) => ({ ...a, [v.name]: v }),
+                  {}
+                );
+                await Seat.findOneAndUpdate(
+                  { _id: seat.id },
+                  {
+                    seats: [{ ...changesinObj }],
+                  },
+                  (err1, data1) => {
+                    if (err1) {
+                      res.status(500).send({ message: err1 });
+                      return;
+                    }
+                  }
+                );
+              });
+
+              await LeaderBoard.findOneAndUpdate(
+                {
+                  companyId: data.company,
+                  profileId: data.profile,
+                },
+                {
+                  consecutiveDays: intialConsecuation
+                    ? 1 + concecutionRange
+                    : 0,
+                  book: [
+                    ...leaderresult.book,
+                    {
+                      bookId: data.id,
+                      bookedTime: interm.toLocaleString(),
+                      from,
+                      to,
+                      coins: Number.parseFloat(10),
+                    },
+                  ],
+                },
+                { new: true },
+                async (err01, data01) => {
+                  if (err01) {
+                    res.status(500).send({ message: err01 });
+                    return;
+                  }
+                  if (data01?.consecutiveDays) {
+                    const profile = await Profile.findOne({ _id: req.userId });
+                    const leaderboard = await LeaderBoard.findOne({
+                      companyId: data01.companyId,
+                      profileId: data01.profileId,
+                    });
+                    await Profile.findOneAndUpdate(
+                      { _id: req.userId },
+                      {
+                        points:
+                          Number.parseFloat(profile.points) +
+                          Number.parseFloat(data01?.consecutiveDays * 10),
+                      },
+                      { new: true },
+                      () => { }
+                    );
+                  }
+                }
+              );
+            }
           }
-        }
-      );
-      await LeaderBoard.findOne(
-        {
-          companyId: data.company,
-          profileId: data.profile,
-        },
-        (err9, data9) => {
-          if (err9) {
-            res.status(500).send({ message: err9 });
+        );
+        await Activity.findOneAndUpdate({ _id: activity._id }, { notifications: ["You have booked a seat", ...activity.notifications] }, { new: true }, (err10, data10) => {
+          if (err10) {
+            res.status(500).send({ message: err10 });
             return;
           }
-          return res.send({
-            message: "Booking created successfully",
-            consecutiveDays: data9?.consecutiveDays,
-          });
-        }
-      );
-    });
-     } else {
-       return res.send({
-         message:
-           "Booking not possible with this time since already the seat is allocated on the timeframe",
-       });
-     } 
+        })
+        await LeaderBoard.findOne(
+          {
+            companyId: data.company,
+            profileId: data.profile,
+          },
+          (err9, data9) => {
+            if (err9) {
+              res.status(500).send({ message: err9 });
+              return;
+            }
+            return res.send({
+              message: "Booking created successfully",
+              consecutiveDays: data9?.consecutiveDays,
+            });
+          }
+        );
+      });
+    } else {
+      return res.send({
+        message:
+          "Booking not possible with this time since already the seat is allocated on the timeframe",
+      });
+    }
   } catch (error) {
     return res.status(500).send({ message: error });
   }
