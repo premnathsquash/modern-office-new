@@ -33,30 +33,18 @@ const createPdf = async (data, fileName) => {
       if (err) {
         console.log("file creatation failed", err);
       }
-      const data = await fs1.readFile(`${appDir}/${fileName}.pdf`, "binary");
-
-
+      const data = await fs1.readFile(`${appDir}/${fileName}.pdf`);
       const params = {
         Key: `${fileName}`,
         Body: Buffer.from(data),
         Bucket: "gu-export-files",
         ContentType: 'application/pdf',
       }
+      s3.upload(params).promise()
+      fs.unlink(`${appDir}/${fileName}.pdf`, (err12) => { })
 
-      const check = []
-
-      s3.upload(params, (err, data) => {
-        const value = new Promise((resolve, reject) => {
-          if (err) {
-            reject(err)
-          }
-          resolve(data.Location)
-        })
-        check.push(value)
-      });
-
-      console.log(check);
     })
+    return `https://gu-export-files.s3.ap-southeast-2.amazonaws.com/${fileName}`
 
   } catch (error) {
     console.log(error);
