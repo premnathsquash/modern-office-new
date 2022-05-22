@@ -24,8 +24,19 @@ const storage = multerS3({
     cb(null, "" + file.originalname +Date.now().toString()); //use Date.now() for unique file keys
   },
 });
+const fileImportStorage = multerS3({
+  s3: s3,
+  acl: "public-read-write",
+  bucket: "gu-import-files",
+  endpoint: "http://" + this.bucket + ".s3.amazonaws.com",
+  contentType: multerS3.AUTO_CONTENT_TYPE,
+  key: function (req, file, cb) {
+    cb(null, "" + file.originalname +Date.now().toString()); //use Date.now() for unique file keys
+  },
+});
 
 module.exports = {
   aws,
   storage,
+  fileImportStorage
 };

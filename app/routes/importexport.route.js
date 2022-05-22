@@ -1,7 +1,9 @@
 const multer = require("multer");
-const uploadcsv = multer({ dest: "../files" });
+const { fileImportStorage } = require("../config/s3");
+const uploadcsv = multer({ fileImportStorage }).single("csv");
 const { errors } = require("celebrate");
 const {  authJwt } = require("../middlewares");
+const controller = require("../controllers/admin/importexportfile.controller");
 
 
 module.exports = function (app) {
@@ -12,13 +14,7 @@ module.exports = function (app) {
     );
     next();
   });
-/* 
-  app.patch(
-    "/mobile-user-profile-image",
-    uploadcsv,
-    [ authJwt.verifyToken, authJwt.isUser],
-    controller31.updateProfileImage
-  );
- */
+  app.post("/upload-pdf", controller.exportPdfFile)
+
   app.use(errors());
 };

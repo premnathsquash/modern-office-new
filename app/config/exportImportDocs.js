@@ -1,35 +1,42 @@
-const pdf = require("pdf-creator-node");
-var parse = require("csv-parse");
-const fs = require("fs");
-const moment = require("moment");
+require("dotenv").config()
 
-const options = {
-  format: "A3",
-  orientation: "landscape",
-  border: "10mm",
-  header: {
-    height: "20mm",
-    contents: '<div style="text-align: center;">Author: Green Universe</div>',
-  },
-};
+const aws = require("aws-sdk");
+const PDFDocument = require('pdfkit');
+const parse = require("csv-parse");
 
-const exporter = async (data, path, name) => {
+const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY;
+const ACCESS_KEY_ID = process.env.ACCESS_KEY_ID;
+const REGION = process.env.REGION;
+
+aws.config.update({
+  secretAccessKey: SECRET_ACCESS_KEY,
+  accessKeyId: ACCESS_KEY_ID,
+  region: REGION,
+});
+
+const s3 = new aws.S3();
+
+const exporter = async (data, fileName) => {
   try {
-    data["exportedAt"] = `${moment().utc().format("YYYY-MM-DD HH:mm")} UTC`;
-    // Read HTML Template
+    const doc = new PDFDocument();
 
-    let html = fs.readFileSync(path, "utf8");
-    let document = {
-      html: html,
-      data: {
-        data,
-      },
-      path: `server/config/exportedFiles/${name}.pdf`,
-      type: "",
-    };
+    doc.text("Text for your PDF");
+    doc.end();
 
-    const pdfPath = await pdf.create(document, options);
-    return pdfPath;
+    const params = {
+      key: fileName,
+      body: doc,
+      bucket: 'gu-export-files',
+      contentType: 'application/pdf',
+      ACL: "public-read-write"
+    }
+    s3.upload(params, function (err, response) {
+      if (err) {
+        console.log(err);
+      }
+      return ("fileuploaded");
+
+    });
   } catch (error) {
     console.log(error);
     throw error;
