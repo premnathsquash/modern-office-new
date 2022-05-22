@@ -4,6 +4,8 @@ const Activity = mongoose.model(
   "Activity",
   new mongoose.Schema(
     {
+      userId: {type : String , unique : true},
+      companyId: {type : String , unique : true},
       email: {
         type: String,
       },

@@ -21,6 +21,7 @@ const Floor = db.floor;
 const OfficeConfigure = db.officeConfigure;
 const Attendance = db.attendance;
 const Notifications = db.notifications;
+const Activity = db.activity;
 const mongoose = db.mongoose;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -441,6 +442,23 @@ exports.userSignup = async (req, res) => {
                 res.status(500).send({ message: err });
                 return;
               }
+              const activities = new Activity({
+                userId: result.id,
+                companyId: req.userId
+              })
+              activities.save(async((err41, data41)=>{
+                if (err41) {
+                  res.status(500).send({ message: err41 });
+                  return;
+                }
+                profile.notification = data41._id
+                profile.save(async (err42, result) => {
+                  if (err42) {
+                    res.status(500).send({ message: err42 });
+                    return;
+                  }
+                })
+              }))
               await User.findOneAndUpdate(
                 { _id: company1._id },
                 { profile: [result._id, ...company1.profile] },

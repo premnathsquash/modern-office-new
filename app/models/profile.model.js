@@ -10,6 +10,10 @@ const Profile = mongoose.model(
     slug: String,
     email: String,
     department: String,
+    notification:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Activity",
+    },
     darkMode: {
       type: Boolean,
       default: false,
@@ -22,7 +26,7 @@ const Profile = mongoose.model(
       type: Boolean,
       default: false,
     },
-    onLeave:{
+    onLeave: {
       type: Boolean,
       default: false,
     },
@@ -88,7 +92,7 @@ const Profile = mongoose.model(
       type: Number,
       default: 0
     },
-  },{strict: false, timestamps: true})
+  }, { strict: false, timestamps: true })
 );
 
 module.exports = Profile;

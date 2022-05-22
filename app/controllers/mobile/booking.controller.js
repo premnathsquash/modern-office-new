@@ -7,6 +7,7 @@ const User = db.user;
 const Seat = db.seats;
 const Booking = db.booking;
 const LeaderBoard = db.leaderBoard;
+const Activity = db.activity;
 
 exports.booking = async (req, res) => {
 
@@ -31,7 +32,7 @@ exports.booking = async (req, res) => {
     const timefrom = moment(from).format('hh:mm A');
     const timeto = moment(to).format('hh:mm A');
 
-    const bookingChecking = await Booking.findOne({
+    let bookingChecking = await Booking.find({
       company: company.id,
       seatBook: seat.id,
       seat: bookedSeat,
@@ -60,9 +61,6 @@ exports.booking = async (req, res) => {
         recurrenceDays: recurrenceDays ?? [],
       },
     });
-
-
-
     booking.save(async (err, data) => {
       if (err) {
         res.status(500).send({ message: err });
@@ -85,29 +83,10 @@ exports.booking = async (req, res) => {
             res.status(500).send({ message: err2 });
             return;
           }
+          
           const {
-            desk: { date: date1, from, to },
+            desk: { dateFrom: date1, fromTime, toTime },
           } = data;
-          const intial = new Intl.DateTimeFormat("en-US", {
-            year: "numeric",
-            month: "numeric",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-            second: "numeric",
-            hourCycle: "h23",
-          }).format(date1);
-          const [day, time] = intial.split(",");
-          const [month, day1, year] = day.split("/");
-          const [hour, minute, second] = time.split(":");
-          const interm = DateTime.utc(
-            parseInt(year),
-            parseInt(month),
-            parseInt(day1),
-            parseInt(hour),
-            parseInt(minute),
-            parseInt(second)
-          );
 
           const leaderresult = await LeaderBoard.findOne({
             companyId: data.company,
@@ -121,9 +100,10 @@ exports.booking = async (req, res) => {
               book: [
                 {
                   bookId: data.id,
-                  bookedTime: interm.toLocaleString(),
-                  from,
-                  to,
+                  bookedTime: date1,
+                  fromTime,
+                  toTime,
+                  consecutiveDays: 0,
                   coins: Number.parseFloat(10),
                 },
               ],
@@ -132,15 +112,7 @@ exports.booking = async (req, res) => {
               if (err) {
                 res.status(500).send({ message: err3 });
                 return;
-              }
-              if (data3?.consecutiveDays) {
-                const profile = await Profile.findOne({ _id: req.userId });
-                const leaderboard = await LeaderBoard.findOne({
-                  companyId: data01.companyId,
-                  profileId: data01.profileId,
-                });
-              }
-            });
+              }});
           } else {
             let days = leaderresult.book.map((ele) => ele.bookedTime);
             days = days.sort((a, b) =>
