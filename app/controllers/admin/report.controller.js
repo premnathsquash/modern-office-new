@@ -217,9 +217,11 @@ exports.peakTimesQuiteTimes = async (req, res) => {
       },
     })
       .populate({ path: "officeConfigure" });
-
-    const startTiming = moment(company.officeConfigure?.TimeFrom ?? "00:00:00", "HH:mm:ss").format("HH")
-    const endTiming = moment(company.officeConfigure?.TimeTo ?? "24:00:00", "HH:mm:ss").format("HH")
+    const starttime001 = company.officeConfigure?.TimeFrom ? company.officeConfigure?.TimeFrom : null
+    const endtime001 = company.officeConfigure?.TimeTo ? company.officeConfigure?.TimeTo : null
+   
+    const startTiming = moment(endtime001 ?? "00:00:00", "HH:mm:ss").format("HH")
+    const endTiming = moment(endtime001 ?? "23:00:00", "HH:mm:ss").format("HH")
 
     let timingcount = parseInt(startTiming)
     while (timingcount < (parseInt(endTiming) + 1)) {
