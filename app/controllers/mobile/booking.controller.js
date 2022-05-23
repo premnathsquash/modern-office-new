@@ -88,7 +88,7 @@ exports.booking = async (req, res) => {
             }
 
             const {
-              desk: { dateFrom: date1, fromTime, toTime },
+              desk: { dateFrom: dateOrigin, fromTime, toTime },
             } = data;
 
             const leaderresult = await LeaderBoard.findOne({
@@ -100,13 +100,13 @@ exports.booking = async (req, res) => {
               const leaderinter = new LeaderBoard({
                 companyId: data.company,
                 profileId: data.profile,
+                consecutiveDays: 0,
                 book: [
                   {
                     bookId: data.id,
-                    bookedTime: date1,
+                    bookedTime: dateOrigin,
                     fromTime,
                     toTime,
-                    consecutiveDays: 0,
                     coins: Number.parseFloat(10),
                   },
                 ],
@@ -128,9 +128,9 @@ exports.booking = async (req, res) => {
               days = Array.from(new Set(days));
 
               let concecutionRange = 0;
-
+/*
               let dateCheck = interm.toLocaleString().split("/");
-
+ 
               let intialConsecuation =
                 `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
                 days[0] ||
@@ -143,7 +143,7 @@ exports.booking = async (req, res) => {
 
               if (leaderresult?.consecutiveDays && intialConsecuation1) {
                 concecutionRange += 1;
-              }
+              } */
 
               await Seat.findOne({ _id: seat.id }, async (err11, data11) => {
                 if (err11) {
@@ -189,18 +189,16 @@ exports.booking = async (req, res) => {
                   profileId: data.profile,
                 },
                 {
-                  consecutiveDays: intialConsecuation
-                    ? 1 + concecutionRange
-                    : 0,
+                  consecutiveDays:  0,
                   book: [
-                    ...leaderresult.book,
                     {
                       bookId: data.id,
-                      bookedTime: interm.toLocaleString(),
+                      bookedTime: dateOrigin,
                       from,
                       to,
                       coins: Number.parseFloat(10),
                     },
+                    ...leaderresult.book,
                   ],
                 },
                 { new: true },
