@@ -225,13 +225,13 @@ exports.peakTimesQuiteTimes = async (req, res) => {
 
     let timingcount = parseInt(startTiming)
     while (timingcount < (parseInt(endTiming) + 1)) {
-      timeRange.push(timingcount)
+      timeRange.push(timingcount.toString().padStart(2, '0'))
       timingcount++
     }
 
     const tempTimeRange = timeRange.reduce((a, v) => ({ ...a, [v]: 0 }), {});
-    const tempory1 = dates.reduce((a, v) => ({ ...a, [v]: tempTimeRange }), {})
 
+    const tempory1 = dates.reduce((a, v) => ({ ...a, [v]: tempTimeRange }), {})
 
     if (company.profile.length > 0) {
       const temp = company.profile.flatMap(el => {
@@ -253,21 +253,30 @@ exports.peakTimesQuiteTimes = async (req, res) => {
 
         const result = Object.keys(tempory1).map(el => {
           const resultObj = []
+          const resultObj1 = []
+          resultObj1.push({ [days[dates.indexOf(el)]]: { ...tempory1[el] } });
           Object.keys(counts).map(el1 => {
-            if (el == el1) {
+            if (el== el1) {
               let temp = 0
               let tempObj = {}
               counts[el1].flatMap((el2, i) => {
-                const tempKey = el2?.fromTime;
+                const tempKey = el2?.fromTime.padStart(2, '0');
                 temp++
                 tempObj[tempKey] = temp
               })
               resultObj.push({ [days[dates.indexOf(el)]]: { ...tempory1[el], ...tempObj } });
             }
           })
-          return resultObj
+          return [...resultObj1, ...resultObj]
         })
-        return res.json(result.flat(4));
+
+        const interm = {}
+        result.flat(4).map(el=>{
+          const [key] = Object.entries(el)
+          interm[key[0]]= key[1];
+        })
+        
+        return res.json(interm);
       } else {
         return res.json({ res: "No data Found" });
       }
