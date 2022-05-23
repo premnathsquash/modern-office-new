@@ -220,7 +220,7 @@ exports.peakTimesQuiteTimes = async (req, res) => {
     const starttime001 = company.officeConfigure?.TimeFrom ? company.officeConfigure?.TimeFrom : null
     const endtime001 = company.officeConfigure?.TimeTo ? company.officeConfigure?.TimeTo : null
    
-    const startTiming = moment(endtime001 ?? "00:00:00", "HH:mm:ss").format("HH")
+    const startTiming = moment(starttime001 ?? "00:00:00", "HH:mm:ss").format("HH")
     const endTiming = moment(endtime001 ?? "23:00:00", "HH:mm:ss").format("HH")
 
     let timingcount = parseInt(startTiming)
@@ -389,11 +389,19 @@ exports.timeUtilization = async (req, res) => {
     })
       .populate({ path: "officeConfigure" });
 
-    const startOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayFrom)] ?? (new Date()).toISOString()).clone().startOf('week')
-    const endOfWeek1 = moment(dates[days.indexOf(company.officeConfigure?.WeekDayTo)] ?? (new Date()).toISOString()).clone().endOf('week')
+      const startday001 = company.officeConfigure?.WeekDayFrom ? dates[days.indexOf(company.officeConfigure?.WeekDayFrom)] : null
+    const endday001 = company.officeConfigure?.WeekDayTo ? dates[days.indexOf(company.officeConfigure?.WeekDayTo)] : null
 
-    const startTiming = moment(company.officeConfigure?.TimeFrom ?? "00:00:00", "HH:mm:ss").format("HH")
-    const endTiming = moment(company.officeConfigure?.TimeTo ?? "24:00:00", "HH:mm:ss").format("HH")
+    const startOfWeek1 = moment(startday001 ?? (new Date()).toISOString()).clone().startOf('week')
+    const endOfWeek1 = moment(endday001 ?? (new Date()).toISOString()).clone().endOf('week')
+
+    const starttime001 = company.officeConfigure?.TimeFrom ? company.officeConfigure?.TimeFrom : null
+    const endtime001 = company.officeConfigure?.TimeTo ? company.officeConfigure?.TimeTo : null
+
+    const startTiming = moment(starttime001 ?? "00:00:00", "HH:mm:ss").format("HH")
+    const endTiming = moment(endtime001 ?? "23:00:00", "HH:mm:ss").format("HH")
+
+    console.log(endTiming, startTiming, endOfWeek1, startOfWeek1);
 
     const totalTimeInweek = (parseInt(endTiming) - parseInt(startTiming)) * (moment(endOfWeek1, "MM/DD/YYYY").diff(moment(startOfWeek1, "MM/DD/YYYY"), 'days') + 1)
 
@@ -406,11 +414,12 @@ exports.timeUtilization = async (req, res) => {
       }).flat(4)
 
       temp = temp.filter(el => (moment(el.info.dateFrom).isBetween(startOfWeek1, endOfWeek1)))
+      
 
       temp.map(el => {
         count[el.name] = count[el.name] ? count[el.name] + Math.abs(parseInt(el.info.asHours())) : Math.abs(parseInt(el.info.asHours()))
       })
-
+    
       for (let [key, value] of Object.entries(count)) {
         result[key] = {
           deskAvaiPercent: parseInt(((totalTimeInweek - value) / totalTimeInweek) * 100),
