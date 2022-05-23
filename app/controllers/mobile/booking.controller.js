@@ -124,11 +124,11 @@ exports.booking = async (req, res) => {
                   ? -1
                   : 1
               );
-              
+
               days = Array.from(new Set(days));
 
               let concecutionRange = 0;
-              if(moment(days[0]).diff(moment(date), "days") == -1){
+              if (moment(days[0]).diff(moment(date), "days") == -1) {
                 concecutionRange += 1
               }
 
@@ -217,30 +217,29 @@ exports.booking = async (req, res) => {
             }
           }
         );
-        const notifyObj = {activityTitle: "You have booked a seat", message: `${bookedSeat} has been booked`, fromDate: date, todate: date1, timefrom, timeto}
+        const notifyObj = { activityTitle: "You have booked a seat", message: `${bookedSeat} has been booked`, fromDate: date, todate: date1, timefrom, timeto }
         await Activity.findOneAndUpdate({ _id: activity._id }, { notifications: [notifyObj, ...activity.notifications] }, { new: true }, (err10, data10) => {
           if (err10) {
             res.status(500).send({ message: err10 });
             return;
           }
         })
-        await LeaderBoard.findOne(
-          {
-            companyId: data.company,
-            profileId: data.profile,
-          },
-          (err9, data9) => {
-            if (err9) {
-              res.status(500).send({ message: err9 });
-              return;
-            }
-            return res.send({
-              message: "Booking created successfully",
-              consecutiveDays: data9?.consecutiveDays,
-            });
-          }
-        );
+
       });
+      const finResult = await LeaderBoard.findOne(
+        {
+          companyId: user.userGroup,
+          profileId: req.userId,
+        })
+
+      return res.send({
+        message: "Booking created successfully",
+        consecutiveDays: finResult?.consecutiveDays,
+
+      }
+      );
+
+
     } else {
       return res.send({
         message:
