@@ -121,29 +121,17 @@ exports.booking = async (req, res) => {
               let days = leaderresult.book.map((ele) => ele.bookedTime);
               days = days.sort((a, b) =>
                 moment(a, "MM-DD-YYYY").isBefore(moment(b, "MM-DD-YYYY"))
-                  ? 1
-                  : -1
+                  ? -1
+                  : 1
               );
               
               days = Array.from(new Set(days));
 
               let concecutionRange = 0;
-/*
-              let dateCheck = interm.toLocaleString().split("/");
- 
-              let intialConsecuation =
-                `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
-                days[0] ||
-                `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
-                days[1];
+              if(moment(days[0]).diff(moment(date), "days") == -1){
+                concecutionRange += 1
+              }
 
-              let intialConsecuation1 =
-                `${dateCheck[0]}/${dateCheck[1] - 1}/${dateCheck[2]}` ==
-                days[0];
-
-              if (leaderresult?.consecutiveDays && intialConsecuation1) {
-                concecutionRange += 1;
-              } */
 
               await Seat.findOne({ _id: seat.id }, async (err11, data11) => {
                 if (err11) {
@@ -189,7 +177,7 @@ exports.booking = async (req, res) => {
                   profileId: data.profile,
                 },
                 {
-                  consecutiveDays:  0,
+                  consecutiveDays: concecutionRange ? leaderresult.consecutiveDays + concecutionRange : 0,
                   book: [
                     {
                       bookId: data.id,
@@ -218,7 +206,7 @@ exports.booking = async (req, res) => {
                       {
                         points:
                           Number.parseFloat(profile.points) +
-                          Number.parseFloat(data01?.consecutiveDays * 10),
+                          Number.parseFloat(leaderboard?.consecutiveDays * 10),
                       },
                       { new: true },
                       () => { }
