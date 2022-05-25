@@ -290,7 +290,6 @@ exports.peakTimesQuiteTimes = async (req, res) => {
 
 exports.conSingleDesk = async (req, res) => {
   try {
-
     const company = await User.findOne({ _id: req.userId }).populate({
       path: "profile",
       populate: {
@@ -306,7 +305,6 @@ exports.conSingleDesk = async (req, res) => {
     const weekfilter = async () => {
 
       const arr = ["one_seater", "two_seater", "four_seater", "six_seater", "eight_seater", "ten_seater"];
-
 
 
       if (company.profile.length > 0) {

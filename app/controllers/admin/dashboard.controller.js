@@ -147,6 +147,7 @@ exports.bookingReq = async (req, res) => {
     if (day) {
       today = new Date(new Date(day).toISOString());
     }
+    
     const company = await User.findOne({ _id: req.userId })
       .populate({
         path: "profile",
@@ -169,10 +170,12 @@ exports.bookingReq = async (req, res) => {
         } = el;
 
         const result1 = booking.map((el1) => {
-          return { desk: el1.desk, seat1: el1.seat, seatBook: el1.seatBook };
+          return { desk: el1?.desk, seat1: el1?.seat, seatBook: el1?.seatBook };
         });
         return { firstName, lastName, dp, result1 };
       });
+
+      //console.log(intermediate1);
 
       const data = intermediate1.map((el) => {
         const result = el?.result1.map((el1) => {

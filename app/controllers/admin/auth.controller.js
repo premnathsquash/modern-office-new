@@ -421,7 +421,7 @@ exports.userSignup = async (req, res) => {
           password: bcrypt.hashSync(pssword, 8),
           dp: fileLocation ?? "",
           email,
-          department: departm.departments,
+          department: departm?.departments ?? "",
           reservedSeats,
           makeAdmin,
           userGroup: req.userId,
@@ -492,6 +492,7 @@ exports.userSignup = async (req, res) => {
 };
 
 exports.userLoginIn = async (req, res) => {
+ 
   try {
     if (!req.body?.email)
       return res.status(400).end({ res: "please provide email" });
