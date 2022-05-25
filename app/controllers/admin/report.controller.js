@@ -48,7 +48,7 @@ exports.peakDays = async (req, res) => {
     }
 
     const monthfilter = async () => {
-      const counts = {}
+      /* const counts = {}
       const months = { January: 0, February: 0, March: 0, April: 0, May: 0, June: 0, July: 0, August: 0, September: 0, October: 0, November: 0, December: 0 }
       if (company.profile.length > 0) {
         company.profile.map((el) => {
@@ -56,10 +56,14 @@ exports.peakDays = async (req, res) => {
             counts[moment(el1?.desk?.dateFrom).format('MMMM')] = counts[moment(el1?.desk?.dateFrom).format('MMMM')] ? counts[moment(el1?.desk?.dateFrom).format('MMMM')] + 1 : 1
           })
         })
-        return res.json({ ...months, ...counts });
-      } else {
+        return res.json({ ...months, ...counts }); */
+
+        const startOfMonth = moment().clone().startOf('month');
+        console.log(startOfMonth);
+        return res.json({ booked: "No Data Found", });
+      /* } else {
         return res.json({ res: "No data Found" });
-      }
+      } */
     }
     const customfilter = async (from, to) => {
 
@@ -163,7 +167,12 @@ exports.totalOcc = async (req, res) => {
       }
     }
 
-    const monthfilter = async () => { }
+    const monthfilter = async () => {
+
+      const startOfMonth = moment().clone().startOf('month');
+      console.log(startOfMonth);
+      return res.json({ booked: "No Data Found", });
+     }
 
     const customfilter = async (from, to) => {
 
