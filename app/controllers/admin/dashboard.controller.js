@@ -143,9 +143,9 @@ exports.workFromHomeOrOffice = async (req, res) => {
 exports.bookingReq = async (req, res) => {
   try {
     const { day } = req.query;
-    let today = moment().utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISOString()
+    let today = moment().utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).format("MM/DD/YYYY")
     if (day) {
-      today = moment(day).utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISOString()
+      today = moment(day).utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).format("MM/DD/YYYY")
     }
     
     const company = await User.findOne({ _id: req.userId })
@@ -199,36 +199,19 @@ exports.bookingReq = async (req, res) => {
         if (day) {
           result1 = result.filter((ele1) => {
 
-            return moment(today, "DD/MM/YYYY").isSame(
-              moment(ele1.dateFrom, "DD/MM/YYYY"),
-              "day"
-            ) ||
-            moment(ele1.dateFrom, "DD/MM/YYYY").isAfter(
-              moment(today, "DD/MM/YYYY"),
-              "day"
-            );
+            return  moment(moment((new Date(ele1.dateFrom)).toISOString()).format("MM/DD/YYYY")).isSame(today)||
+            moment(moment((new Date(ele1.dateFrom)).toISOString()).format("MM/DD/YYYY")).isAfter(today)
           });
         } else {
           result1 = result.filter((ele1) => {
-
-            console.log(today, ele1.dateFrom);
-            console.log(moment(today, "DD/MM/YYYY").isSame(
-              moment(ele1.dateFrom, "DD/MM/YYYY"),
-              "day"
-            ));
-
+            
             return (
-              moment(today, "DD/MM/YYYY").isSame(
-                moment(ele1.dateFrom, "DD/MM/YYYY"),
-                "day"
-              ) ||
-              moment(ele1.dateFrom, "DD/MM/YYYY").isAfter(
-                moment(ele1.dateFrom, "DD/MM/YYYY"),
-                "day"
-              )
+              moment(moment((new Date(ele1.dateFrom)).toISOString()).format("MM/DD/YYYY")).isSame(today)||
+              moment(moment((new Date(ele1.dateFrom)).toISOString()).format("MM/DD/YYYY")).isAfter(today)
             );
           });
         }
+        
         console.log(result1);
 
         return {
