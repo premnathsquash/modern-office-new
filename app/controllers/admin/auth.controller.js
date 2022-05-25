@@ -359,34 +359,39 @@ exports.userSignup = async (req, res) => {
       }
       const checkSeat1 = [];
       const checkSeat2 = [];
-      Object.entries(data11.seats[0]).forEach((ele) => {
-        const [key, value] = ele;
-        if (key == seatName) {
-          const newValue = {
-            ...value,
-            available: false,
-          };
-          checkSeat1.push(newValue);
-        } else {
-          checkSeat2.push({ ...value, available: value.available ?? true });
-        }
-      });
-      const changesinObj = [...checkSeat1, ...checkSeat2].reduce(
-        (a, v) => ({ ...a, [v.name]: v }),
-        {}
-      );
-      await Seat.findOneAndUpdate(
-        { _id: seatId },
-        {
-          seats: [{ ...changesinObj }],
-        },
-        (err1, data1) => {
-          if (err1) {
-            res.status(500).send({ message: err1 });
-            return;
+      if (data11.seats[0]) {
+        Object.entries(data11.seats[0]).forEach((ele) => {
+          const [key, value] = ele;
+          if (key == seatName) {
+            const newValue = {
+              ...value,
+              available: false,
+            };
+            checkSeat1.push(newValue);
+          } else {
+            checkSeat2.push({ ...value, available: value.available ?? true });
           }
-        }
-      );
+        });
+      }
+      let changesinObj = []
+      if (checkSeat1.length > 0 && checkSeat2.length > 0) {
+        changesinObj = [...checkSeat1, ...checkSeat2].reduce(
+          (a, v) => ({ ...a, [v.name]: v }),
+          {}
+        );
+        await Seat.findOneAndUpdate(
+          { _id: seatId },
+          {
+            seats: [{ ...changesinObj }],
+          },
+          (err1, data1) => {
+            if (err1) {
+              res.status(500).send({ message: err1 });
+              return;
+            }
+          }
+        );
+      }
     });
 
     const departm = await Departments.findOne({ _id: department });
@@ -492,7 +497,7 @@ exports.userSignup = async (req, res) => {
 };
 
 exports.userLoginIn = async (req, res) => {
- 
+
   try {
     if (!req.body?.email)
       return res.status(400).end({ res: "please provide email" });
