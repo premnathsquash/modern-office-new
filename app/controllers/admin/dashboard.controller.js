@@ -177,7 +177,6 @@ exports.bookingReq = async (req, res) => {
 
       const data = intermediate1.map((el) => {
         
-        
         const result = el?.result1.map((el1) => {
           return {
             recurrenceDays: el1.desk.recurrenceDays,
@@ -193,7 +192,6 @@ exports.bookingReq = async (req, res) => {
           };
         });
         
-  
         let result1;
 
         if (day) {
@@ -211,8 +209,6 @@ exports.bookingReq = async (req, res) => {
             );
           });
         }
-        
-        console.log(result1);
 
         return {
           username: `${el.firstName} ${el.lastName}`,
