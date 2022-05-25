@@ -812,7 +812,7 @@ exports.getAllProfileusers = async (req, res) => {
 
       return {
         attendanceId: attendance._id,
-        departmentId: departIntermed._id,
+        departmentId: departIntermed?._id ?? "",
         wfo: attendance.workfromoffice,
         wfoDays: attendance.days,
         wfoRange: attendance.range,

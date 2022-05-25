@@ -143,9 +143,9 @@ exports.workFromHomeOrOffice = async (req, res) => {
 exports.bookingReq = async (req, res) => {
   try {
     const { day } = req.query;
-    let today = new Date(new Date().toISOString());
+    let today = moment().utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISOString()
     if (day) {
-      today = new Date(new Date(day).toISOString());
+      today = moment(day).utcOffset(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISOString()
     }
     
     const company = await User.findOne({ _id: req.userId })
@@ -175,9 +175,9 @@ exports.bookingReq = async (req, res) => {
         return { firstName, lastName, dp, result1 };
       });
 
-      //console.log(intermediate1);
-
       const data = intermediate1.map((el) => {
+        
+        
         const result = el?.result1.map((el1) => {
           return {
             recurrenceDays: el1.desk.recurrenceDays,
@@ -192,29 +192,45 @@ exports.bookingReq = async (req, res) => {
             seatBook: el1.seatBook.seats["0"][el1.seat1],
           };
         });
+        
+  
         let result1;
 
         if (day) {
           result1 = result.filter((ele1) => {
+
             return moment(today, "DD/MM/YYYY").isSame(
               moment(ele1.dateFrom, "DD/MM/YYYY"),
+              "day"
+            ) ||
+            moment(ele1.dateFrom, "DD/MM/YYYY").isAfter(
+              moment(today, "DD/MM/YYYY"),
               "day"
             );
           });
         } else {
           result1 = result.filter((ele1) => {
+
+            console.log(today, ele1.dateFrom);
+            console.log(moment(today, "DD/MM/YYYY").isSame(
+              moment(ele1.dateFrom, "DD/MM/YYYY"),
+              "day"
+            ));
+
             return (
               moment(today, "DD/MM/YYYY").isSame(
                 moment(ele1.dateFrom, "DD/MM/YYYY"),
                 "day"
               ) ||
               moment(ele1.dateFrom, "DD/MM/YYYY").isAfter(
-                moment(today, "DD/MM/YYYY"),
+                moment(ele1.dateFrom, "DD/MM/YYYY"),
                 "day"
               )
             );
           });
         }
+        console.log(result1);
+
         return {
           username: `${el.firstName} ${el.lastName}`,
           dp: el.dp,
