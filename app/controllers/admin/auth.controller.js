@@ -352,67 +352,77 @@ exports.userSignup = async (req, res) => {
       seatName,
     } = req.body;
 
-    await Seat.findOne({ _id: seatId }, async (err11, data11) => {
-      if (err11) {
-        res.status(500).send({ message: err11 });
-        return;
-      }
-      const checkSeat1 = [];
-      const checkSeat2 = [];
-      if (data11.seats[0]) {
-        Object.entries(data11.seats[0]).forEach((ele) => {
-          const [key, value] = ele;
-          if (key == seatName) {
-            const newValue = {
-              ...value,
-              available: false,
-            };
-            checkSeat1.push(newValue);
-          } else {
-            checkSeat2.push({ ...value, available: value.available ?? true });
-          }
-        });
-      }
-      let changesinObj = []
-      if (checkSeat1.length > 0 && checkSeat2.length > 0) {
-        changesinObj = [...checkSeat1, ...checkSeat2].reduce(
-          (a, v) => ({ ...a, [v.name]: v }),
-          {}
-        );
-        await Seat.findOneAndUpdate(
-          { _id: seatId },
-          {
-            seats: [{ ...changesinObj }],
-          },
-          (err1, data1) => {
-            if (err1) {
-              res.status(500).send({ message: err1 });
-              return;
-            }
-          }
-        );
-      }
-    });
-
-    const departm = await Departments.findOne({ _id: department });
-    await Departments.findOneAndUpdate(
-      { _id: departm.id },
-      { users: departm.users + 1 },
-      (err, data) => {
-        if (err) {
-          res.status(500).send({ message: err });
+    if (seatId) {
+      await Seat.findOne({ _id: seatId }, async (err11, data11) => {
+        if (err11) {
+          res.status(500).send({ message: err11 });
           return;
         }
-      }
-    );
+        const checkSeat1 = [];
+        const checkSeat2 = [];
+
+        if (data11 && data11?.seats[0]) {
+
+          Object.entries(data11.seats[0]).forEach((ele) => {
+            const [key, value] = ele;
+            if (key == seatName) {
+              const newValue = {
+                ...value,
+                available: false,
+              };
+              checkSeat1.push(newValue);
+            } else {
+              checkSeat2.push({ ...value, available: value.available ?? true });
+            }
+          });
+        }
+        let changesinObj = []
+        if (checkSeat1.length > 0 && checkSeat2.length > 0) {
+          changesinObj = [...checkSeat1, ...checkSeat2].reduce(
+            (a, v) => ({ ...a, [v.name]: v }),
+            {}
+          );
+          await Seat.findOneAndUpdate(
+            { _id: seatId },
+            {
+              seats: [{ ...changesinObj }],
+            },
+            (err1, data1) => {
+              if (err1) {
+                res.status(500).send({ message: err1 });
+                return;
+              }
+            }
+          );
+        }
+      });
+    }
+    const departm = await Departments.findOne({ _id: department });
+    if (departm) {
+      await Departments.findOneAndUpdate(
+        { _id: departm?.id },
+        { users: departm?.users + 1 },
+        (err, data) => {
+          if (err) {
+            res.status(500).send({ message: err });
+            return;
+          }
+        }
+      );
+    }
     const attend = new Attendance({});
+
     const company1 = await User.findOne({
       _id: req.userId,
     }).populate({ path: "notification" });
+    
     const company1Notification = company1?.notification
-    const company2 = company1.departments.find(
-      (ele) => mongoose.Types.ObjectId(ele).toHexString() == departm.id
-    );
+    let company2 = true
+    if (departm) {
+      company2 = company1.departments.find(
+        (ele) => mongoose.Types.ObjectId(ele).toHexString() == departm?.id
+      );
+    }
 
     if (company2 && company1.profile.length < company1.maxSeat) {
       attend.save((error, attend1) => {
